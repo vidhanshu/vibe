@@ -17,6 +17,9 @@ model User {
   pronoun    String?
   gender     String?
 
+  // session
+  token String?
+
   posts Post[] @relation("posts_of_user")
 
   createdAt DateTime @default(now())
@@ -38,6 +41,7 @@ model Post {
   medias    Media[]  @relation("medias_of_post")
 
   @@index([userId])
+  @@index([userId, id])
   @@map("posts")
 }
 

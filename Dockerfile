@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # Install pnpm package manager globally
-RUN npm i -g pnpm @nestjs/cli
+RUN npm i -g pnpm
 
 # Install dependencies
 RUN pnpm install

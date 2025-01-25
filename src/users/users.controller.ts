@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Query,
   Param,
@@ -10,39 +9,37 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { FilterUsersDto } from './dto/filter-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from 'src/common/decorators/user.decorator';
+import { AccessTokenPayload } from 'src/auth/types/jwt';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get()
+  getUsers(@Query() filterUsersDto: FilterUsersDto) {
+    return this.usersService.getUsers(filterUsersDto);
   }
 
-  @Get()
-  findAll(@Query() filterUsersDto: FilterUsersDto) {
-    return this.usersService.findAll(filterUsersDto);
+  @Get('/profile')
+  getProfile(@User('sub') userId: string) {
+    return this.usersService.getUserById(userId);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.findOne(id);
+  getUserById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.getUserById(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.update(id, updateUserDto);
+  @Patch('profile')
+  update(@User('sub') userId: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateUser(userId, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.remove(id);
+  @Delete('profile')
+  remove(@User('sub') userId: string) {
+    return this.usersService.deleteAccount(userId);
   }
 }

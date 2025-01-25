@@ -10,18 +10,16 @@ import { PaginatedResponse } from 'src/common/types/return-type';
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createPostDto: CreatePostDto): Promise<Post> {
-    // TODO: user will be taken from the request
+  createPost(id: string, createPostDto: CreatePostDto): Promise<Post> {
     return this.prisma.post.create({
       data: {
         ...createPostDto,
-        userId: '72c837b4-babe-42e5-9122-f25590e14f4e',
+        userId: id,
       },
-      include: { user: true },
     });
   }
 
-  async findAll({
+  async getAllPosts({
     limit: take = 10,
     page = 1,
     search,
@@ -51,19 +49,20 @@ export class PostsService {
     };
   }
 
-  async findOne(id: string): Promise<Post> {
+  async getPostById(id: string): Promise<Post> {
     const post = await this.prisma.post.findUnique({ where: { id } });
     if (!post) throw new NotFoundException(`Post #${id} not found`);
     return post;
   }
 
-  async update(
+  async updatePost(
     id: string,
+    userId: string,
     { content, title }: UpdatePostDto,
   ): Promise<Post | undefined> {
     try {
       return await this.prisma.post.update({
-        where: { id },
+        where: { id, userId }, // user can only update their own post
         data: { title, content },
       });
     } catch (error) {
@@ -73,11 +72,12 @@ export class PostsService {
     }
   }
 
-  async remove(
+  async removePost(
     id: string,
+    userId: string,
   ): Promise<{ statusCode: number; message: string } | undefined> {
     try {
-      await this.prisma.post.delete({ where: { id } });
+      await this.prisma.post.delete({ where: { id, userId } }); // user can only delete their own post
       return { statusCode: 200, message: 'Post deleted successfully' };
     } catch (error) {
       if (error.code === 'P2025') {
