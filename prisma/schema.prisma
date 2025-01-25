@@ -8,17 +8,54 @@ datasource db {
 }
 
 model User {
-  id          String  @id @default(uuid())
-  username    String  @unique
-  email       String? @unique
-  password    String
-  profile_url String?
-  bio         String?
-  pronoun     String?
-  gender      String?
+  id         String  @id @default(uuid())
+  username   String  @unique
+  email      String? @unique
+  password   String
+  profileUrl String?
+  bio        String?
+  pronoun    String?
+  gender     String?
+
+  posts Post[] @relation("posts_of_user")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model Post {
+  id      String @id @default(uuid())
+  title   String
+  content String
+
+  userId String
+  user   User   @relation("posts_of_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  medias    Media[]  @relation("medias_of_post")
+
+  @@index([userId])
+  @@map("posts")
+}
+
+model Media {
+  id        String    @id @default(uuid())
+  url       String
+  mediaType MediaType
+  postId    String
+  post      Post      @relation("medias_of_post", fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@map("medias")
+}
+
+enum MediaType {
+  image
+  video
 }

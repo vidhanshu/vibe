@@ -22,13 +22,14 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   @IsEmail()
   email: string;
 
   @IsString()
   @IsOptional()
   @IsUrl()
-  profile_url: string;
+  profileUrl: string;
 
   @IsString()
   @IsOptional()

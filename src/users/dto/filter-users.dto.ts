@@ -1,21 +1,7 @@
-import { Transform } from 'class-transformer';
-import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional } from 'class-validator';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
-export class FilterUsersDto {
-  @IsOptional()
-  @IsString()
-  search: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => Number(value))
-  page: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => Number(value))
-  limit: number;
-
+export class FilterUsersDto extends PaginationDto {
   @IsOptional()
   @IsIn(['createdAt:asc', 'createdAt:desc'], {
     message:
