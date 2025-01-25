@@ -1,4 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsUrl,
+  IsArray,
+  IsEmail,
+  IsString,
+  MinLength,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -15,4 +24,23 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @IsString()
+  @IsOptional()
+  @IsUrl()
+  profile_url: string;
+
+  @IsString()
+  @IsOptional()
+  bio: string;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['male', 'female', 'other', 'prefer_not_to_say'])
+  gender: string;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['he', 'she', 'they'])
+  pronoun: string;
 }
