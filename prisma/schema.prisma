@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id         String  @id @default(uuid())
-  username   String  @unique
-  email      String? @unique
-  password   String
-  profileUrl String?
-  bio        String?
-  pronoun    String?
-  gender     String?
+  id           String  @id @default(uuid())
+  username     String  @unique
+  email        String? @unique
+  password     String
+  profilePhoto Media?  @relation("profile_of_user")
+  bio          String?
+  pronoun      String?
+  gender       String?
 
   // session
   token String?
@@ -48,9 +48,14 @@ model Post {
 model Media {
   id        String    @id @default(uuid())
   url       String
+  key       String
   mediaType MediaType
-  postId    String
-  post      Post      @relation("medias_of_post", fields: [postId], references: [id], onDelete: Cascade)
+
+  postId String?
+  post   Post?   @relation("medias_of_post", fields: [postId], references: [id], onDelete: Cascade)
+
+  userId String? @unique
+  user   User?   @relation("profile_of_user", fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

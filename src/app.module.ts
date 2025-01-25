@@ -9,12 +9,14 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './common/guards/jwt.guard';
 import { JwtStrategy } from './auth/strategy/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
+import { MediasModule } from './medias/medias.module';
 
 @Module({
   imports: [
+    AuthModule,
     UsersModule,
     PostsModule,
-    AuthModule,
+    MediasModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],

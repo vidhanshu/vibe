@@ -14,7 +14,6 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { FilterPostDto } from './dto/filter-post.dto';
 import { User } from 'src/common/decorators/user.decorator';
-import { AccessTokenPayload } from 'src/auth/types/jwt';
 
 @Controller('posts')
 export class PostsController {

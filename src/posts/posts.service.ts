@@ -5,18 +5,27 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { FilterPostDto } from './dto/filter-post.dto';
 import { Post, Prisma } from '@prisma/client';
 import { PaginatedResponse } from 'src/common/types/return-type';
+import { MediasService } from 'src/medias/medias.service';
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mediasService: MediasService,
+  ) {}
 
-  createPost(id: string, createPostDto: CreatePostDto): Promise<Post> {
-    return this.prisma.post.create({
-      data: {
-        ...createPostDto,
-        userId: id,
-      },
-    });
+  createPost(
+    id: string,
+    { content, title, medias }: CreatePostDto,
+  ): Promise<Post> {
+    const data: Prisma.PostCreateInput = {
+      title,
+      content,
+      user: { connect: { id } },
+    };
+    if (medias.length) data.medias = { create: medias };
+
+    return this.prisma.post.create({ data, include: { medias: true } });
   }
 
   async getAllPosts({
@@ -25,7 +34,11 @@ export class PostsService {
     search,
   }: FilterPostDto): Promise<PaginatedResponse<Post>> {
     const skip = (page - 1) * take;
-    const filter: Prisma.PostFindManyArgs = { take, skip };
+    const filter: Prisma.PostFindManyArgs = {
+      take,
+      skip,
+      include: { medias: true },
+    };
     if (search) {
       filter.where = { title: { contains: search, mode: 'insensitive' } };
     }
@@ -50,7 +63,10 @@ export class PostsService {
   }
 
   async getPostById(id: string): Promise<Post> {
-    const post = await this.prisma.post.findUnique({ where: { id } });
+    const post = await this.prisma.post.findUnique({
+      where: { id },
+      include: { medias: true },
+    });
     if (!post) throw new NotFoundException(`Post #${id} not found`);
     return post;
   }
@@ -62,8 +78,9 @@ export class PostsService {
   ): Promise<Post | undefined> {
     try {
       return await this.prisma.post.update({
-        where: { id, userId }, // user can only update their own post
+        where: { id, userId },
         data: { title, content },
+        include: { medias: true },
       });
     } catch (error) {
       if (error.code === 'P2025') {
@@ -76,13 +93,21 @@ export class PostsService {
     id: string,
     userId: string,
   ): Promise<{ statusCode: number; message: string } | undefined> {
-    try {
-      await this.prisma.post.delete({ where: { id, userId } }); // user can only delete their own post
-      return { statusCode: 200, message: 'Post deleted successfully' };
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException();
-      }
+    const post = await this.prisma.post.findUnique({
+      where: { id, userId },
+      include: { medias: true },
+    });
+    if (!post) throw new NotFoundException(`Post #${id} not found`);
+
+    await this.prisma.post.delete({
+      where: { id, userId },
+      select: { id: true },
+    });
+
+    if (post.medias.length) {
+      await this.mediasService.deleteFiles(post.medias.map(({ key }) => key));
     }
+
+    return { statusCode: 200, message: 'Post deleted successfully' };
   }
 }

@@ -1,13 +1,13 @@
+import { Type } from 'class-transformer';
 import {
   IsIn,
-  IsUrl,
-  IsArray,
   IsEmail,
   IsString,
   MinLength,
   IsNotEmpty,
   IsOptional,
 } from 'class-validator';
+import { MediaDto } from 'src/medias/dto/media.dto';
 
 export class CreateUserDto {
   @IsString()
@@ -20,16 +20,15 @@ export class CreateUserDto {
   @MinLength(6)
   password: string;
 
+  @Type(() => MediaDto)
+  @IsOptional()
+  profilePhoto: MediaDto;
+
   @IsString()
   @IsNotEmpty()
   @IsOptional()
   @IsEmail()
   email: string;
-
-  @IsString()
-  @IsOptional()
-  @IsUrl()
-  profileUrl: string;
 
   @IsString()
   @IsOptional()

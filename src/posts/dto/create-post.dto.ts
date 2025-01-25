@@ -1,4 +1,7 @@
-import { IsArray, IsString, MaxLength } from 'class-validator';
+import { Media } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { IsArray, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { MediaDto } from 'src/medias/dto/media.dto';
 
 export class CreatePostDto {
   @IsString()
@@ -9,5 +12,8 @@ export class CreatePostDto {
   @MaxLength(1000)
   content: string;
 
-  // TODO: Add medias, post media module creation
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MediaDto)
+  medias: MediaDto[];
 }
