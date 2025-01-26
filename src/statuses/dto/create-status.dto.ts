@@ -15,6 +15,7 @@ export class CreateStatusDto {
 
   @IsString()
   @ValidateIf((dto) => !dto.medias || dto.medias.length === 0)
+  @IsOptional()
   backgroundColor: string;
 
   @IsOptional()

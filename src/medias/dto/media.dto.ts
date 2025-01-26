@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsUrl } from 'class-validator';
+import { IsString, IsEnum, IsUrl, Matches } from 'class-validator';
 
 export enum MediaType {
   IMAGE = 'image',
@@ -6,7 +6,9 @@ export enum MediaType {
 }
 
 export class MediaDto {
-  @IsUrl()
+  @Matches(/^(https?:\/\/)?[a-zA-Z0-9.-]+\.s3\.[a-zA-Z0-9.-]+\/.+$/, {
+    message: 'URL must be a valid AWS S3 URL',
+  })
   url: string;
 
   @IsString()

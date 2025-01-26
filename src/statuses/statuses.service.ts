@@ -21,7 +21,14 @@ export class StatusesService {
       skip: (page - 1) * limit,
       take: limit,
       include: {
-        user: true,
+        user: {
+          select: {
+            username: true,
+            id: true,
+            profilePhoto: { select: { url: true } },
+          },
+        },
+        medias: true,
       },
       //  get the statuses of the users to whom I follow, and my status
       where: {
@@ -103,6 +110,8 @@ export class StatusesService {
       await this.mediasService.deleteFiles([
         ...existingStatus.medias.map(({ key }) => key),
       ]);
+
+      console.log(existingStatus);
     } else {
       await this.prisma.status.delete({
         where: { id: existingStatus.id },

@@ -1,55 +1,77 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3 } from 'aws-sdk';
+import { v4 } from 'uuid';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 
 @Injectable()
 export class MediasService {
-  private awsS3: S3;
-  private readonly bucketName: string;
+  private readonly s3Client: S3Client;
+  private readonly bucketName = this.configService.get<string>('AWS_S3_BUCKET');
+  private readonly region = this.configService.get<string>('AWS_REGION');
+  private readonly accessKeyId =
+    this.configService.get<string>('AWS_ACCESS_KEY')!;
+  private readonly secretAccessKey =
+    this.configService.get<string>('AWS_SECRET_KEY')!;
+  private readonly baseS3Url = `https://${this.bucketName}.s3.${this.region}.amazonaws.com`;
 
   constructor(private configService: ConfigService) {
-    this.awsS3 = new S3({
-      accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY'),
-      secretAccessKey: this.configService.get<string>('AWS_SECRET_KEY'),
-      region: this.configService.get<string>('AWS_REGION'),
+    this.s3Client = new S3Client({
+      region: this.region,
+      credentials: {
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretAccessKey,
+      },
     });
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET') as string;
   }
 
   async uploadFiles(files: Array<Express.Multer.File>) {
     const promises: Promise<any>[] = [];
-    const mediaTypes: string[] = [];
+    const mediaTypesAndIds: { type: string; id: string }[] = [];
 
     for (const file of files) {
       const folder = file.mimetype.startsWith('image') ? 'image' : 'video';
-      const params = {
-        Bucket: this.bucketName,
-        Key: `${folder}s/${Date.now()}-${file.originalname}`,
-        Body: file.buffer,
-      };
-      promises.push(this.awsS3.upload(params).promise());
-      mediaTypes.push(folder);
-    }
-    const response = await Promise.all(promises);
+      const uuid = v4();
+      const key = `${folder}s/${uuid}-${file.originalname}`;
 
-    return response.map(({ Key, Location }, idx) => ({
-      key: Key,
-      url: Location,
-      mediaType: mediaTypes[idx],
-    }));
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: file.buffer,
+        ContentType: file.mimetype, // Ensures correct content type
+      });
+
+      promises.push(this.s3Client.send(command));
+      mediaTypesAndIds.push({ type: folder, id: uuid });
+    }
+
+    const responses = await Promise.all(promises);
+
+    return responses.map((_, idx) => {
+      const { id, type } = mediaTypesAndIds[idx];
+      return {
+        key: `${type}s/${id}-${files[idx].originalname}`,
+        url: `${this.baseS3Url}/${type}s/${id}-${files[idx].originalname}`,
+        mediaType: type,
+      };
+    });
   }
 
   async deleteFiles(keys: string[]) {
     const promises: Promise<any>[] = [];
+
     for (const key of keys) {
-      const params = {
+      const command = new DeleteObjectCommand({
         Bucket: this.bucketName,
         Key: key,
-      };
-      promises.push(this.awsS3.deleteObject(params).promise());
+      });
+
+      promises.push(this.s3Client.send(command));
     }
 
-    // also delete from db
     await Promise.all(promises);
 
     return {
