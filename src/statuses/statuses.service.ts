@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { FilterStatusesDto } from './dto/filter-statuses.dto';
@@ -13,43 +17,73 @@ export class StatusesService {
     private mediasService: MediasService,
   ) {}
 
+  async addStatusView(id: string, userId: string) {
+    // Allow self view
+    // const existingStatus = await this.prisma.status.findUnique({
+    //   where: { id },
+    //   select: { userId: true },
+    // });
+
+    // if (existingStatus?.userId === userId) {
+    //   throw new BadRequestException("Can't add a view for your own status");
+    // }
+
+    const existingView = await this.prisma.statusView.findUnique({
+      where: { viewerId_statusId: { viewerId: userId, statusId: id } },
+      select: { id: true },
+    });
+    if (!existingView) {
+      await this.prisma.statusView.create({
+        data: { viewerId: userId, statusId: id },
+      });
+    }
+  }
+
   async getStatuses(
     userId: string,
     { limit = 30, page = 1 }: FilterStatusesDto,
   ): Promise<PaginatedResponse<Status>> {
-    const filter: Prisma.StatusFindManyArgs = {
-      skip: (page - 1) * limit,
-      take: limit,
-      include: {
-        user: {
-          select: {
-            username: true,
-            id: true,
-            profilePhoto: { select: { url: true } },
-          },
-        },
-        medias: true,
-      },
-      //  get the statuses of the users to whom I follow, and my status
-      where: {
-        OR: [
-          { userId },
-          { user: { followers: { some: { followerId: userId } } } },
-        ],
-        // get statuses that are creating in the last 24 hours
-        createdAt: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        },
+    const where = {
+      OR: [
+        //  get the statuses of the users to whom I follow, and my status
+        { userId },
+        { user: { followers: { some: { followerId: userId } } } },
+      ],
+      // get statuses that are created in the last 24 hours
+      createdAt: {
+        gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
       },
     };
 
     const [items, count] = await Promise.all([
-      this.prisma.status.findMany(filter),
-      this.prisma.status.count({ where: filter.where }),
+      this.prisma.status.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              username: true,
+              id: true,
+              profilePhoto: { select: { url: true } },
+            },
+          },
+          views: { select: { viewerId: true } },
+          _count: {
+            select: {
+              views: true,
+            },
+          },
+        },
+        where,
+      }),
+      this.prisma.status.count({ where }),
     ]);
 
     return {
-      items,
+      items: items.map(({ views, ...rest }) => {
+        const viewed = views.map(({ viewerId }) => viewerId).includes(userId);
+        return { ...rest, viewed };
+      }),
       metadata: {
         currentPage: page,
         itemsCount: items.length,

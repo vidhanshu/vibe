@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { StatusesService } from './statuses.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { User } from 'src/common/decorators/user.decorator';
@@ -7,6 +15,11 @@ import { FilterStatusesDto } from './dto/filter-statuses.dto';
 @Controller('statuses')
 export class StatusesController {
   constructor(private statusesService: StatusesService) {}
+
+  @Post(':id/add-view')
+  addStatusView(@Param('id') id: string, @User('sub') userId: string) {
+    return this.statusesService.addStatusView(id, userId);
+  }
 
   @Get()
   getStatuses(
