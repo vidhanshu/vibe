@@ -23,7 +23,10 @@ export class UsersService {
     const filter: Prisma.UserFindManyArgs = {
       skip,
       take,
-      include: { profilePhoto: true },
+      include: {
+        profilePhoto: true,
+        _count: { select: { followers: true, following: true } },
+      },
     };
     if (search)
       filter.where = {

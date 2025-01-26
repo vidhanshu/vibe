@@ -20,14 +20,33 @@ model User {
   // session
   token String?
 
-  posts    Post[]    @relation("posts_of_user")
-  likes    Like[]    @relation("liked_by_user")
-  comments Comment[] @relation("commented_by_user")
+  posts     Post[]    @relation("posts_of_user")
+  likes     Like[]    @relation("liked_by_user")
+  comments  Comment[] @relation("commented_by_user")
+  followers Follow[]  @relation("followers_of_user")
+  following Follow[]  @relation("following_of_user")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model Follow {
+  id String @id @default(uuid())
+
+  followerId  String
+  followingId String
+  follower    User   @relation("followers_of_user", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User   @relation("following_of_user", fields: [followingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([followerId, followingId]) // Prevents duplicate follow records
+  @@index([followerId]) // Optimizes queries for a user's followers
+  @@index([followingId]) // Optimizes queries for a user's following
+  @@map("follows")
 }
 
 model Post {
