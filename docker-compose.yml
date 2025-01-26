@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: vibe
     ports:
       - '4000:4000' # Maps host port 4000 to container port 4000
     volumes:

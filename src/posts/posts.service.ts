@@ -37,7 +37,12 @@ export class PostsService {
     const filter: Prisma.PostFindManyArgs = {
       take,
       skip,
-      include: { medias: true },
+      include: {
+        medias: true,
+        _count: {
+          select: { likes: true, comments: true },
+        },
+      },
     };
     if (search) {
       filter.where = { title: { contains: search, mode: 'insensitive' } };

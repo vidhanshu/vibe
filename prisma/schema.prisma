@@ -20,7 +20,9 @@ model User {
   // session
   token String?
 
-  posts Post[] @relation("posts_of_user")
+  posts    Post[]    @relation("posts_of_user")
+  likes    Like[]    @relation("liked_by_user")
+  comments Comment[] @relation("commented_by_user")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,13 +38,50 @@ model Post {
   userId String
   user   User   @relation("posts_of_user", fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  medias    Media[]  @relation("medias_of_post")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  medias    Media[]   @relation("medias_of_post")
+  likes     Like[]    @relation("likes_of_posts")
+  comments  Comment[] @relation("comments_of_post")
 
   @@index([userId])
   @@index([userId, id])
   @@map("posts")
+}
+
+model Like {
+  id String @id @default(uuid())
+
+  postId String
+  userId String
+  post   Post   @relation("likes_of_posts", fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation("liked_by_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([postId, userId]) // Ensures a user can like a post only once
+  @@index([userId])
+  @@index([postId])
+  @@map("likes")
+}
+
+model Comment {
+  id      String @id @default(uuid())
+  content String
+
+  postId String
+  userId String
+  post   Post   @relation("comments_of_post", fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation("commented_by_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+  @@index([userId, id])
+  @@map("comments")
 }
 
 model Media {
