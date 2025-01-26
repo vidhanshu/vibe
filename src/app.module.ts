@@ -10,6 +10,9 @@ import { JwtGuard } from './common/guards/jwt.guard';
 import { JwtStrategy } from './auth/strategy/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { MediasModule } from './medias/medias.module';
+import { StatusesModule } from './statuses/statuses.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronTasksModule } from './cron-tasks/cron-tasks.module';
 
 @Module({
   imports: [
@@ -17,7 +20,10 @@ import { MediasModule } from './medias/medias.module';
     UsersModule,
     PostsModule,
     MediasModule,
+    StatusesModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
+    CronTasksModule,
   ],
   controllers: [AppController],
   providers: [

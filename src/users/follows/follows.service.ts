@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginatedResponse } from 'src/common/types/return-type';
 import type { Follow, Prisma, User } from '@prisma/client';
@@ -15,6 +15,10 @@ export class FollowsService {
     followerId: string;
     followingId: string;
   }) {
+    if (followerId === followingId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+
     const follow = await this.prisma.follow.findUnique({
       where: { followerId_followingId: { followerId, followingId } },
     });

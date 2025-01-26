@@ -20,11 +20,17 @@ model User {
   // session
   token String?
 
-  posts     Post[]    @relation("posts_of_user")
-  likes     Like[]    @relation("liked_by_user")
-  comments  Comment[] @relation("commented_by_user")
-  followers Follow[]  @relation("followers_of_user")
-  following Follow[]  @relation("following_of_user")
+  posts      Post[]    @relation("posts_of_user")
+  likes      Like[]    @relation("liked_by_user")
+  comments   Comment[] @relation("commented_by_user")
+  /**
+   * The below relation may look confusing but
+   * followers becomes the list of Follow where followingId = userId i.e i'm the guy who is being followed
+   * followings becomes the list of Follow where followerId = userId i.e i'm the guy who is the follower of the user
+   */
+  followings Follow[]  @relation("followers_of_user")
+  followers  Follow[]  @relation("following_of_user")
+  status     Status?   @relation("status_of_user")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,11 +121,42 @@ model Media {
   userId String? @unique
   user   User?   @relation("profile_of_user", fields: [userId], references: [id], onDelete: Cascade)
 
+  statusId String?
+  status   Status? @relation("status_of_media", fields: [statusId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([postId])
   @@map("medias")
+}
+
+model Status {
+  id String @id @default(uuid())
+
+  // if text
+  message         String?
+  backgroundColor String? @default("#000000")
+
+  // if medias
+  medias Media[] @relation("status_of_media")
+  userId String  @unique
+  user   User    @relation("status_of_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  statusType StatusType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, id])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("statuses")
+}
+
+enum StatusType {
+  media
+  text
 }
 
 enum MediaType {

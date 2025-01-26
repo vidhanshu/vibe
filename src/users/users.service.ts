@@ -25,7 +25,7 @@ export class UsersService {
       take,
       include: {
         profilePhoto: true,
-        _count: { select: { followers: true, following: true } },
+        _count: { select: { followers: true, followings: true } },
       },
     };
     if (search)
