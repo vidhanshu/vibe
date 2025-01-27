@@ -1,13 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { FilterStatusesDto } from './dto/filter-statuses.dto';
 import { PaginatedResponse } from 'src/common/types/return-type';
-import { Prisma, Status } from '@prisma/client';
+import { Status, StatusType } from '@prisma/client';
 import { MediasService } from 'src/medias/medias.service';
 
 @Injectable()
@@ -105,7 +101,7 @@ export class StatusesService {
       return this.prisma.status.create({
         data: {
           userId,
-          statusType: 'media',
+          statusType: StatusType.MEDIA,
           medias: {
             create: medias,
           },
@@ -116,7 +112,7 @@ export class StatusesService {
       return this.prisma.status.create({
         data: {
           userId,
-          statusType: 'text',
+          statusType: StatusType.TEXT,
           message,
           backgroundColor,
         },
@@ -135,7 +131,7 @@ export class StatusesService {
 
     if (!existingStatus) throw new NotFoundException();
 
-    if (existingStatus.statusType === 'media') {
+    if (existingStatus.statusType === StatusType.MEDIA) {
       // Intentionally kept sequential
       await this.prisma.status.delete({
         where: { id: existingStatus.id },

@@ -14,20 +14,20 @@ export class CreateChatDto {
   chatType: 'DM' | 'GROUP';
 
   @IsString()
-  @ValidateIf((obj) => obj.chatType === 'GROUP')
+  @ValidateIf((obj) => obj.chatType === ChatType.GROUP)
   name: string;
 
   @IsString()
   @IsOptional()
-  @ValidateIf((obj) => obj.chatType === 'GROUP')
+  @ValidateIf((obj) => obj.chatType === ChatType.GROUP)
   description: string;
 
   @IsUUID()
-  @ValidateIf((obj) => obj.chatType === 'DM')
+  @ValidateIf((obj) => obj.chatType === ChatType.DM)
   participantId: string;
 
   @IsArray()
-  @ValidateIf((obj) => obj.chatType === 'GROUP')
+  @ValidateIf((obj) => obj.chatType === ChatType.GROUP)
   @IsUUID('4', { each: true })
   @ArrayMinSize(1)
   participantIds: string[];

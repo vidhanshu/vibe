@@ -235,11 +235,11 @@ enum ChatType {
 }
 
 enum StatusType {
-  media
-  text
+  MEDIA
+  TEXT
 }
 
 enum MediaType {
-  image
-  video
+  IMAGE
+  VIDEO
 }

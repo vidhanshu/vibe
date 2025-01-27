@@ -45,7 +45,7 @@ export class MediasService {
       });
 
       promises.push(this.s3Client.send(command));
-      mediaTypesAndIds.push({ type: folder, id: uuid });
+      mediaTypesAndIds.push({ type: folder.toUpperCase(), id: uuid });
     }
 
     const responses = await Promise.all(promises);

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Chat, ChatGroupRole, Message, Prisma } from '@prisma/client';
+import { Chat, ChatGroupRole, ChatType, Message, Prisma } from '@prisma/client';
 import { FilterChatsDto } from './dto/filter-chats.dto';
 import { PaginatedResponse } from 'src/common/types/return-type';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -26,7 +26,7 @@ export class ChatsService {
       participantIds,
     }: CreateChatDto,
   ) {
-    if (chatType === 'DM') {
+    if (chatType === ChatType.DM) {
       // TODO: add self dm support
       if (userId == participantId) {
         throw new BadRequestException('You cannot DM yourself');
@@ -34,7 +34,7 @@ export class ChatsService {
 
       const existingChat = await this.prisma.chat.findFirst({
         where: {
-          type: 'DM',
+          type: ChatType.DM,
           participants: {
             every: { userId: { in: [participantId, userId] } },
             some: { userId },

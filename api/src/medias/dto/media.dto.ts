@@ -1,9 +1,5 @@
-import { IsString, IsEnum, IsUrl, Matches } from 'class-validator';
-
-export enum MediaType {
-  IMAGE = 'image',
-  VIDEO = 'video',
-}
+import { MediaType } from '@prisma/client';
+import { IsString, IsEnum, Matches } from 'class-validator';
 
 export class MediaDto {
   @Matches(/^(https?:\/\/)?[a-zA-Z0-9.-]+\.s3\.[a-zA-Z0-9.-]+\/.+$/, {
@@ -14,6 +10,6 @@ export class MediaDto {
   @IsString()
   key: string;
 
-  @IsEnum(MediaType, { message: 'mediaType must be either "image" or "video"' })
+  @IsEnum(MediaType, { message: 'mediaType must be either "IMAGE" or "VIDEO"' })
   mediaType: MediaType;
 }
