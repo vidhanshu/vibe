@@ -20,18 +20,20 @@ model User {
   // session
   token String?
 
-  posts          Post[]       @relation("posts_of_user")
-  likes          Like[]       @relation("liked_by_user")
-  comments       Comment[]    @relation("commented_by_user")
+  posts             Post[]       @relation("posts_of_user")
+  likes             Like[]       @relation("liked_by_user")
+  comments          Comment[]    @relation("commented_by_user")
   /**
    * The below relation may look confusing but
    * followers becomes the list of Follow where followingId = userId i.e i'm the guy who is being followed
    * followings becomes the list of Follow where followerId = userId i.e i'm the guy who is the follower of the user
    */
-  followings     Follow[]     @relation("followers_of_user")
-  followers      Follow[]     @relation("following_of_user")
-  status         Status?      @relation("status_of_user")
-  statusesViewed StatusView[] @relation("viewed_by_user")
+  followings        Follow[]     @relation("followers_of_user")
+  followers         Follow[]     @relation("following_of_user")
+  status            Status?      @relation("status_of_user")
+  statusesViewed    StatusView[] @relation("viewed_by_user")
+  participatedChats ChatMember[] @relation("user_chats")
+  messagesSent      Message[]    @relation("sent_messages")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,6 +127,9 @@ model Media {
   statusId String?
   status   Status? @relation("status_of_media", fields: [statusId], references: [id], onDelete: Cascade)
 
+  messageId String?  @unique
+  message   Message? @relation("message_media", fields: [messageId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -171,6 +176,62 @@ model StatusView {
   @@index([statusId])
   @@index([viewerId])
   @@map("status_views")
+}
+
+model Chat {
+  id   String   @id @default(uuid())
+  type ChatType
+
+  // group only
+  name        String?
+  description String?
+
+  participants ChatMember[] @relation("chat_members")
+  messages     Message[]    @relation("chat_messages")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("chats")
+}
+
+model ChatMember {
+  id       String        @id @default(uuid())
+  chatId   String
+  userId   String
+  chat     Chat          @relation("chat_members", fields: [chatId], references: [id], onDelete: Cascade)
+  user     User          @relation("user_chats", fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt DateTime      @default(now())
+  leftAt   DateTime?
+  role     ChatGroupRole
+
+  @@unique([chatId, userId]) // Ensures a user can join a chat only once
+  @@map("chat_members")
+}
+
+model Message {
+  id       String  @id @default(uuid())
+  chatId   String
+  senderId String
+  text     String?
+  media    Media?  @relation("message_media")
+  chat     Chat    @relation("chat_messages", fields: [chatId], references: [id], onDelete: Cascade)
+  sender   User    @relation("sent_messages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("messages")
+}
+
+enum ChatGroupRole {
+  ADMIN
+  MEMBER
+}
+
+enum ChatType {
+  DM
+  GROUP
 }
 
 enum StatusType {

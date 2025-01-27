@@ -13,6 +13,7 @@ import { MediasModule } from './medias/medias.module';
 import { StatusesModule } from './statuses/statuses.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronTasksModule } from './cron-tasks/cron-tasks.module';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CronTasksModule } from './cron-tasks/cron-tasks.module';
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
     CronTasksModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [
