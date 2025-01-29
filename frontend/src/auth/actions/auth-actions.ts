@@ -1,12 +1,12 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { AUTH_API_ROUTES } from "../routes";
 import {
   clearAuthToken,
   setAuthToken,
 } from "@/src/common/utils/get-auth-cookie";
 import api from "@/src/common/utils/axios";
+import { NSAuth } from "../types";
 
 export const signUp = async (username: string, password: string) => {
   try {
@@ -52,35 +52,6 @@ export const signOut = async () => {
     const res = await api.post(AUTH_API_ROUTES.SIGNOUT);
     await clearAuthToken(); // clear the token no matter what
     if (res.status !== 200) return { message: res.data.message };
-  } catch (error: any) {
-    return { message: error.message };
-  }
-};
-
-export const userById = async (id: string) => {
-  try {
-    const response = await api.get(AUTH_API_ROUTES.USER_BY_ID(id));
-    const resJson = response.data;
-
-    if (response.status !== 200) return { message: resJson.message };
-
-    return resJson;
-  } catch (error: any) {
-    return { message: error.message };
-  }
-};
-
-export const getProfile = async () => {
-  try {
-    const response = await api.get(AUTH_API_ROUTES.PROFILE);
-    const resJson = response.data;
-
-    if (response.status !== 200)
-      return {
-        message: resJson.message,
-      };
-
-    return resJson;
   } catch (error: any) {
     return { message: error.message };
   }

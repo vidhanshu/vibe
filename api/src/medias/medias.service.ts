@@ -53,8 +53,8 @@ export class MediasService {
     return responses.map((_, idx) => {
       const { id, type } = mediaTypesAndIds[idx];
       return {
-        key: `${type}s/${id}-${files[idx].originalname}`,
-        url: `${this.baseS3Url}/${type}s/${id}-${files[idx].originalname}`,
+        key: `${type.toLowerCase()}s/${id}-${files[idx].originalname}`,
+        url: `${this.baseS3Url}/${type.toLowerCase()}s/${id}-${files[idx].originalname}`,
         mediaType: type,
       };
     });

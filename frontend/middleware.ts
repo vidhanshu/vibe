@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getProfile } from "./src/users/actions/user-actions";
 
 const PUBLIC_ROUTES = ["/auth"];
 const PRIVATE_ROUTES = ["/"];
 
 export async function middleware(req: NextRequest) {
-  const token = req.cookies.get("authToken")?.value;
   const { pathname } = req.nextUrl;
   const purePathname = pathname.split("?")[0];
 
   try {
+    const { user } = await getProfile();
     // if logged in
-    if (token) {
+    if (user) {
       if (PUBLIC_ROUTES.some((route) => purePathname === route)) {
         if (purePathname === "/") {
           return NextResponse.next();
@@ -31,5 +32,8 @@ export async function middleware(req: NextRequest) {
       // Allow access to public and unrestricted routes
       return NextResponse.next();
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    return NextResponse.next();
+  }
 }
