@@ -63,7 +63,7 @@ export class UsersService {
 
   async getUserById(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException(`User #${id} not found`);
+    if (!user) throw new NotFoundException(`User not found`);
     return user;
   }
 
@@ -75,7 +75,7 @@ export class UsersService {
       where: { id },
       include: { profilePhoto: true },
     });
-    if (!user) throw new NotFoundException(`User #${id} not found`);
+    if (!user) throw new NotFoundException(`User not found`);
 
     const data: Prisma.UserUpdateInput = { ...updateUserDto };
     if (
@@ -102,7 +102,7 @@ export class UsersService {
 
   async deleteAccount(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException(`User #${id} not found`);
+    if (!user) throw new NotFoundException(`User not found`);
 
     return this.prisma.user.delete({ where: { id } });
   }
