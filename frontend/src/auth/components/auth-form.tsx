@@ -22,24 +22,42 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Image from "next/image";
+import { signUp, signIn as Login } from "@/src/auth/actions/auth-actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const authFormSchema = z.object({
   username: z.string().min(3).max(20),
-  email: z.optional(z.string()),
+  // email: z.optional(z.string()),
   password: z.string().min(8),
 });
 
 function AuthForm() {
+  const router = useRouter();
   const [signIn, setSignIn] = useState(true);
 
   const form = useForm<z.infer<typeof authFormSchema>>({
-    defaultValues: { username: "", password: "", email: "" },
+    defaultValues: { username: "", password: "" },
     resolver: zodResolver(authFormSchema),
   });
 
-  const onSubmit = (value: z.infer<typeof authFormSchema>) => {
-    console.log(value);
+  const onSubmit = async ({
+    username,
+    password,
+  }: z.infer<typeof authFormSchema>) => {
+    if (signIn) {
+      const { message } = await Login(username, password);
+      if (message) return toast.error(message);
+      else toast.success("Logged in successfully");
+    } else {
+      const { message } = await signUp(username, password);
+      if (message) return toast.error(message);
+      else toast.success("Signed up successfully");
+    }
+    router.replace("/");
   };
+
+  const { isSubmitting } = form.formState;
 
   return (
     <Card className="w-[400px]">
@@ -64,7 +82,7 @@ function AuthForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {!signIn && (
+            {/* {!signIn && (
               <FormField
                 control={form.control}
                 name="email"
@@ -85,7 +103,7 @@ function AuthForm() {
                   </FormItem>
                 )}
               />
-            )}
+            )} */}
             <FormField
               control={form.control}
               name="username"
@@ -93,7 +111,12 @@ function AuthForm() {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input autoFocus placeholder="eg. vibe" {...field} />
+                    <Input
+                      disabled={isSubmitting}
+                      autoFocus
+                      placeholder="eg. vibe"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,6 +130,7 @@ function AuthForm() {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
+                      disabled={isSubmitting}
                       type="password"
                       placeholder="Enter your password"
                       {...field}
@@ -117,7 +141,7 @@ function AuthForm() {
               )}
             />
             <div className="pt-4">
-              <Button type="submit" className="w-full">
+              <Button loading={isSubmitting} type="submit" className="w-full">
                 {signIn ? "Login" : "Sign Up"}
               </Button>
             </div>
@@ -125,6 +149,8 @@ function AuthForm() {
               {signIn ? "Don't have an account?" : "Already have an account?"}
               <span
                 onClick={() => {
+                  if (isSubmitting) return;
+
                   form.reset();
                   setSignIn((e) => !e);
                 }}
