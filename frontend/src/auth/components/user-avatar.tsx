@@ -1,18 +1,27 @@
+"use client";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import useSessionStore from "@/src/common/stores/session-store";
+import { cn } from "@/lib/utils";
 
-const UserAvatar = () => {
-  const { isLoading, user } = useSessionStore();
-
-  if (isLoading) return <Skeleton className="size-7 rounded-full" />;
-
+const UserAvatar = ({
+  className,
+  username = "V",
+  fallbackClassName,
+  url,
+}: {
+  url?: string;
+  username?: string;
+  className?: string;
+  fallbackClassName?: string;
+}) => {
   return (
-    <Avatar className="size-6">
-      <AvatarImage src={user?.profilePhoto?.url} alt="@vibe" />
-      <AvatarFallback>
-        {user?.username?.[0].toUpperCase() ?? "V"}
+    <Avatar className={cn("size-6", className)}>
+      <AvatarImage src={url} alt="@vibe" />
+      <AvatarFallback className={fallbackClassName}>
+        {username?.[0].toUpperCase() ?? "V"}
       </AvatarFallback>
     </Avatar>
   );

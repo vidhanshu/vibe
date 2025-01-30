@@ -17,7 +17,7 @@ export const userById = async (id: string) => {
   }
 };
 
-export const geUserByUsername = async (
+export const getUserByUsername = async (
   username: string
 ): Promise<{ user?: NSAuth.User; message?: string }> => {
   try {

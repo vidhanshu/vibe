@@ -69,6 +69,7 @@ export class UsersService {
           select: {
             followers: true,
             followings: true,
+            posts: true,
           },
         },
         profilePhoto: true,
@@ -86,6 +87,7 @@ export class UsersService {
           select: {
             followers: true,
             followings: true,
+            posts: true,
           },
         },
         profilePhoto: true,

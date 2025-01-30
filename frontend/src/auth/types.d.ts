@@ -11,6 +11,11 @@ export namespace NSAuth {
     createdAt: Date;
     updatedAt: Date;
     profilePhoto?: Media;
+    _count: {
+      followers: number;
+      followings: number;
+      posts: number;
+    };
   }
   // TODO: move this to appropriate folder later
   export interface Media {

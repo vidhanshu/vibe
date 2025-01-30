@@ -47,7 +47,7 @@ const Sidebar = () => {
   const { user } = useSessionStore();
 
   return (
-    <aside className="pr-6 pl-4 py-8 space-y-8 max-w-[250px] border-r h-full">
+    <div className="pr-6 pl-4 py-8 space-y-8 col-span-2 h-full">
       <Image
         src="/full-logo.svg"
         className=""
@@ -80,7 +80,7 @@ const Sidebar = () => {
           </Link>
         </div>
       </div>
-    </aside>
+    </div>
   );
 };
 

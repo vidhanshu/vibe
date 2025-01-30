@@ -5,9 +5,14 @@ import React, { PropsWithChildren } from "react";
 const MainLayout = ({ children }: PropsWithChildren) => {
   return (
     <SessionProvider>
-      <main className="grid grid-cols-3 min-h-screen">
-        <Sidebar />
-        <div>{children}</div>
+      <main className="relative min-h-screen grid grid-cols-[250px_1fr] gap-x-4">
+        {/* Sidebar */}
+        <aside className="sticky top-0 h-screen border-r">
+          <Sidebar />
+        </aside>
+
+        {/* Main Content */}
+        {children}
       </main>
     </SessionProvider>
   );
