@@ -81,10 +81,19 @@ const ProfileHeader = () => {
         <div className="flex-1 flex flex-col justify-between py-2">
           <div className="flex gap-x-4 items-center">
             <p className="text-2xl">
-              {currentUser?.username} .{" "}
-              <span className="text-muted-foreground text-lg">
-                {PRONOUN_MAP[currentUser?.pronoun as keyof typeof PRONOUN_MAP]}
-              </span>
+              {currentUser?.username}
+              {currentUser?.pronoun && (
+                <>
+                  .{" "}
+                  <span className="text-muted-foreground text-lg">
+                    {
+                      PRONOUN_MAP[
+                        currentUser?.pronoun as keyof typeof PRONOUN_MAP
+                      ]
+                    }
+                  </span>
+                </>
+              )}
             </p>
             {!isUserSelf && (
               <Button className="font-semibold" variant="default" size="sm">

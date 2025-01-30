@@ -15,6 +15,7 @@ import Link from "next/link";
 import { PropsWithChildren } from "react";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import useSessionStore from "../stores/session-store";
+import CreatePostModal from "./modals/create-post-modal";
 
 const SIDEBAR_ITEMS = [
   {
@@ -37,10 +38,6 @@ const SIDEBAR_ITEMS = [
     icon: Heart,
     href: null,
   },
-  {
-    icon: PlusSquare,
-    href: null,
-  },
 ];
 
 const Sidebar = () => {
@@ -56,9 +53,6 @@ const Sidebar = () => {
         height={42}
       />
       <div className="space-y-4">
-        {/* {SIDEBAR_ITEMS.map(({}) => {
-          return <></>;
-        })} */}
         <Link href="/">
           <SidebarItem icon={Home}>Home</SidebarItem>
         </Link>
@@ -66,13 +60,15 @@ const Sidebar = () => {
         <SidebarItem icon={Compass}>Explore</SidebarItem>
         <SidebarItem icon={MessageCircle}>Messages</SidebarItem>
         <SidebarItem icon={Heart}>Notifications</SidebarItem>
-        <SidebarItem icon={PlusSquare}>Create</SidebarItem>
+        <CreatePostModal>
+          <SidebarItem icon={PlusSquare}>Create</SidebarItem>
+        </CreatePostModal>
         <div>
           <Link aria-disabled={!user} href={`/users/${user?.username}`}>
             <SidebarItem
               icon={PlusSquare}
               buttonProps={{
-                startContent: <UserAvatar />,
+                startContent: <UserAvatar url={user?.profilePhoto?.url} />,
               }}
             >
               Profile
@@ -93,6 +89,7 @@ const SidebarItem = ({
 }: { icon: LucideIcon; buttonProps?: ButtonProps } & PropsWithChildren) => {
   return (
     <Button
+      asChild
       variant="ghost"
       startContent={<Icon className="size-6" />}
       className="justify-start font-medium text-base w-full h-12"
