@@ -1,5 +1,5 @@
 "use client";
-
+import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/ui/button";
 import {
   Dialog,
@@ -189,7 +189,7 @@ const CreatePostModal = ({
               >
                 <ArrowLeft className="size-6 cursor-pointer" />
               </ConfirmDialog>
-
+              <h1>View and crop</h1>
               <button
                 onClick={() => setStep("caption")}
                 className="text-blue-500 font-bold hover:text-white"
@@ -319,7 +319,11 @@ const ViewCropStep = ({
   });
 
   return (
-    <div className="flex-1 relative flex items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden">
+    <motion.div
+      // initial={{ x: 200 }}
+      // animate={{ x: 0 }}
+      className="flex-1 relative flex items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden"
+    >
       {mediaElements[active]}
       {medias.length > 1 && (
         <>
@@ -440,7 +444,7 @@ const ViewCropStep = ({
           </Popover>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
@@ -462,90 +466,96 @@ const CaptionStep = ({
       <div className="w-[576px] h-[576px] flex items-center">
         <ViewCropStep files={files} />
       </div>
-      <div className="w-[300px] max-h-[576px] overflow-y-auto flex-1 p-4 space-y-4">
-        <div className="flex gap-x-4">
-          <UserAvatar url={user?.profilePhoto?.url} /> {user?.username}
-        </div>
-        <input
-          disabled={isLoading}
-          className="w-full bg-white/5 px-2 rounded-sm outline-none border-none py-1"
-          value={value.title}
-          onChange={(e) => setValue((p) => ({ ...p, title: e.target.value }))}
-          placeholder="eg. My first post"
-        />
-        <textarea
-          disabled={isLoading}
-          value={value.description}
-          maxLength={2500}
-          onChange={(e) =>
-            setValue((p) => ({ ...p, description: e.target.value }))
-          }
-          className="bg-neutral-800 outline-none border-none resize-none min-h-[120px] px-2 py-1 bg-white/5 w-full rounded-md"
-          autoCorrect="false"
-          placeholder="Write a caption..."
-        />
-        <div className="flex justify-end items-center text-muted-foreground text-xs">
-          <TooltipProvider>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger>
-                <span>{value.description.length}/2500</span>
-              </TooltipTrigger>
-              <TooltipContent align="end" side="bottom">
-                <p>Characters after 125 will be truncated in the feed</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Accordion type="multiple">
-          <AccordionItem className="border-b border-white/10" value="tags">
-            <AccordionTrigger
-              disabled={isLoading}
-              className="hover:no-underline py-2"
-            >
-              Tags
-            </AccordionTrigger>
-            <AccordionContent className="py-1 px-1">
-              <p className="text-muted-foreground text-xs">
-                Add tags to help people find your post
-              </p>
-              <h1>Feature yet to be implemented...</h1>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem className="border-b border-white/10" value="advance">
-            <AccordionTrigger
-              disabled={isLoading}
-              className="hover:no-underline py-2"
-            >
-              Advance settings
-            </AccordionTrigger>
-            <AccordionContent className="py-2">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <div className="flex gap-x-2 justify-between">
-                    <h1>Hide like and view counts on this post</h1>
-                    <Switch className="border border-white/10" />
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: "300px" }}
+        exit={{ width: 0 }}
+      >
+        <div className="w-[300px] max-h-[576px] overflow-y-auto flex-1 p-4 space-y-4">
+          <div className="flex gap-x-4">
+            <UserAvatar url={user?.profilePhoto?.url} /> {user?.username}
+          </div>
+          <input
+            disabled={isLoading}
+            className="w-full bg-white/5 px-2 rounded-sm outline-none border-none py-1"
+            value={value.title}
+            onChange={(e) => setValue((p) => ({ ...p, title: e.target.value }))}
+            placeholder="eg. My first post"
+          />
+          <textarea
+            disabled={isLoading}
+            value={value.description}
+            maxLength={2500}
+            onChange={(e) =>
+              setValue((p) => ({ ...p, description: e.target.value }))
+            }
+            className="bg-neutral-800 outline-none border-none resize-none min-h-[120px] px-2 py-1 bg-white/5 w-full rounded-md"
+            autoCorrect="false"
+            placeholder="Write a caption..."
+          />
+          <div className="flex justify-end items-center text-muted-foreground text-xs">
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger>
+                  <span>{value.description.length}/2500</span>
+                </TooltipTrigger>
+                <TooltipContent align="end" side="bottom">
+                  <p>Characters after 125 will be truncated in the feed</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Accordion type="multiple">
+            <AccordionItem className="border-b border-white/10" value="tags">
+              <AccordionTrigger
+                disabled={isLoading}
+                className="hover:no-underline py-2"
+              >
+                Tags
+              </AccordionTrigger>
+              <AccordionContent className="py-1 px-1">
+                <p className="text-muted-foreground text-xs">
+                  Add tags to help people find your post
+                </p>
+                <h1>Feature yet to be implemented...</h1>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem className="border-b border-white/10" value="advance">
+              <AccordionTrigger
+                disabled={isLoading}
+                className="hover:no-underline py-2"
+              >
+                Advance settings
+              </AccordionTrigger>
+              <AccordionContent className="py-2">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex gap-x-2 justify-between">
+                      <h1>Hide like and view counts on this post</h1>
+                      <Switch className="border border-white/10" />
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      Only you will see the total number of likes and views on
+                      this post. You can change this later by going to the ···
+                      menu at the top of the post.
+                    </p>
                   </div>
-                  <p className="text-muted-foreground text-xs">
-                    Only you will see the total number of likes and views on
-                    this post. You can change this later by going to the ···
-                    menu at the top of the post.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex gap-x-2 justify-between">
-                    <h1>Turn off comments</h1>
-                    <Switch className="border border-white/10" />
+                  <div className="space-y-2">
+                    <div className="flex gap-x-2 justify-between">
+                      <h1>Turn off comments</h1>
+                      <Switch className="border border-white/10" />
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      You can change this later by going to the ··· menu at the
+                      top of the post.
+                    </p>
                   </div>
-                  <p className="text-muted-foreground text-xs">
-                    You can change this later by going to the ··· menu at the
-                    top of the post.
-                  </p>
                 </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </motion.div>
     </div>
   );
 };

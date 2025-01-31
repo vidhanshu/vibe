@@ -67,13 +67,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn("relative", buttonVariants({ variant, size, className }))}
+        className={cn("", buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || loading}
         {...props}
       >
         {loading ? (
-          <span>
+          <span className="relative">
             <Loader2 className="w-5 h-5 animate-spin absolute left-0 right-0 mx-auto" />
             {/* to keep width same as it has */}
             <div className="invisible flex gap-x-4 items-center">
@@ -84,7 +84,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </span>
         ) : (
           <div
-            className={cn("flex gap-x-4 items-center", containerClassName)}
+            className={cn("flex gap-x-4 items-center cursor-pointer", containerClassName)}
             {...restProps}
           >
             {startContent}

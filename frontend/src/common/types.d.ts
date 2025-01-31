@@ -37,4 +37,10 @@ export namespace NSCommon {
       limit: number;
     };
   }
+
+  export interface PaginationDto {
+    limit?: number;
+    page?: number;
+    search?: string;
+  }
 }
