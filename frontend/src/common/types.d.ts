@@ -3,7 +3,7 @@ export namespace NSCommon {
     id: string;
     url: string;
     key: string;
-    mediaType: "IMAGE" | "VIDEO";
+    mediaType: MediaType;
     postId: string | null;
     userId: string | null;
     statusId: string | null;
@@ -15,13 +15,17 @@ export namespace NSCommon {
     id: string;
     url: string;
     key: string;
-    mediaType: "IMAGE" | "VIDEO";
+    mediaType: MediaType;
   }
 
-  export type Response<T> = Promise<{
-    message?: string;
-    data: T | null;
-  }>;
+  export type MediaType = "IMAGE" | "VIDEO";
+
+  export type Response<T, K = {}> = Promise<
+    {
+      message?: string;
+      data: T | null;
+    } & K
+  >;
 
   export interface PaginatedResponse<T> {
     items: T[];

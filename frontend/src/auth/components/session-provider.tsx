@@ -14,14 +14,14 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
   useQuery({
     queryKey: ["session"],
     queryFn: async () => {
-      const { message, user = null, statusCode } = await getProfile();
+      const { message, data = null, statusCode } = await getProfile();
       if (message) {
         toast.error(message);
         if (statusCode === 401) router.replace("/auth");
         return null;
       }
-      setSession(user);
-      return user;
+      setSession(data);
+      return data;
     },
   });
 

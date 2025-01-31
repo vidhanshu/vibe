@@ -40,7 +40,7 @@ const ProfileHeader = () => {
   }
 
   const isUserSelf = user?.username === params.username;
-  const currentUser = data?.user;
+  const currentUser = data?.data;
 
   const TABS = [
     {

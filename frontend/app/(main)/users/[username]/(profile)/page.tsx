@@ -8,7 +8,7 @@ const UserPage = async ({
   params: Promise<{ username: string }>;
 }) => {
   const { username } = await params;
-  const { message, user } = await getUserByUsername(username);
+  const { message, data } = await getUserByUsername(username);
   if (message) return <p>User not found!</p>;
 
   return (

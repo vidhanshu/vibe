@@ -2,10 +2,11 @@
 
 import { NSAuth } from "@/src/auth/types";
 import api from "../utils/axios";
+import { NSCommon } from "../types";
 
 export const uploadFiles = async (
   files: File[]
-): Promise<{ files?: Omit<NSAuth.Media, "id">[]; message?: string }> => {
+): NSCommon.Response<Omit<NSAuth.Media, "id">[]> => {
   try {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
@@ -14,16 +15,20 @@ export const uploadFiles = async (
         "Content-Type": "multipart/form-data",
       },
     });
-    return { files: res.data };
+    return { data: res.data };
   } catch (error: any) {
-    return { message: error.response?.data?.message ?? error.message };
+    return {
+      message: error.response?.data?.message ?? error.message,
+      data: null,
+    };
   }
 };
 
-export const deleteFiles = async (keys: string[]) => {
+export const deleteFiles = async (keys: string[]): NSCommon.Response<null> => {
   try {
     await api.post("/medias/delete", { keys });
+    return { data: null };
   } catch (error: any) {
-    return { error: error.message };
+    return { message: error.message, data: null };
   }
 };

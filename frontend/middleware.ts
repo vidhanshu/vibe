@@ -9,9 +9,9 @@ export async function middleware(req: NextRequest) {
   const purePathname = pathname.split("?")[0];
 
   try {
-    const { user } = await getProfile();
+    const { data } = await getProfile();
     // if logged in
-    if (user) {
+    if (data) {
       if (PUBLIC_ROUTES.some((route) => purePathname === route)) {
         if (purePathname === "/") {
           return NextResponse.next();

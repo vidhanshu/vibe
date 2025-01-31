@@ -1,8 +1,14 @@
-import { IsString, IsStrongPassword, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsStrongPassword,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CredentialsDto {
   @IsString()
   @MinLength(3)
+  @MaxLength(20)
   username: string;
 
   @IsString()

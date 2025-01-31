@@ -1,10 +1,10 @@
-import { NSAuth } from "@/src/auth/types";
+import { NSUser } from "@/src/users/types";
 import { create } from "zustand";
 
 interface SessionStore {
-  user: NSAuth.User | null;
+  user: NSUser.User | null;
   isLoading: boolean;
-  setSession: (user: NSAuth.User | null) => void;
+  setSession: (user: NSUser.User | null) => void;
 }
 
 const useSessionStore = create<SessionStore>()((set) => ({

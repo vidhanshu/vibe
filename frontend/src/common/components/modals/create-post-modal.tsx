@@ -77,13 +77,13 @@ const CreatePostModal = ({
   const { isPending, mutate } = useMutation({
     mutationKey: ["create-post"],
     mutationFn: async () => {
-      const { message, post } = await createPost({
+      const { message, data } = await createPost({
         title: value.title,
         content: value.description,
         medias: files,
       });
       if (message) return toast.error(message);
-      return post;
+      return data;
     },
     onSuccess: (post) => {
       toast.success("Post created successfully");

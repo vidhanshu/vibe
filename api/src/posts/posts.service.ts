@@ -32,6 +32,7 @@ export class PostsService {
     limit: take = 10,
     page = 1,
     search,
+    username,
   }: FilterPostDto): Promise<PaginatedResponse<Post>> {
     const skip = (page - 1) * take;
     const filter: Prisma.PostFindManyArgs = {
@@ -46,6 +47,10 @@ export class PostsService {
     };
     if (search) {
       filter.where = { title: { contains: search, mode: 'insensitive' } };
+    }
+
+    if (username) {
+      filter.where = { user: { username } };
     }
 
     const [posts, count] = await Promise.all([

@@ -14,17 +14,15 @@ export const createPost = async ({
   title: string;
   content: string;
   medias?: File[];
-  // TODO:  Please add post type
-}): Promise<{ message?: string; post?: any }> => {
+}): NSCommon.Response<{ post: NSPost.Post }> => {
   let uploadedFiles: Omit<NSAuth.Media, "id">[] = [];
   try {
     if (medias?.length) {
       const res = await uploadFiles(medias);
       if (res.message) {
-        console.log("[upload failed]", res.message);
-        return { message: res.message };
+        return { message: res.message, data: null };
       }
-      uploadedFiles = res.files ?? [];
+      uploadedFiles = res.data ?? [];
     }
     const newPayload: any = { title, content };
     if (uploadedFiles.length) {
@@ -35,17 +33,15 @@ export const createPost = async ({
       // delete uploaded files, if error
       if (uploadedFiles.length)
         await deleteFiles(uploadedFiles.map(({ key }) => key));
-      console.log("[post creation failed]", res.data.message);
-      return { message: res.data.message };
+      return { message: res.data.message, data: null };
     }
 
-    return { post: res.data };
+    return { data: res.data };
   } catch (error: any) {
-    console.log("[post creation failed]", error.message);
     // delete uploaded files, if error
     if (uploadedFiles.length)
       await deleteFiles(uploadedFiles.map(({ key }) => key));
-    return { message: error.message };
+    return { message: error.message, data: null };
   }
 };
 
@@ -53,7 +49,6 @@ export const getPosts = async ({
   username,
 }: {
   username: string;
-  // TODO: make all server actions follow this patter of response
 }): NSCommon.Response<NSCommon.PaginatedResponse<NSPost.Post>> => {
   try {
     const res = await api.get(`/posts?username=${username}`);
