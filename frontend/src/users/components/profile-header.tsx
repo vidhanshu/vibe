@@ -18,6 +18,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import FollowersModal from "@/src/common/components/modals/followers-modal";
 
 const PRONOUN_MAP = {
   he: "he/his",
@@ -125,9 +126,11 @@ const ProfileHeader = () => {
             <h1>
               <b>{currentUser?._count.posts}</b> Posts
             </h1>
-            <h1>
-              <b>{currentUser?._count.followers}</b> Followers
-            </h1>
+            <FollowersModal id={data?.data?.id!}>
+              <h1 className="cursor-pointer">
+                <b>{currentUser?._count.followers}</b> Followers
+              </h1>
+            </FollowersModal>
             <h1>
               <b>{currentUser?._count.followings}</b> Followings
             </h1>

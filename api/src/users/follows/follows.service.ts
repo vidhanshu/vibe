@@ -34,7 +34,7 @@ export class FollowsService {
 
   async getFollowers(
     userId: string,
-    { limit = 10, page = 1 }: FilterFollowsDto,
+    { limit = 10, page = 1, search }: FilterFollowsDto,
   ): Promise<PaginatedResponse<User>> {
     const skip = (page - 1) * limit;
 
@@ -42,7 +42,19 @@ export class FollowsService {
       this.prisma.follow.findMany({
         skip,
         take: limit,
-        where: { followingId: userId },
+        where: {
+          followingId: userId,
+          ...(search
+            ? {
+                follower: {
+                  username: {
+                    contains: search,
+                    mode: 'insensitive',
+                  },
+                },
+              }
+            : {}),
+        },
         include: {
           follower: {
             include: { profilePhoto: true },

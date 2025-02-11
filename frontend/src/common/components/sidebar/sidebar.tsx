@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PropsWithChildren, useEffect, useState } from "react";
+import {
+  PropsWithChildren,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal";
@@ -22,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDebounceValue } from "usehooks-ts";
+import { useDebounceValue, useOnClickOutside } from "usehooks-ts";
 import { getUsers } from "@/src/users/actions/user-actions";
 import { toast } from "sonner";
 import SearchDrawer from "./search-drawer";
@@ -72,8 +78,15 @@ const Sidebar = () => {
     }
   };
 
+  const ref = useRef<HTMLDivElement>(null);
+  const handleClickOutside = () => {
+    if (collapsed) setCollapsed(false);
+  };
+
+  useOnClickOutside(ref as any, handleClickOutside);
+
   return (
-    <>
+    <div ref={ref} className="h-full">
       <div
         className={cn(
           "pr-6 pl-4 py-8 space-y-8 h-full",
@@ -154,7 +167,7 @@ const Sidebar = () => {
                 collapsed={collapsed}
                 icon={PlusSquare}
                 buttonProps={{
-                  startContent: <UserAvatar url={user?.profilePhoto?.url} />,
+                  startContent: <UserAvatar url={user?.profilePhoto?.url} username={user?.username} />,
                 }}
               >
                 Profile
@@ -175,7 +188,7 @@ const Sidebar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { FilterPostDto } from './dto/filter-post.dto';
 import { Post, Prisma } from '@prisma/client';
 import { PaginatedResponse } from 'src/common/types/return-type';
 import { MediasService } from 'src/medias/medias.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreatePostDto } from './dto/create-post.dto';
+import { FilterPostDto } from './dto/filter-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -75,7 +75,16 @@ export class PostsService {
   async getPostById(id: string): Promise<Post> {
     const post = await this.prisma.post.findUnique({
       where: { id },
-      include: { medias: true },
+      include: {
+        medias: true,
+        user: true,
+        _count: true,
+        likes: {
+          select: {
+            userId: true,
+          },
+        },
+      },
     });
     if (!post) throw new NotFoundException(`Post #${id} not found`);
     return post;

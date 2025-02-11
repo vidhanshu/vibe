@@ -1,5 +1,10 @@
 "use client";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import Button from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +13,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import UserAvatar from "@/src/auth/components/user-avatar";
+import { createPost } from "@/src/posts/actions/posts-actions";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -19,38 +40,18 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import React, {
   PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import Dropzone from "react-dropzone";
-import ConfirmDialog from "../dialogs/confirm-dialog";
-import UserAvatar from "@/src/auth/components/user-avatar";
-import useSessionStore from "../../stores/session-store";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPost } from "@/src/posts/actions/posts-actions";
 import { toast } from "sonner";
-import { useParams } from "next/navigation";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import useSessionStore from "../../stores/session-store";
+import ConfirmDialog from "../dialogs/confirm-dialog";
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -287,10 +288,14 @@ const ViewCropStep = ({
 }) => {
   const [active, setActive] = useState(0);
 
-  const medias = files.map((file) => ({
-    src: URL.createObjectURL(file),
-    isImage: file.type.startsWith("image"),
-  }));
+  const medias = useMemo(
+    () =>
+      files.map((file) => ({
+        src: URL.createObjectURL(file),
+        isImage: file.type.startsWith("image"),
+      })),
+    [files]
+  );
 
   // Function to handle adding new files
   const handleAddFiles = useCallback(

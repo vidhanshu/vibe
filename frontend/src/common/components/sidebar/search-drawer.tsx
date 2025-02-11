@@ -1,17 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDebounceValue } from "usehooks-ts";
-import { getUsers } from "@/src/users/actions/user-actions";
-import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import UserAvatar from "@/src/auth/components/user-avatar";
+import { getUsers } from "@/src/users/actions/user-actions";
 import NoContent from "@/src/users/components/no-content";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useDebounceValue } from "usehooks-ts";
 
 const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
   const [debounced, updateDebounced] = useDebounceValue("", 1000);
@@ -49,6 +49,7 @@ const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
       </div>
       <div className="px-6">
         <Input
+          autoFocus
           onChange={(e) => updateDebounced(e.target.value)}
           type="search"
           placeholder="Search"

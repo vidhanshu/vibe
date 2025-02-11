@@ -3,11 +3,11 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment-dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { FilterCommentsDto } from './dto/filter-comments.dto';
 import { Comment, Prisma } from '@prisma/client';
 import { PaginatedResponse } from 'src/common/types/return-type';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateCommentDto } from './dto/create-comment-dto';
+import { FilterCommentsDto } from './dto/filter-comments.dto';
 
 @Injectable()
 export class CommentsService {
@@ -20,7 +20,11 @@ export class CommentsService {
     const filter: Prisma.CommentFindManyArgs = {
       where: { postId },
       skip: (page - 1) * limit,
+      include: {
+        user: true,
+      },
       take: limit,
+      orderBy: { createdAt: 'desc' },
     };
 
     const [items, count] = await Promise.all([

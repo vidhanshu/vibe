@@ -57,3 +57,103 @@ export const getPosts = async ({
     return { message: error.message, data: null };
   }
 };
+
+export const getPostById = async (
+  id: string
+): NSCommon.Response<NSPost.DetailedPost> => {
+  try {
+    const response = await api.get(`/posts/${id}`);
+    const resJson = response.data;
+
+    if (response.status !== 200)
+      return { message: resJson.message, data: null };
+
+    return { data: resJson };
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
+// 
+export const likeUnLike = async (
+  postId: string
+): NSCommon.Response<NSPost.Like> => {
+  try {
+    const response = await api.post(`/posts/${postId}/like-unlike`);
+    const resJson = response.data;
+
+    if (response.status !== 200)
+      return { message: resJson.message, data: null };
+
+    return { data: resJson };
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
+
+// 
+export const getComments = async (
+  postId: string,
+  { page = 1 }: NSCommon.PaginationDto
+): NSCommon.Response<NSCommon.PaginatedResponse<NSPost.Comment>> => {
+  try {
+    const query = new URLSearchParams();
+    query.append("page", page.toString());
+    const res = await api.get(`/posts/${postId}/comments?${query.toString()}`);
+    return { data: res.data };
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
+export const addComment = async (
+  postId: string,
+  content: string
+): NSCommon.Response<NSPost.Comment> => {
+  try {
+    const response = await api.post(`/posts/${postId}/comments`, { content });
+    const resJson = response.data;
+
+    if (response.status !== 201)
+      return { message: resJson.message, data: null };
+
+    return { data: resJson };
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
+export const deleteComment = async (
+  postId: string,
+  commentId: string
+): NSCommon.Response<null> => {
+  try {
+    const response = await api.delete(`/posts/${postId}/comments/${commentId}`);
+    if (response.status !== 200)
+      return { message: response.data.message, data: null };
+    return { data: null };
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
+export const updateComment = async (
+  postId: string,
+  commentId: string,
+  content: string
+): NSCommon.Response<NSPost.Comment> => {
+  try {
+    const response = await api.put(`/posts/${postId}/comments/${commentId}`, {
+      content,
+    });
+    const resJson = response.data;
+
+    if (response.status !== 200)
+      return { message: resJson.message, data: null };
+
+    return { data: resJson };
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
