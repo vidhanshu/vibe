@@ -78,3 +78,22 @@ export const getUsers = async ({
     return { message: error.message, data: null };
   }
 };
+
+export const updateProfile = async ({
+  gender,
+  bio,
+  profilePhoto,
+  pronoun,
+}: Partial<NSUser.User>): NSCommon.Response<NSUser.User> => {
+  try {
+    const res = await api.patch(`/users/profile`, {
+      gender,
+      bio,
+      profilePhoto,
+      pronoun,
+    });
+    return { data: res.data };
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};

@@ -22,29 +22,6 @@ import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal";
 import SearchDrawer from "./search-drawer";
 
-const SIDEBAR_ITEMS = [
-  {
-    icon: Home,
-    href: "/",
-  },
-  {
-    icon: Search,
-    href: null,
-  },
-  {
-    icon: Compass,
-    href: null,
-  },
-  {
-    icon: MessageCircle,
-    href: null,
-  },
-  {
-    icon: Heart,
-    href: null,
-  },
-];
-
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mode, setMode] = useState<"search" | "notification">("search");
@@ -162,6 +139,7 @@ const Sidebar = () => {
                       username={user?.username}
                     />
                   ),
+                  onClick: () => setCollapsed(false),
                 }}
               >
                 Profile

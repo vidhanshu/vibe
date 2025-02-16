@@ -101,7 +101,7 @@ const ProfileHeader = () => {
           url={currentUser?.profilePhoto?.url}
           className="size-40"
         />
-        <div className="flex-1 flex flex-col justify-between py-2">
+        <div className="flex-1 flex flex-col justify-between py-2 gap-2">
           <div className="flex gap-x-4 items-center">
             <p className="text-2xl">
               {currentUser?.username}
@@ -134,9 +134,11 @@ const ProfileHeader = () => {
               </Button>
             )}
             {isUserSelf && (
-              <Button className="font-semibold" variant="secondary" size="sm">
-                Edit profile
-              </Button>
+              <Link href="/users/accounts/edit">
+                <Button className="font-semibold" variant="secondary" size="sm">
+                  Edit profile
+                </Button>
+              </Link>
             )}
             {!isUserSelf && (
               <Button size="icon-sm" variant="secondary" className="rounded-md">
@@ -168,7 +170,7 @@ const ProfileHeader = () => {
               <b>{currentUser?._count.followings}</b> Followings
             </h1>
           </div>
-          <p>{currentUser?.bio}</p>
+          <pre>{currentUser?.bio}</pre>
         </div>
       </div>
       <div className="border-t max-w-[900px] flex justify-center mx-auto">

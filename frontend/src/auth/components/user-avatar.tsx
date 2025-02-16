@@ -1,9 +1,7 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import useSessionStore from "@/src/common/stores/session-store";
 import { cn } from "@/lib/utils";
 
 const UserAvatar = ({
@@ -19,7 +17,11 @@ const UserAvatar = ({
 }) => {
   return (
     <Avatar className={cn("size-6", className)}>
-      <AvatarImage src={url} alt="@vibe" />
+      <AvatarImage
+        src={url}
+        alt="@vibe"
+        className="object-cover object-center"
+      />
       <AvatarFallback className={fallbackClassName}>
         {username?.[0].toUpperCase() ?? "V"}
       </AvatarFallback>

@@ -54,7 +54,7 @@ import useSessionStore from "../../stores/session-store";
 import ConfirmDialog from "../dialogs/confirm-dialog";
 
 const MAX_FILES = 5;
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 interface Value {
   title: string;
   description: string;
@@ -222,7 +222,14 @@ const CreatePostModal = ({
                   isPending && "cursor-wait"
                 )}
               >
-                {isPending ? <Loader2 className="animate-spin" /> : "Share"}
+                {isPending ? (
+                  <div className="flex items-center gap-x-2">
+                  Posting...
+                    <Loader2 className="animate-spin" />
+                  </div>
+                ) : (
+                  "Share"
+                )}
               </button>
             </div>
           )}
@@ -566,5 +573,5 @@ const CaptionStep = ({
 };
 
 const VideoPreview = React.memo(({ src }: { src: string }) => {
-  return <video src={src} controls className="w-full h-auto" />;
+  return <video src={src} controls className="w-full h-auto object-contain" />;
 });
