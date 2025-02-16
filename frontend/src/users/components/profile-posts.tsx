@@ -8,13 +8,15 @@ import { NSPost } from "@/src/posts/actions/types";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, MessageCircle } from "lucide-react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import NoContent from "./no-content";
 
 const ProfilePosts = () => {
   const { user } = useSessionStore();
   const params = useParams();
+  const sp = useSearchParams();
   const { data, isPending } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
@@ -30,14 +32,14 @@ const ProfilePosts = () => {
   });
   const isSelf = params?.username === user?.username;
 
+  const postId = sp.get("postId");
+
   return (
     <div>
       {data?.data?.items?.length ? (
         <div className="grid grid-cols-3 gap-4">
           {data.data.items.map((item) => (
-            <ViewPostModal key={item.id} postId={item.id}>
-              {({ open, setOpen }) => <ProfilePostCard post={item} />}
-            </ViewPostModal>
+            <ProfilePostCard post={item} key={item.id} />
           ))}
         </div>
       ) : (
@@ -57,6 +59,7 @@ const ProfilePosts = () => {
           )}
         </NoContent>
       )}
+      {postId ? <ViewPostModal postId={postId} /> : null}
     </div>
   );
 };
@@ -64,8 +67,12 @@ const ProfilePosts = () => {
 export default ProfilePosts;
 
 const ProfilePostCard = ({ post }: { post: NSPost.Post }) => {
+  const param = useParams();
   return (
-    <div className="h-[300px] relative z-0 bg-white/10 rounded-md overflow-hidden group">
+    <Link
+      href={`/users/${param.username}?postId=${post.id}`}
+      className="h-[300px] relative z-0 bg-white/10 rounded-md overflow-hidden group"
+    >
       {post.medias?.[0]?.url && post.medias?.[0]?.mediaType === "IMAGE" ? (
         <Image
           key={post.id}
@@ -95,6 +102,6 @@ const ProfilePostCard = ({ post }: { post: NSPost.Post }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };

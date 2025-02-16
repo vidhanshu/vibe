@@ -14,14 +14,12 @@ const usePost = ({
   postId,
   comment,
   editCommentId,
-  open,
   setComment,
   setEditCommentId,
 }: {
   postId: string;
   comment: string;
   setComment: React.Dispatch<React.SetStateAction<string>>;
-  open: boolean;
   editCommentId: string | null;
   setEditCommentId: React.Dispatch<React.SetStateAction<string | null>>;
 }) => {
@@ -30,17 +28,17 @@ const usePost = ({
     queryKey: ["post", postId],
     queryFn: async () => {
       const { data, message } = await getPostById(postId);
-      if (message) toast.error(message);
+      // if (message) toast.error(message);
       return data;
     },
-    enabled: !!postId && open,
+    enabled: !!postId,
   });
 
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ["comments", postId],
     queryFn: async () => {
       const { data, message } = await getComments(postId, {});
-      if (message) toast.error(message);
+      // if (message) toast.error(message);
       return data;
     },
   });

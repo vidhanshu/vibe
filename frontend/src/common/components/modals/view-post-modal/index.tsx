@@ -3,17 +3,16 @@
 import Button from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import usePost from "@/src/posts/hooks/use-post";
+import NoContent from "@/src/users/components/no-content";
 import dayjs from "dayjs";
 import {
   Bookmark,
@@ -24,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import useSessionStore from "../../../stores/session-store";
@@ -35,14 +35,11 @@ import PostSkeleton from "./post-skeleton";
 
 interface ViewPostModalProps {
   postId: string;
-  children: (props: {
-    open: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  }) => React.ReactNode;
 }
-const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
+const ViewPostModal = ({ postId }: ViewPostModalProps) => {
+  const router = useRouter();
+
   const currentUserId = useSessionStore((select) => select.user?.id);
-  const [open, setOpen] = useState(false);
   const [comment, setComment] = useState("");
   const [liked, setLiked] = useState(false);
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
@@ -62,7 +59,6 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
     postId,
     comment,
     editCommentId,
-    open,
     setComment,
     setEditCommentId,
   });
@@ -74,9 +70,9 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
   }, [post, currentUserId]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>{children({ open, setOpen })}</DialogTrigger>
+    <Dialog open>
       <DialogContent
+        overlayProps={{ onClick: () => router.back() }}
         hideCloseBtn
         className="w-full h-full max-w-screen-xl max-h-[calc(100vh-32px)] p-0 bg-black"
       >
@@ -86,7 +82,7 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
 
         {isPostLoading ? (
           <PostSkeleton />
-        ) : (
+        ) : post ? (
           <div className="grid grid-cols-12">
             <PostMediaCarousel
               title={post?.title!}
@@ -107,11 +103,13 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
                   />
                   {post?.user?.username}
                 </Link>
-                <DialogClose asChild>
-                  <Button size="icon-xs" variant="secondary">
-                    <X className="size-4" />
-                  </Button>
-                </DialogClose>
+                <Button
+                  onClick={() => router.back()}
+                  size="icon-xs"
+                  variant="secondary"
+                >
+                  <X className="size-4" />
+                </Button>
               </div>
               <div className="flex-1 overflow-y-auto max-h-[calc(100%-200px)]">
                 <div className="p-4">
@@ -237,6 +235,10 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
                 </form>
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="h-full flex justify-center items-center">
+            <NoContent title="No post found" subtitle="404" />
           </div>
         )}
       </DialogContent>

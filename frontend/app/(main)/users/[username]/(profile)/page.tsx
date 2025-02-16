@@ -1,6 +1,5 @@
 import { getUserByUsername } from "@/src/users/actions/user-actions";
 import ProfilePosts from "@/src/users/components/profile-posts";
-import React from "react";
 
 const UserPage = async ({
   params,
@@ -11,11 +10,7 @@ const UserPage = async ({
   const { message, data } = await getUserByUsername(username);
   if (message) return <p>User not found!</p>;
 
-  return (
-    <div>
-      <ProfilePosts />
-    </div>
-  );
+  return <ProfilePosts />;
 };
 
 export default UserPage;
