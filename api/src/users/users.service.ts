@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { FilterUsersDto } from './dto/filter-users.dto';
 import { Prisma, User } from '@prisma/client';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginatedResponse } from 'src/common/types/return-type';
 import { MediasService } from 'src/medias/medias.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { FilterUsersDto } from './dto/filter-users.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -62,6 +62,7 @@ export class UsersService {
   }
 
   async getUserById(id: string): Promise<User> {
+    //TODO: Also check if the user who is requesting follows or not, for O(1) checking
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -79,7 +80,22 @@ export class UsersService {
     return user;
   }
 
-  async getUserByUsername(username: string): Promise<User> {
+  async getUserByUsername(
+    username: string,
+    currentUserId: string,
+  ): Promise<User & { follows: boolean }> {
+    // Also check if the user who is requesting follows or not, for O(1) checking
+    const follows = await this.prisma.user.findFirst({
+      where: {
+        username,
+        followers: {
+          some: {
+            followerId: currentUserId,
+          },
+        },
+      },
+      select: { id: true },
+    });
     const user = await this.prisma.user.findUnique({
       where: { username },
       include: {
@@ -94,7 +110,7 @@ export class UsersService {
       },
     });
     if (!user) throw new NotFoundException(`User not found`);
-    return user;
+    return { ...user, follows: !!follows };
   }
 
   async updateUser(

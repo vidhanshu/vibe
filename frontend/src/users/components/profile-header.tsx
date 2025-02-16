@@ -1,8 +1,13 @@
 "use client";
 
 import Button from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
+import FollowersModal from "@/src/common/components/modals/followers-modal";
 import useSessionStore from "@/src/common/stores/session-store";
+import { getShortNumber } from "@/src/common/utils/number";
+import { getUserByUsername } from "@/src/users/actions/user-actions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bookmark,
   Grid3X3,
@@ -12,13 +17,11 @@ import {
   UserPlus2,
   Youtube,
 } from "lucide-react";
-import { getUserByUsername } from "@/src/users/actions/user-actions";
-import ProfileHeaderSkeleton from "./skeletons/profile-header-skeleton";
-import { useParams, usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import FollowersModal from "@/src/common/components/modals/followers-modal";
+import { useParams, usePathname } from "next/navigation";
+import { toast } from "sonner";
+import { followUnfollow } from "../actions/follow-actions";
+import ProfileHeaderSkeleton from "./skeletons/profile-header-skeleton";
 
 const PRONOUN_MAP = {
   he: "he/his",
@@ -28,6 +31,7 @@ const PRONOUN_MAP = {
 
 const ProfileHeader = () => {
   const params = useParams();
+  const qc = useQueryClient();
   const pathname = usePathname()?.split("?")[0];
   const { user, isLoading } = useSessionStore();
 
@@ -35,6 +39,24 @@ const ProfileHeader = () => {
     queryKey: ["profile", params.username],
     queryFn: () => getUserByUsername(params.username as string),
   });
+
+  const { mutate: handleFollowUnfollow, isPending: isFollowPending } =
+    useMutation({
+      mutationKey: ["follows"],
+      mutationFn: async (userId: string) => {
+        const res = await followUnfollow(userId);
+        if (res.message) {
+          toast.error(res.message);
+        } else {
+          toast.success(
+            `${data?.data?.follows ? "Unfollowed" : "Followed"} successfully`
+          );
+          qc.invalidateQueries({ queryKey: ["profile", params.username] });
+          qc.invalidateQueries({ queryKey: ["followers"] });
+        }
+        return res.data;
+      },
+    });
 
   if (isLoading || isUserLoading) {
     return <ProfileHeaderSkeleton />;
@@ -97,8 +119,18 @@ const ProfileHeader = () => {
               )}
             </p>
             {!isUserSelf && (
-              <Button className="font-semibold" variant="default" size="sm">
-                Follow
+              <Button
+                onClick={() =>
+                  data?.data?.id && handleFollowUnfollow(data.data.id)
+                }
+                className={cn(
+                  "font-semibold",
+                  data?.data?.follows && "bg-blue-500 hover:bg-blue-600"
+                )}
+                variant="default"
+                size="sm"
+              >
+                {data?.data?.follows ? "Unfollow" : "Follow"}
               </Button>
             )}
             {isUserSelf && (
@@ -128,7 +160,8 @@ const ProfileHeader = () => {
             </h1>
             <FollowersModal id={data?.data?.id!}>
               <h1 className="cursor-pointer">
-                <b>{currentUser?._count.followers}</b> Followers
+                <b>{getShortNumber(currentUser?._count.followers ?? 0)}</b>{" "}
+                Followers
               </h1>
             </FollowersModal>
             <h1>

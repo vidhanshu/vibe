@@ -8,7 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserAvatar from "@/src/auth/components/user-avatar";
-import { getFollowers } from "@/src/users/actions/user-actions";
+import { getFollowers } from "@/src/users/actions/follow-actions";
 import NoContent from "@/src/users/components/no-content";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User, X } from "lucide-react";

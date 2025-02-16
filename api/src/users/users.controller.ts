@@ -34,8 +34,11 @@ export class UsersController {
   }
 
   @Get('/username/:username')
-  getUserByUsername(@Param('username') username: string) {
-    return this.usersService.getUserByUsername(username);
+  getUserByUsername(
+    @Param('username') username: string,
+    @User('sub') currentUserId: string,
+  ) {
+    return this.usersService.getUserByUsername(username, currentUserId);
   }
 
   @Patch('profile')

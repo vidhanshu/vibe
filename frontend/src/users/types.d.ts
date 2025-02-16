@@ -15,4 +15,8 @@ export namespace NSUser {
       posts: number;
     };
   }
+
+  export interface UserWithFollows extends User {
+    follows: boolean;
+  }
 }
