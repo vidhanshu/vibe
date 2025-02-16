@@ -30,7 +30,6 @@ const ProfilePosts = () => {
   });
   const isSelf = params?.username === user?.username;
 
-
   return (
     <div>
       {data?.data?.items?.length ? (
@@ -67,7 +66,7 @@ export default ProfilePosts;
 const ProfilePostCard = ({ post }: { post: NSPost.Post }) => {
   return (
     <div className="h-[300px] relative z-0 bg-white/10 rounded-md overflow-hidden group">
-      {post.medias?.[0]?.url ? (
+      {post.medias?.[0]?.url && post.medias?.[0]?.mediaType === "IMAGE" ? (
         <Image
           key={post.id}
           alt={post.title}

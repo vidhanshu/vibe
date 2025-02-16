@@ -400,7 +400,7 @@ const ViewCropStep = ({
                 );
                 if (!isImage) {
                   return (
-                    <div key={key} className="relative">
+                    <div key={key} className="relative cursor-pointer">
                       <div
                         onClick={() => setActive(key)}
                         className="w-[100px] h-[100px] flex items-center justify-center bg-background/80 rounded-md"
@@ -412,7 +412,7 @@ const ViewCropStep = ({
                   );
                 }
                 return (
-                  <div className="relative" key={key}>
+                  <div className="relative cursor-pointer" key={key}>
                     <Image
                       onClick={() => setActive(key)}
                       src={src}

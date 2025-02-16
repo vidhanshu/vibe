@@ -11,31 +11,27 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
-import { NSPost } from "@/src/posts/actions/types";
 import usePost from "@/src/posts/hooks/use-post";
 import dayjs from "dayjs";
 import {
   Bookmark,
-  ChevronLeft,
-  ChevronRight,
   Forward,
   Heart,
   MessageCircle,
   Smile,
   X,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import useSessionStore from "../../stores/session-store";
-import { getShortRelativeTime } from "../../utils/dayjs";
-import EmojiPicker from "../popovers/emoji-picker";
-import ShowMore from "../show-more";
-import { ConfirmationModal } from "./confirmation-modal";
+import useSessionStore from "../../../stores/session-store";
+import EmojiPicker from "../../popovers/emoji-picker";
+import ShowMore from "../../show-more";
+import Comment from "./comment";
+import PostMediaCarousel from "./post-media-carousel";
+import PostSkeleton from "./post-skeleton";
 
 interface ViewPostModalProps {
   postId: string;
@@ -47,7 +43,6 @@ interface ViewPostModalProps {
 const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
   const currentUserId = useSessionStore((select) => select.user?.id);
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
   const [comment, setComment] = useState("");
   const [liked, setLiked] = useState(false);
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
@@ -72,8 +67,6 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
     setEditCommentId,
   });
 
-  const LENGTH = post?.medias.length ?? 0;
-
   useEffect(() => {
     if (!currentUserId) return;
     if (post?.likes?.some(({ userId }) => userId === currentUserId))
@@ -92,66 +85,13 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
         </DialogHeader>
 
         {isPostLoading ? (
-          <div className="grid grid-cols-12">
-            <div className="col-span-7 p-4">
-              <Skeleton className="h-full w-full" />
-            </div>
-            <div className="col-span-5 p-4 space-y-4">
-              <div className="flex gap-x-4">
-                <Skeleton className="size-8 rounded-full" />
-                <Skeleton className="w-full" />
-              </div>
-              <Separator />
-              <div className="space-y-8">
-                <div className="flex gap-x-4">
-                  <Skeleton className="size-8 rounded-full" />
-                  <Skeleton className="w-full" />
-                </div>
-                {Array.from({ length: 8 }).map((_, idx) => (
-                  <div key={idx} className="flex gap-x-4 max-w-[300px]">
-                    <Skeleton className="size-8 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="w-full h-[20px]" />
-                      <Skeleton className="w-full h-[5px]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <PostSkeleton />
         ) : (
           <div className="grid grid-cols-12">
-            <div className="col-span-7 flex items-center justify-center border-r  relative">
-              <Image
-                width={500}
-                height={500}
-                alt={post?.title!}
-                src={post?.medias[active].url!}
-                className="w-[calc(100%-20px)] max-h-[calc(100vh-100px)] object-contain object-center"
-              />
-              {LENGTH > 1 && (
-                <>
-                  <Button
-                    size="icon-sm"
-                    variant="secondary"
-                    className="absolute inset-y-0 my-auto left-4"
-                    onClick={() =>
-                      setActive((prev) => (prev - 1 + LENGTH) % LENGTH)
-                    }
-                  >
-                    <ChevronLeft />
-                  </Button>
-                  <Button
-                    size="icon-sm"
-                    variant="secondary"
-                    className="absolute inset-y-0 my-auto right-4"
-                    onClick={() => setActive((prev) => (prev + 1) % LENGTH)}
-                  >
-                    <ChevronRight />
-                  </Button>
-                </>
-              )}
-            </div>
+            <PostMediaCarousel
+              title={post?.title!}
+              medias={post?.medias ?? []}
+            />
 
             <div className="col-span-5 flex flex-col max-h-[calc(100vh-32px)]">
               <div className="border-b px-4 py-2 flex items-center gap-x-4 justify-between">
@@ -245,7 +185,9 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
                     </p>
                   </div>
                 </div>
+
                 <Separator />
+
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -303,72 +245,3 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
 };
 
 export default ViewPostModal;
-
-const Comment = ({
-  content,
-  createdAt,
-  id,
-  user,
-  editCommentId,
-  updatedAt,
-  setEditCommentId,
-  handleDeleteComment,
-  isDeletingComment,
-}: NSPost.Comment & {
-  setEditCommentId: (id: string | null) => void;
-  editCommentId: string | null;
-  handleDeleteComment: (id: string) => void;
-  isDeletingComment: boolean;
-}) => {
-  const currentUserId = useSessionStore((select) => select.user?.id);
-
-  return (
-    <div className="flex gap-x-4">
-      <UserAvatar username={user?.username} url={user.profilePhoto} />
-      <div className="space-y-2">
-        <div>
-          <Link
-            href={`/users/${user.username}`}
-            className="font-bold hover:cursor-pointer"
-          >
-            {user.username}
-          </Link>
-          {createdAt !== updatedAt && (
-            <span className="text-xs text-muted-foreground ml-2">(edited)</span>
-          )}
-        </div>
-        <p className="text-sm">{content}</p>
-        <div className="flex gap-x-4 items-center">
-          <p className="text-xs text-muted-foreground font-bold">
-            {getShortRelativeTime(createdAt!)}
-          </p>
-          {user.id === currentUserId && (
-            <>
-              <button
-                onClick={setEditCommentId.bind(
-                  null,
-                  editCommentId === id ? null : id
-                )}
-                className={cn("text-blue-500 text-xs font-bold")}
-              >
-                {editCommentId === id ? "Cancel" : "Edit"}
-              </button>
-              <ConfirmationModal onConfirm={() => handleDeleteComment(id)}>
-                <button
-                  disabled={isDeletingComment}
-                  className={cn(
-                    "text-rose-500 text-xs font-bold",
-                    isDeletingComment &&
-                      "text-muted-foreground cursor-not-allowed"
-                  )}
-                >
-                  Delete
-                </button>
-              </ConfirmationModal>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};

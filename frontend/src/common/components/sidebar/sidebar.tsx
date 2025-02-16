@@ -1,6 +1,10 @@
 "use client";
 
 import Button, { ButtonProps } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import UserAvatar from "@/src/auth/components/user-avatar";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Compass,
   Heart,
@@ -9,28 +13,13 @@ import {
   MessageCircle,
   PlusSquare,
   Search,
-  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  PropsWithChildren,
-  RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import UserAvatar from "@/src/auth/components/user-avatar";
+import { PropsWithChildren, useRef, useState } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal";
-import { AnimatePresence, motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDebounceValue, useOnClickOutside } from "usehooks-ts";
-import { getUsers } from "@/src/users/actions/user-actions";
-import { toast } from "sonner";
 import SearchDrawer from "./search-drawer";
 
 const SIDEBAR_ITEMS = [
@@ -167,7 +156,12 @@ const Sidebar = () => {
                 collapsed={collapsed}
                 icon={PlusSquare}
                 buttonProps={{
-                  startContent: <UserAvatar url={user?.profilePhoto?.url} username={user?.username} />,
+                  startContent: (
+                    <UserAvatar
+                      url={user?.profilePhoto?.url}
+                      username={user?.username}
+                    />
+                  ),
                 }}
               >
                 Profile
