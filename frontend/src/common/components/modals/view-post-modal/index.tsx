@@ -23,9 +23,10 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useCopyToClipboard } from "usehooks-ts";
 import useSessionStore from "../../../stores/session-store";
 import EmojiPicker from "../../popovers/emoji-picker";
 import ShowMore from "../../show-more";
@@ -38,6 +39,10 @@ interface ViewPostModalProps {
 }
 const ViewPostModal = ({ postId }: ViewPostModalProps) => {
   const router = useRouter();
+  const p = usePathname();
+  const sp = useSearchParams();
+
+  const pathname = window.location.href + p + sp.toString();
 
   const currentUserId = useSessionStore((select) => select.user?.id);
   const [comment, setComment] = useState("");
@@ -45,6 +50,7 @@ const ViewPostModal = ({ postId }: ViewPostModalProps) => {
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
 
   const commentInputRef = useRef<HTMLInputElement>(null);
+  const [_copiedText, copyText] = useCopyToClipboard();
 
   const {
     comments,
@@ -166,7 +172,14 @@ const ViewPostModal = ({ postId }: ViewPostModalProps) => {
                       >
                         <MessageCircle className="size-4" />
                       </Button>
-                      <Button variant="secondary" size="icon-xs">
+                      <Button
+                        onClick={() => {
+                          copyText(pathname);
+                          toast.success("Link copied to clipboard");
+                        }}
+                        variant="secondary"
+                        size="icon-xs"
+                      >
                         <Forward className="size-4" />
                       </Button>
                     </div>
