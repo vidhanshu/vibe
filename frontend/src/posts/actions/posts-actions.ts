@@ -144,7 +144,7 @@ export const updateComment = async (
   content: string
 ): NSCommon.Response<NSPost.Comment> => {
   try {
-    const response = await api.put(`/posts/${postId}/comments/${commentId}`, {
+    const response = await api.patch(`/posts/${postId}/comments/${commentId}`, {
       content,
     });
     const resJson = response.data;

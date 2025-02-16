@@ -5,8 +5,6 @@ export const getShortRelativeTime = (timestamp: string | Date) => {
   const time = dayjs(timestamp);
   const diffSeconds = now.diff(time, "seconds");
 
-  console.log(new Date(timestamp), timestamp);
-
   if (diffSeconds < 60) return `${diffSeconds} s`;
   const diffMinutes = now.diff(time, "minutes");
   if (diffMinutes < 60) return `${diffMinutes} m`;

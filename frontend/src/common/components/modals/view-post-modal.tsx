@@ -14,13 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
-import {
-  addComment,
-  getComments,
-  getPostById,
-  likeUnLike,
-} from "@/src/posts/actions/posts-actions";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { NSPost } from "@/src/posts/actions/types";
+import usePost from "@/src/posts/hooks/use-post";
 import dayjs from "dayjs";
 import {
   Bookmark,
@@ -40,6 +35,7 @@ import useSessionStore from "../../stores/session-store";
 import { getShortRelativeTime } from "../../utils/dayjs";
 import EmojiPicker from "../popovers/emoji-picker";
 import ShowMore from "../show-more";
+import { ConfirmationModal } from "./confirmation-modal";
 
 interface ViewPostModalProps {
   postId: string;
@@ -50,69 +46,39 @@ interface ViewPostModalProps {
 }
 const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
   const currentUserId = useSessionStore((select) => select.user?.id);
-  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [comment, setComment] = useState("");
   const [liked, setLiked] = useState(false);
+  const [editCommentId, setEditCommentId] = useState<string | null>(null);
 
   const commentInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: comments, isLoading: isLoadingComments } = useQuery({
-    queryKey: ["comments"],
-    queryFn: async () => {
-      const { data, message } = await getComments(postId, {});
-      if (message) toast.error(message);
-      return data;
-    },
+  const {
+    comments,
+    handleComment,
+    handleDeleteComment,
+    handleLike,
+    handleUpdateComment,
+    isCommentDeleting,
+    isPostLoading,
+    post,
+  } = usePost({
+    postId,
+    comment,
+    editCommentId,
+    open,
+    setComment,
+    setEditCommentId,
   });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["post", postId],
-    queryFn: async () => {
-      const { data, message } = await getPostById(postId);
-      if (message) toast.error(message);
-      return data;
-    },
-    enabled: !!postId && open,
-  });
-
-  const { mutate: handleLike } = useMutation({
-    mutationKey: ["like-post"],
-    mutationFn: async () => {
-      const { data, message } = await likeUnLike(postId);
-      if (message) toast.error(message);
-      return data;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["post", postId] });
-    },
-  });
-
-  const { mutate: handleComment } = useMutation({
-    mutationKey: ["add-comment"],
-    mutationFn: async () => {
-      const { data, message } = await addComment(postId, comment);
-      if (message) toast.error(message);
-      return data;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["post", postId] });
-      qc.invalidateQueries({ queryKey: ["posts"] });
-      qc.invalidateQueries({ queryKey: ["comments"] });
-      setComment("");
-    },
-  });
-
-  const LENGTH = data?.medias.length ?? 0;
+  const LENGTH = post?.medias.length ?? 0;
 
   useEffect(() => {
     if (!currentUserId) return;
-    if (data?.likes?.some(({ userId }) => userId === currentUserId))
+    if (post?.likes?.some(({ userId }) => userId === currentUserId))
       setLiked(true);
-  }, [data, currentUserId]);
-
-  const isFetching = isLoading || isLoadingComments;
+  }, [post, currentUserId]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -122,10 +88,10 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
         className="w-full h-full max-w-screen-xl max-h-[calc(100vh-32px)] p-0 bg-black"
       >
         <DialogHeader className="hidden">
-          <DialogTitle></DialogTitle>
+          <DialogTitle> </DialogTitle>
         </DialogHeader>
 
-        {isFetching ? (
+        {isPostLoading ? (
           <div className="grid grid-cols-12">
             <div className="col-span-7 p-4">
               <Skeleton className="h-full w-full" />
@@ -159,8 +125,8 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
               <Image
                 width={500}
                 height={500}
-                alt={data?.title!}
-                src={data?.medias[active].url!}
+                alt={post?.title!}
+                src={post?.medias[active].url!}
                 className="w-[calc(100%-20px)] max-h-[calc(100vh-100px)] object-contain object-center"
               />
               {LENGTH > 1 && (
@@ -190,16 +156,16 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
             <div className="col-span-5 flex flex-col max-h-[calc(100vh-32px)]">
               <div className="border-b px-4 py-2 flex items-center gap-x-4 justify-between">
                 <Link
-                  href={`users/${data?.user?.username}`}
+                  href={`users/${post?.user?.username}`}
                   className="flex items-center gap-x-4"
                 >
                   <UserAvatar
                     className="size-6"
                     fallbackClassName="text-base"
-                    username={data?.user?.username}
-                    url={data?.user?.profilePhoto}
+                    username={post?.user?.username}
+                    url={post?.user?.profilePhoto}
                   />
-                  {data?.user?.username}
+                  {post?.user?.username}
                 </Link>
                 <DialogClose asChild>
                   <Button size="icon-xs" variant="secondary">
@@ -213,49 +179,30 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
                     <UserAvatar
                       className="size-6"
                       fallbackClassName="text-base"
-                      username={data?.user?.username}
-                      url={data?.user?.profilePhoto}
+                      username={post?.user?.username}
+                      url={post?.user?.profilePhoto}
                     />
                     <div>
-                      <h1 className="font-bold">{data?.title}</h1>
-                      <ShowMore text={data?.content ?? ""} />
+                      <h1 className="font-bold">{post?.title}</h1>
+                      <ShowMore text={post?.content ?? ""} />
                     </div>
                   </div>
                   <h1 className="font-bold text-muted-foreground mt-6 mb-2">
                     Comments
                   </h1>
                   <div className="space-y-4">
-                    {comments?.items.map(({ id, content, user, createdAt }) => (
-                      <div key={id} className="flex gap-x-4">
-                        <UserAvatar
-                          username={user?.username}
-                          url={user.profilePhoto}
-                        />
-                        <div className="space-y-2">
-                          <Link
-                            href={`/users/${user.username}`}
-                            className="font-bold hover:cursor-pointer"
-                          >
-                            {user.username}
-                          </Link>
-                          <p className="text-sm">{content}</p>
-                          <div className="flex gap-x-4 items-center">
-                            <p className="text-xs text-muted-foreground font-bold">
-                              {getShortRelativeTime(createdAt!)}
-                            </p>
-                            {user.id === currentUserId && (
-                              <>
-                                <button className="text-blue-500 text-xs font-bold">
-                                  Edit
-                                </button>
-                                <button className="text-rose-500 text-xs font-bold">
-                                  Delete
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                    {comments?.items.map((comment) => (
+                      <Comment
+                        handleDeleteComment={handleDeleteComment}
+                        isDeletingComment={isCommentDeleting}
+                        setEditCommentId={(id) => {
+                          setEditCommentId(id);
+                          setComment(id ? comment.content : "");
+                        }}
+                        editCommentId={editCommentId}
+                        key={comment.id}
+                        {...comment}
+                      />
                     ))}
                   </div>
                 </div>
@@ -285,14 +232,16 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
                         <Forward className="size-4" />
                       </Button>
                     </div>
-                    <Button variant="secondary" size="icon-xs">
-                      <Bookmark className="size-4" />
-                    </Button>
+                    {post?.userId !== currentUserId && (
+                      <Button variant="secondary" size="icon-xs">
+                        <Bookmark className="size-4" />
+                      </Button>
+                    )}
                   </div>
                   <div>
-                    <h1 className="font-bold">{data?._count.likes} likes</h1>
+                    <h1 className="font-bold">{post?._count.likes} likes</h1>
                     <p className="text-sm text-muted-foreground">
-                      {dayjs(data?.createdAt).format("MMMM D, YYYY")}
+                      {dayjs(post?.createdAt).format("MMMM D, YYYY")}
                     </p>
                   </div>
                 </div>
@@ -302,12 +251,16 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
                     e.preventDefault();
                     if (!comment.trim().length)
                       return toast.error("Comment cannot be empty");
-                    handleComment();
+                    if (editCommentId) {
+                      handleUpdateComment();
+                    } else {
+                      handleComment();
+                    }
                   }}
                   className="flex items-center px-4"
                 >
                   <EmojiPicker
-                    onEmojiClick={(e) => setComment((p) => `${p} ${e}`)}
+                    onEmojiClick={(e) => setComment((p) => `${p}${e}`)}
                   >
                     {({ open, setOpen }) => (
                       <Button
@@ -337,7 +290,7 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
                       !comment.trim().length && "text-blue-500/50"
                     )}
                   >
-                    Post
+                    {editCommentId ? "Update" : "Post"}
                   </button>
                 </form>
               </div>
@@ -350,3 +303,72 @@ const ViewPostModal = ({ children, postId }: ViewPostModalProps) => {
 };
 
 export default ViewPostModal;
+
+const Comment = ({
+  content,
+  createdAt,
+  id,
+  user,
+  editCommentId,
+  updatedAt,
+  setEditCommentId,
+  handleDeleteComment,
+  isDeletingComment,
+}: NSPost.Comment & {
+  setEditCommentId: (id: string | null) => void;
+  editCommentId: string | null;
+  handleDeleteComment: (id: string) => void;
+  isDeletingComment: boolean;
+}) => {
+  const currentUserId = useSessionStore((select) => select.user?.id);
+
+  return (
+    <div className="flex gap-x-4">
+      <UserAvatar username={user?.username} url={user.profilePhoto} />
+      <div className="space-y-2">
+        <div>
+          <Link
+            href={`/users/${user.username}`}
+            className="font-bold hover:cursor-pointer"
+          >
+            {user.username}
+          </Link>
+          {createdAt !== updatedAt && (
+            <span className="text-xs text-muted-foreground ml-2">(edited)</span>
+          )}
+        </div>
+        <p className="text-sm">{content}</p>
+        <div className="flex gap-x-4 items-center">
+          <p className="text-xs text-muted-foreground font-bold">
+            {getShortRelativeTime(createdAt!)}
+          </p>
+          {user.id === currentUserId && (
+            <>
+              <button
+                onClick={setEditCommentId.bind(
+                  null,
+                  editCommentId === id ? null : id
+                )}
+                className={cn("text-blue-500 text-xs font-bold")}
+              >
+                {editCommentId === id ? "Cancel" : "Edit"}
+              </button>
+              <ConfirmationModal onConfirm={() => handleDeleteComment(id)}>
+                <button
+                  disabled={isDeletingComment}
+                  className={cn(
+                    "text-rose-500 text-xs font-bold",
+                    isDeletingComment &&
+                      "text-muted-foreground cursor-not-allowed"
+                  )}
+                >
+                  Delete
+                </button>
+              </ConfirmationModal>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
