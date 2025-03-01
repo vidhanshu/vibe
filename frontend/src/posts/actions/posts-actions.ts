@@ -4,7 +4,7 @@ import { NSAuth } from "@/src/auth/types";
 import { deleteFiles, uploadFiles } from "@/src/common/actions/file-actions";
 import { NSCommon } from "@/src/common/types";
 import api from "@/src/common/utils/axios";
-import { NSPost } from "./types";
+import { NSPost } from "../types";
 
 export const createPost = async ({
   title,
@@ -74,7 +74,7 @@ export const getPostById = async (
   }
 };
 
-// 
+//
 export const likeUnLike = async (
   postId: string
 ): NSCommon.Response<NSPost.Like> => {
@@ -91,8 +91,7 @@ export const likeUnLike = async (
   }
 };
 
-
-// 
+//
 export const getComments = async (
   postId: string,
   { page = 1 }: NSCommon.PaginationDto

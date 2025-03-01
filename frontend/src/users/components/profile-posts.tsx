@@ -4,7 +4,7 @@ import CreatePostModal from "@/src/common/components/modals/create-post-modal";
 import ViewPostModal from "@/src/common/components/modals/view-post-modal";
 import useSessionStore from "@/src/common/stores/session-store";
 import { getPosts } from "@/src/posts/actions/posts-actions";
-import { NSPost } from "@/src/posts/actions/types";
+import { NSPost } from "@/src/posts/types";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, MessageCircle } from "lucide-react";
 import Image from "next/image";

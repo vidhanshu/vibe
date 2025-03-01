@@ -2,6 +2,14 @@
 
 import Button from "@/components/ui/button";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Form,
   FormControl,
   FormField,
@@ -16,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import { uploadFiles } from "@/src/common/actions/file-actions";
@@ -23,7 +32,7 @@ import useSessionStore from "@/src/common/stores/session-store";
 import { updateProfile } from "@/src/users/actions/user-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -37,6 +46,7 @@ const userFormSchema = z.object({
 type UpdateUserValues = z.infer<typeof userFormSchema>;
 
 const EditPage = () => {
+  const [profileChangeModalOpen, setProfileChangeModalOpen] = useState(false);
   const { user, setSession } = useSessionStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const form = useForm<UpdateUserValues>({
@@ -92,6 +102,7 @@ const EditPage = () => {
                     ? user.profilePhoto.url
                     : "/no-user.jpeg"
                 }
+                onClick={() => setProfileChangeModalOpen(true)}
               />
               <h1 className="text-lg font-bold">{user?.username}</h1>
             </div>
@@ -207,6 +218,27 @@ const EditPage = () => {
           </Button>
         </form>
       </Form>
+
+      <Dialog
+        open={profileChangeModalOpen}
+        onOpenChange={setProfileChangeModalOpen}
+      >
+        <DialogTrigger asChild></DialogTrigger>
+        <DialogContent
+          hideCloseBtn
+          className="max-w-[400px] px-8 py-4 flex justify-center flex-col"
+        >
+          <DialogHeader>
+            <DialogTitle>Change Profile Photo</DialogTitle>
+          </DialogHeader>
+          <Separator />
+          <button>Remove current photo</button>
+          <button>Remove current photo</button>
+          <DialogClose asChild>
+            <button>Cancel</button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

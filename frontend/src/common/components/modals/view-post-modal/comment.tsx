@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import useSessionStore from "@/src/common/stores/session-store";
 import { getShortRelativeTime } from "@/src/common/utils/dayjs";
-import { NSPost } from "@/src/posts/actions/types";
+import { NSPost } from "@/src/posts/types";
 import Link from "next/link";
 import { ConfirmationModal } from "../confirmation-modal";
 

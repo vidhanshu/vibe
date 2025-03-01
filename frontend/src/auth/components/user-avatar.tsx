@@ -9,14 +9,16 @@ const UserAvatar = ({
   username = "V",
   fallbackClassName,
   url,
+  onClick,
 }: {
   url?: string;
   username?: string;
   className?: string;
   fallbackClassName?: string;
+  onClick?: () => void;
 }) => {
   return (
-    <Avatar className={cn("size-6", className)}>
+    <Avatar className={cn("size-6", className)} onClick={onClick}>
       <AvatarImage
         src={url}
         alt="@vibe"
