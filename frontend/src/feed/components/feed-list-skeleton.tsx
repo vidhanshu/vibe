@@ -15,7 +15,7 @@ export default FeedListSkeleton;
 
 const FeedPostCardSkeleton = () => {
   return (
-    <div className="space-y-4 max-w-lg mx-auto">
+    <div className="space-y-4 max-w-[29rem] mx-auto">
       {/* header */}
       <div className="flex justify-between items-center">
         <div className="flex gap-x-2 items-center">

@@ -3,47 +3,43 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import useSessionStore from "@/src/common/stores/session-store";
+import useComments from "@/src/posts/hooks/use-comments";
+import useLike from "@/src/posts/hooks/use-like";
 import { NSPost } from "@/src/posts/types";
 import dayjs from "dayjs";
 import { Bookmark, Forward, Heart, MessageCircle, Smile } from "lucide-react";
 import Link from "next/link";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import EmojiPicker from "../../popovers/emoji-picker";
 import ShowMore from "../../show-more";
 
 const PostFooter = ({
-  liked,
-  setLiked,
-  handleLike,
-  comment,
-  setComment,
   post,
   editCommentId,
-  handleComment,
-  handleUpdateComment,
   className,
   variant = "detailed",
   onCommentClick,
   autoFocusComment = true,
   pathToCopy,
+  setEditCommentId,
+  comment,
+  setComment,
 }: {
-  liked: boolean;
-  setLiked: React.Dispatch<React.SetStateAction<boolean>>;
-  handleLike: () => void;
-  handleUpdateComment: () => void;
-  handleComment: () => void;
-  comment: string;
-  setComment: React.Dispatch<React.SetStateAction<string>>;
   post: NSPost.DetailedPost;
-  editCommentId: string | null;
   className?: string;
   autoFocusComment?: boolean;
   variant?: "detailed" | "feed";
   onCommentClick?: () => void;
   pathToCopy?: string;
+  editCommentId: string | null;
+  setEditCommentId: React.Dispatch<React.SetStateAction<string | null>>;
+  comment: string;
+  setComment: React.Dispatch<React.SetStateAction<string>>;
 }) => {
+  const [liked, setLiked] = useState(false);
+
   const currentUserId = useSessionStore((select) => select.user?.id);
 
   const commentInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +47,24 @@ const PostFooter = ({
   const [_copiedText, copyText] = useCopyToClipboard();
 
   const isFeedVariant = variant === "feed";
+
+  const { handleUpdateComment, handleComment } = useComments({
+    comment,
+    editCommentId,
+    postId: post.id,
+    setComment,
+    setEditCommentId,
+  });
+
+  const { handleLike } = useLike({
+    postId: post.id,
+  });
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    if (post?.likes?.some(({ userId }) => userId === currentUserId))
+      setLiked(true);
+  }, [post, currentUserId]);
 
   return (
     <div

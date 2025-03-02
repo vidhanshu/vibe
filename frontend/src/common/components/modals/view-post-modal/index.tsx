@@ -10,8 +10,7 @@ import {
 import usePost from "@/src/posts/hooks/use-post";
 import NoContent from "@/src/users/components/no-content";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import useSessionStore from "../../../stores/session-store";
+import { useState } from "react";
 import PostComments from "./post-comments";
 import PostFooter from "./post-footer";
 import PostMediaCarousel from "./post-media-carousel";
@@ -25,37 +24,16 @@ interface ViewPostModalProps {
 }
 const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
   const router = useRouter();
+  const [comment, setComment] = useState("");
   const p = usePathname();
   const sp = useSearchParams();
   const pathname = window.location.href + p + sp.toString();
-  const currentUserId = useSessionStore((select) => select.user?.id);
-  const [comment, setComment] = useState("");
-  const [liked, setLiked] = useState(false);
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
 
-  const {
-    comments,
-    handleComment,
-    handleDeleteComment,
-    handleLike,
-    handleUpdateComment,
-    isCommentDeleting,
-    isPostLoading,
-    post,
-  } = usePost({
+  const { isPostLoading, post } = usePost({
     postId,
-    comment,
-    editCommentId,
-    setComment,
-    setEditCommentId,
     skipPostFetch: false,
   });
-
-  useEffect(() => {
-    if (!currentUserId) return;
-    if (post?.likes?.some(({ userId }) => userId === currentUserId))
-      setLiked(true);
-  }, [post, currentUserId]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -88,25 +66,19 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
             <div className="col-span-5 flex flex-col max-h-[calc(100vh-32px)]">
               <PostComments
                 post={post}
-                comments={comments?.items ?? []}
-                editCommentId={editCommentId}
-                handleDeleteComment={handleDeleteComment}
-                isCommentDeleting={isCommentDeleting}
-                setEditCommentId={setEditCommentId}
+                comment={comment}
                 setComment={setComment}
+                editCommentId={editCommentId}
+                setEditCommentId={setEditCommentId}
                 setOpen={setOpen}
               />
               <PostFooter
                 post={post}
                 comment={comment}
                 setComment={setComment}
-                editCommentId={editCommentId}
-                handleComment={handleComment}
-                handleLike={handleLike}
-                handleUpdateComment={handleUpdateComment}
-                liked={liked}
-                setLiked={setLiked}
                 pathToCopy={pathname}
+                editCommentId={editCommentId}
+                setEditCommentId={setEditCommentId}
               />
             </div>
           </div>

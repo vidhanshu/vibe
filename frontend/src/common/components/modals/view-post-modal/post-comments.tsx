@@ -1,8 +1,9 @@
 import Button from "@/components/ui/button";
 import UserAvatar from "@/src/auth/components/user-avatar";
+import useComments from "@/src/posts/hooks/use-comments";
 import { NSPost } from "@/src/posts/types";
 import NoContent from "@/src/users/components/no-content";
-import { MessageCircle, X } from "lucide-react";
+import { CircleCheckBig, Loader, MessageCircle, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
@@ -12,24 +13,36 @@ import Comment from "./comment";
 const PostComments = ({
   post,
   setOpen,
-  comments,
-  handleDeleteComment,
-  isCommentDeleting,
   setEditCommentId,
+  comment,
   setComment,
   editCommentId,
 }: {
   post: NSPost.DetailedPost;
-  comments: NSPost.Comment[];
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  handleDeleteComment: (id: string) => void;
-  isCommentDeleting: boolean;
   setEditCommentId: React.Dispatch<React.SetStateAction<string | null>>;
   setComment: React.Dispatch<React.SetStateAction<string>>;
   editCommentId: string | null;
+  comment: string;
 }) => {
   const router = useRouter();
   const p = usePathname();
+
+  const {
+    comments,
+    handleDeleteComment,
+    hasMoreComments,
+    isCommentDeleting,
+    isFetchingMoreComments,
+    ref,
+  } = useComments({
+    comment,
+    editCommentId,
+    postId: post.id,
+    setComment,
+    setEditCommentId,
+    skipCommentsFetch: false,
+  });
 
   return (
     <>
@@ -58,7 +71,7 @@ const PostComments = ({
           <X className="size-4" />
         </Button>
       </div>
-      <div className="flex-1 overflow-y-auto max-h-[calc(100%-200px)]">
+      <div className="flex-1 overflow-y-auto max-h-[calc(100%-200px)] pb-8">
         <div className="p-4">
           <div className="flex gap-x-4">
             <UserAvatar
@@ -101,6 +114,19 @@ const PostComments = ({
             )}
           </div>
         </div>
+        <div ref={ref} />
+        {isFetchingMoreComments && (
+          <Loader className="mx-auto size-6 animate-spin" />
+        )}
+        {!hasMoreComments && comments.length > 10 && (
+          <NoContent
+            size="sm"
+            icon={CircleCheckBig}
+            iconContainerClassName="border-none size-auto p-0"
+            title="All caught up"
+            subtitle="No more comments to show"
+          />
+        )}
       </div>
     </>
   );

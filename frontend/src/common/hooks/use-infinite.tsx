@@ -6,12 +6,14 @@ const useInfinite = ({
   fetcher,
   queryKey,
   filters,
+  enabled = true,
 }: {
   //eslint-disable-next-line
   fetcher: Function;
   //eslint-disable-next-line
   filters?: Record<string, any>;
   queryKey: string[];
+  enabled?: boolean;
 }) => {
   const { ref, inView } = useInView();
 
@@ -37,12 +39,14 @@ const useInfinite = ({
         ? (currentPage as number) + 1
         : undefined;
     },
+    enabled,
   });
 
   const data = useMemo(() => d?.pages.filter(Boolean).flat() ?? [], [d]);
 
   useEffect(() => {
     if (inView && hasNextPage) {
+      console.log("[inView]");
       fetchNextPage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
