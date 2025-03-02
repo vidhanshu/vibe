@@ -1,18 +1,18 @@
 import {
-  Controller,
-  Get,
   Body,
-  Query,
+  Controller,
+  Delete,
+  Get,
   Param,
   ParseUUIDPipe,
   Patch,
-  Delete,
+  Query,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { AccessTokenPayload } from 'src/auth/types/jwt';
+import { User } from 'src/common/decorators/user.decorator';
 import { FilterUsersDto } from './dto/filter-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from 'src/common/decorators/user.decorator';
-import { AccessTokenPayload } from 'src/auth/types/jwt';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
@@ -21,6 +21,11 @@ export class UsersController {
   @Get()
   getUsers(@Query() filterUsersDto: FilterUsersDto) {
     return this.usersService.getUsers(filterUsersDto);
+  }
+
+  @Get('/suggested-to-follow')
+  getSuggestedToFollow(@Query() filterUsersDto: FilterUsersDto, @User() user: AccessTokenPayload) {
+    return this.usersService.getSuggestedToFollow(filterUsersDto,user.sub);
   }
 
   @Get('/profile')

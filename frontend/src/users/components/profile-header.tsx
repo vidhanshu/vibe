@@ -3,7 +3,7 @@
 import Button from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
-import FollowersModal from "@/src/common/components/modals/followers-modal";
+import FollowersFollowingsModal from "@/src/common/components/modals/followers-followings-modal";
 import useSessionStore from "@/src/common/stores/session-store";
 import { getShortNumber } from "@/src/common/utils/number";
 import { getUserByUsername } from "@/src/users/actions/user-actions";
@@ -160,18 +160,28 @@ const ProfileHeader = () => {
               <b>{currentUser?._count.posts}</b> Posts
             </h1>
             {data?.data?.id && (
-              <FollowersModal id={data.data.id}>
+              <FollowersFollowingsModal id={data.data.id}>
                 <h1 className="cursor-pointer">
                   <b>{getShortNumber(currentUser?._count.followers ?? 0)}</b>{" "}
                   Followers
                 </h1>
-              </FollowersModal>
+              </FollowersFollowingsModal>
             )}
-            <h1>
-              <b>{currentUser?._count.followings}</b> Followings
-            </h1>
+            {data?.data?.id && (
+              <FollowersFollowingsModal forFollowers={false} id={data.data.id}>
+                <h1 className="cursor-pointer">
+                  <b>{getShortNumber(currentUser?._count.followings ?? 0)}</b>{" "}
+                  Followings
+                </h1>
+              </FollowersFollowingsModal>
+            )}
           </div>
-          <pre className="text-sm">{currentUser?.bio}</pre>
+          <p
+            className="text-sm break-words max-w-xs"
+            dangerouslySetInnerHTML={{
+              __html: currentUser?.bio?.replaceAll("\n", "<br />") ?? "",
+            }}
+          />
         </div>
       </div>
       <div className="border-t max-w-[900px] flex justify-center mx-auto">

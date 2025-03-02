@@ -8,7 +8,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserAvatar from "@/src/auth/components/user-avatar";
-import { getFollowers } from "@/src/users/actions/follow-actions";
+import {
+  getFollowers,
+  getFollowings,
+} from "@/src/users/actions/follow-actions";
 import NoContent from "@/src/users/components/no-content";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User, X } from "lucide-react";
@@ -17,20 +20,23 @@ import React, { PropsWithChildren, useEffect } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
 
-const FollowersModal = ({
+const FollowersFollowingsModal = ({
   id,
   children,
-}: { id: string } & PropsWithChildren) => {
+  forFollowers = true,
+}: { id: string; forFollowers?: boolean } & PropsWithChildren) => {
   const qc = useQueryClient();
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = useDebounceValue("", 1000);
 
   const [isLoading, setIsLoading] = React.useState(false);
   const { refetch, data } = useQuery({
-    queryKey: ["followers"],
+    queryKey: [forFollowers ? "followers" : "followings"],
     queryFn: async () => {
       setIsLoading(true);
-      const res = await getFollowers({ id, search });
+      const res = forFollowers
+        ? await getFollowers({ id, search })
+        : await getFollowings({ id, search });
       if (res.message) {
         toast.error(res.message);
         setIsLoading(false);
@@ -60,7 +66,9 @@ const FollowersModal = ({
         hideCloseBtn
       >
         <DialogHeader className="border-b border-white/10 p-2 relative">
-          <DialogTitle className="text-center">Followers</DialogTitle>
+          <DialogTitle className="text-center">
+            {forFollowers ? "Followers" : "Followings"}
+          </DialogTitle>
           <X
             className="absolute size-6 top-0 right-4 cursor-pointer"
             onClick={() => setOpen(false)}
@@ -92,22 +100,28 @@ const FollowersModal = ({
                   subtitle=""
                 />
               </div>
+            ) : !data?.items?.length ? (
+              <NoContent
+                titleClassName="text-xl"
+                iconContainerClassName="size-10"
+                icon={User}
+                title={`No ${forFollowers ? "followers" : "followings"} found`}
+                subtitle=""
+              />
             ) : (
               data?.items?.map((user) => (
-                <Link
-                  key={user.id}
-                  onClick={() => {}}
-                  href={`/users/${user.username}`}
-                >
-                  <div className="flex gap-x-4 items-center">
-                    <UserAvatar
-                      className="size-8"
-                      url={user.profilePhoto?.url}
-                      username={user.username}
-                    />
-                    {user.username}
-                  </div>
-                </Link>
+                <div key={user.id}>
+                  <Link href={`/users/${user.username}`}>
+                    <div className="flex gap-x-4 items-center">
+                      <UserAvatar
+                        className="size-8"
+                        url={user.profilePhoto?.url}
+                        username={user.username}
+                      />
+                      {user.username}
+                    </div>
+                  </Link>
+                </div>
               ))
             )}
           </div>
@@ -117,4 +131,4 @@ const FollowersModal = ({
   );
 };
 
-export default FollowersModal;
+export default FollowersFollowingsModal;

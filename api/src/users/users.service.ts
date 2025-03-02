@@ -61,6 +61,71 @@ export class UsersService {
     };
   }
 
+  async getSuggestedToFollow(
+    { limit: take = 10, page = 1, search, sort }: FilterUsersDto,
+    userId: string,
+  ): Promise<PaginatedResponse<User>> {
+    const skip = (page - 1) * take;
+
+    // Get the users followed by the current user
+    const followings = await this.prisma.user.findMany({
+      where: {
+        followings: {
+          some: { followingId: userId }, // Users that the current user follows
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const followingIds = followings.map(({ id }) => id);
+
+    // Find potential suggestions (friends of friends)
+    const suggestedUsers = await this.prisma.user.findMany({
+      where: {
+        followers: {
+          none: { followerId: userId }, // Exclude users to whom I already follow
+          some: { followerId: { in: followingIds } }, // Users followed by my followings
+        },
+        id: { not: userId }, // Exclude myself
+        OR: search
+          ? [{ username: { contains: search, mode: 'insensitive' } }]
+          : undefined,
+      },
+      take,
+      skip,
+      orderBy: sort ? { [sort]: 'desc' } : undefined, // Example: sort by followers count
+      include: {
+        profilePhoto: true,
+        followers: {
+          select: { follower: { select: { username: true } } },
+          take: 2,
+        },
+      },
+    });
+
+    // Count total suggested users
+    const count = await this.prisma.user.count({
+      where: {
+        followers: { some: { followerId: { in: followingIds } } },
+        followings: { none: { followingId: userId } },
+        id: { not: userId },
+      },
+    });
+
+    return {
+      items: suggestedUsers,
+      metadata: {
+        currentPage: page,
+        totalItems: count,
+        itemsCount: suggestedUsers.length,
+        totalPages: Math.ceil(count / take),
+        limit: take,
+      },
+    };
+  }
+
   async getUserById(id: string): Promise<User> {
     //TODO: Also check if the user who is requesting follows or not, for O(1) checking
     const user = await this.prisma.user.findUnique({

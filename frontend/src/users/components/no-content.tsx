@@ -16,6 +16,7 @@ const NoContent = ({
   iconContainerClassName,
   containerClassName,
   iconClassName,
+  size = "sm",
 }: {
   icon?: LucideIcon;
   title?: string;
@@ -28,24 +29,47 @@ const NoContent = ({
   iconContainerClassName?: string;
   iconClassName?: string;
   containerClassName?: string;
+  size?: "sm" | "lg";
 } & PropsWithChildren) => {
   return (
     <div
       className={cn(
-        "mx-auto max-w-[300px] text-center flex flex-col items-center gap-4",
+        "mx-auto max-w-[300px] text-center flex flex-col items-center",
+        size === "sm" ? "gap-1" : "gap-4",
         containerClassName
       )}
     >
       <div
         className={cn(
-          "size-16 border-white border-[1px] rounded-full flex items-center justify-center p-2",
+          size === "sm"
+            ? "size-8 border-white border-[1px] rounded-full flex items-center justify-center p-1"
+            : "size-16 border-white border-[1px] rounded-full flex items-center justify-center p-2",
           iconContainerClassName
         )}
       >
-        <Icon className={cn("size-8 stroke-[1]", iconClassName)} />
+        <Icon
+          className={cn(
+            size === "sm" ? "size-6" : "size-8 stroke-[1]",
+            iconClassName
+          )}
+        />
       </div>
-      <h1 className={cn("text-4xl font-bold", titleClassName)}>{title}</h1>
-      <p className={cn("", subtitleClassName)}>{subtitle}</p>
+      <h1
+        className={cn(
+          size === "sm" ? "text-xl font-bold" : "text-4xl font-bold",
+          titleClassName
+        )}
+      >
+        {title}
+      </h1>
+      <p
+        className={cn(
+          size === "sm" ? "text-muted-foreground text-sm" : "",
+          subtitleClassName
+        )}
+      >
+        {subtitle}
+      </p>
       {link && (
         <Link className="text-blue-500" href={link}>
           {linkText}

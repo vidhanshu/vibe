@@ -102,7 +102,7 @@ const FeedPostCard = (detailedPost: NSPost.DetailedPost) => {
         <div className="flex justify-between items-center">
           <div className="flex gap-x-2 items-center">
             <Link
-              href={`/user/${user.username}`}
+              href={`/users/${user.username}`}
               className="flex gap-x-2 items-center"
             >
               <UserAvatar

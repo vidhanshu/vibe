@@ -84,6 +84,30 @@ export const getUsers = async ({
   }
 };
 
+export const getFollowSuggestions = async ({
+  limit = 10,
+  page = 1,
+  search,
+}: NSCommon.PaginationDto): NSCommon.Response<
+  NSCommon.PaginatedResponse<
+    NSUser.User & {
+      followers: { follower: { username: string } }[];
+    }
+  >
+> => {
+  try {
+    const query = new URLSearchParams();
+    query.append("limit", limit.toString());
+    query.append("page", page.toString());
+    if (search) query.append("search", search);
+    const res = await api.get(`/users/suggested-to-follow?${query.toString()}`);
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
 export const updateProfile = async ({
   gender,
   bio,
