@@ -16,28 +16,30 @@ const usePost = ({
   editCommentId,
   setComment,
   setEditCommentId,
+  skipPostFetch = true,
 }: {
   postId: string;
   comment: string;
   setComment: React.Dispatch<React.SetStateAction<string>>;
   editCommentId: string | null;
   setEditCommentId: React.Dispatch<React.SetStateAction<string | null>>;
+  skipPostFetch?: boolean;
 }) => {
   const qc = useQueryClient();
   const { data: post, isLoading: isPostLoading } = useQuery({
     queryKey: ["post", postId],
     queryFn: async () => {
-      const { data, message } = await getPostById(postId);
+      const { data } = await getPostById(postId);
       // if (message) toast.error(message);
       return data;
     },
-    enabled: !!postId,
+    enabled: !!postId && !skipPostFetch,
   });
 
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ["comments", postId],
     queryFn: async () => {
-      const { data, message } = await getComments(postId, {});
+      const { data } = await getComments(postId, {});
       // if (message) toast.error(message);
       return data;
     },
@@ -52,6 +54,7 @@ const usePost = ({
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["post", postId] });
+      qc.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 
@@ -63,8 +66,8 @@ const usePost = ({
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["post", postId] });
       qc.invalidateQueries({ queryKey: ["posts"] });
+      qc.invalidateQueries({ queryKey: ["post", postId] });
       qc.invalidateQueries({ queryKey: ["comments"] });
       setComment("");
     },

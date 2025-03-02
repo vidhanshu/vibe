@@ -10,6 +10,7 @@ interface SessionStore {
 const useSessionStore = create<SessionStore>()((set) => ({
   isLoading: true,
   user: null,
+
   setSession(user) {
     set({ user, isLoading: false });
   },

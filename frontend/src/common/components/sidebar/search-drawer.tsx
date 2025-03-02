@@ -45,7 +45,8 @@ const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
     refetch().finally(() => {
       setIsLoading(false);
     });
-  }, [debounced, qc]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [debounced, qc]);
 
   return (
     <>

@@ -20,7 +20,7 @@ export namespace NSCommon {
 
   export type MediaType = "IMAGE" | "VIDEO";
 
-  export type Response<T, K = {}> = Promise<
+  export type Response<T, K = object> = Promise<
     {
       message?: string;
       data: T | null;

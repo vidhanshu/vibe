@@ -39,10 +39,21 @@ export class PostsService {
       take,
       skip,
       include: {
+        user: {
+          select: {
+            id: true,
+            profilePhoto: true,
+            username: true,
+          },
+        },
         medias: true,
+        likes: true,
         _count: {
           select: { likes: true, comments: true },
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     };
     if (search) {
@@ -54,7 +65,7 @@ export class PostsService {
     }
 
     const [posts, count] = await Promise.all([
-      this.prisma.post.findMany(filter),
+      this.prisma.post.findMany(filter) as Promise<Post[]>,
       this.prisma.post.count({
         where: filter.where,
       }),

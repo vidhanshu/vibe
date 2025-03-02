@@ -24,6 +24,7 @@ export const createPost = async ({
       }
       uploadedFiles = res.data ?? [];
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newPayload: any = { title, content };
     if (uploadedFiles.length) {
       newPayload.medias = uploadedFiles;
@@ -37,6 +38,7 @@ export const createPost = async ({
     }
 
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // delete uploaded files, if error
     if (uploadedFiles.length)
@@ -47,12 +49,18 @@ export const createPost = async ({
 
 export const getPosts = async ({
   username,
+  page,
 }: {
-  username: string;
+  username?: string;
+  page?: number;
 }): NSCommon.Response<NSCommon.PaginatedResponse<NSPost.Post>> => {
   try {
-    const res = await api.get(`/posts?username=${username}`);
+    const sp = new URLSearchParams();
+    if (page) sp.append("page", page.toString());
+    if (username) sp.append("username", username);
+    const res = await api.get(`/posts?${sp.toString()}`);
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -62,6 +70,7 @@ export const getPostById = async (
   id: string
 ): NSCommon.Response<NSPost.DetailedPost> => {
   try {
+    console.log("[calllll----->]");
     const response = await api.get(`/posts/${id}`);
     const resJson = response.data;
 
@@ -69,6 +78,7 @@ export const getPostById = async (
       return { message: resJson.message, data: null };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -86,6 +96,7 @@ export const likeUnLike = async (
       return { message: resJson.message, data: null };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -101,6 +112,7 @@ export const getComments = async (
     query.append("page", page.toString());
     const res = await api.get(`/posts/${postId}/comments?${query.toString()}`);
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -118,6 +130,7 @@ export const addComment = async (
       return { message: resJson.message, data: null };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -132,6 +145,7 @@ export const deleteComment = async (
     if (response.status !== 200)
       return { message: response.data.message, data: null };
     return { data: null };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -152,6 +166,7 @@ export const updateComment = async (
       return { message: resJson.message, data: null };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }

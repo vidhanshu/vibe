@@ -16,19 +16,8 @@ export namespace NSPost {
     };
   }
 
-  export interface DetailedPost {
-    id: string;
-    title: string;
-    content: string;
-    userId: string;
+  export interface DetailedPost extends Post {
     user: NSUser.User;
-    createdAt: Date;
-    updatedAt: Date;
-    medias: NSCommon.FullMedia[];
-    _count: {
-      likes: 0;
-      comments: 0;
-    };
     likes: { userId: string }[];
   }
 

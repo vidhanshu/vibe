@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import { uploadFiles } from "@/src/common/actions/file-actions";
 import useSessionStore from "@/src/common/stores/session-store";
+import { NSCommon } from "@/src/common/types";
 import { updateProfile } from "@/src/users/actions/user-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -51,8 +52,8 @@ const EditPage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const form = useForm<UpdateUserValues>({
     defaultValues: {
-      pronoun: user?.pronoun ? (user.pronoun as any) : "he",
-      gender: user?.gender ? (user.gender as any) : "male",
+      pronoun: user?.pronoun ? user.pronoun : "he",
+      gender: user?.gender ? user.gender : "male",
       bio: user?.bio ? user.bio : "",
     },
     resolver: zodResolver(userFormSchema),
@@ -65,7 +66,8 @@ const EditPage = () => {
         const res = await uploadFiles([file]);
         if (res.message || !res.data) return toast.error(res.message);
         await updateProfile({ profilePhoto: res.data[0] });
-        if (user) setSession({ ...user, profilePhoto: res.data[0] });
+        if (user)
+          setSession({ ...user, profilePhoto: res.data[0] as NSCommon.Media });
       },
     });
 
@@ -78,11 +80,11 @@ const EditPage = () => {
 
   useEffect(() => {
     form.reset({
-      pronoun: user?.pronoun ? (user.pronoun as any) : "he",
-      gender: user?.gender ? (user.gender as any) : "male",
+      pronoun: user?.pronoun ? user.pronoun : "he",
+      gender: user?.gender ? user.gender : "male",
       bio: user?.bio ? user.bio : "",
     });
-  }, [user]);
+  }, [user, form]);
 
   const isSubmitting = form.formState.isSubmitting;
   const isDirty = form.formState.isDirty;
@@ -98,7 +100,7 @@ const EditPage = () => {
                 className="size-16"
                 username={user?.username}
                 url={
-                  user?.profilePhoto.url
+                  user?.profilePhoto?.url
                     ? user.profilePhoto.url
                     : "/no-user.jpeg"
                 }

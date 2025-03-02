@@ -86,7 +86,7 @@ const CreatePostModal = ({
       if (message) return toast.error(message);
       return data;
     },
-    onSuccess: (post) => {
+    onSuccess: () => {
       toast.success("Post created successfully");
       const keysToInvalidate = [["posts"], ["profile", params.username]];
       keysToInvalidate.forEach((q) => qc.invalidateQueries({ queryKey: q }));
@@ -224,7 +224,7 @@ const CreatePostModal = ({
               >
                 {isPending ? (
                   <div className="flex items-center gap-x-2">
-                  Posting...
+                    Posting...
                     <Loader2 className="animate-spin" />
                   </div>
                 ) : (
@@ -324,7 +324,7 @@ const ViewCropStep = ({
           alt="image"
           width={500}
           height={500}
-          className="w-full h-auto object-contain"
+          className="w-auto h-auto object-contain"
         />
       );
     return <VideoPreview key={key} src={media.src} />;
@@ -334,7 +334,7 @@ const ViewCropStep = ({
     <motion.div
       // initial={{ x: 200 }}
       // animate={{ x: 0 }}
-      className="flex-1 relative flex items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden"
+      className="flex-1 relative flex items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden border-r border-white/10"
     >
       {mediaElements[active]}
       {medias.length > 1 && (
@@ -573,5 +573,7 @@ const CaptionStep = ({
 };
 
 const VideoPreview = React.memo(({ src }: { src: string }) => {
-  return <video src={src} controls className="w-full h-auto object-contain" />;
+  return <video src={src} controls className="w-auto h-full object-contain" />;
 });
+
+VideoPreview.displayName = "VideoPreview";

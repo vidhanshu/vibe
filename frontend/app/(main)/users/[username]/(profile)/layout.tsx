@@ -1,6 +1,5 @@
-import { getUserByUsername } from "@/src/users/actions/user-actions";
 import ProfileHeader from "@/src/users/components/profile-header";
-import React, { PropsWithChildren } from "react";
+import { PropsWithChildren } from "react";
 
 const ProfileLayout = async ({ children }: PropsWithChildren) => {
   return (

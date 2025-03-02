@@ -1,6 +1,7 @@
 "use server";
 
 import { AUTH_API_ROUTES } from "@/src/auth/routes";
+import { NSAuth } from "@/src/auth/types";
 import { NSCommon } from "@/src/common/types";
 import api from "@/src/common/utils/axios";
 import { NSUser } from "../types";
@@ -14,6 +15,7 @@ export const userById = async (id: string): NSCommon.Response<NSUser.User> => {
       return { message: resJson.message, data: null };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -30,6 +32,7 @@ export const getUserByUsername = async (
       return { message: resJson.message, data: null };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -51,6 +54,7 @@ export const getProfile = async (): NSCommon.Response<
       };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       message: error.message,
@@ -74,6 +78,7 @@ export const getUsers = async ({
     if (search) query.append("search", search);
     const res = await api.get(`/users?${query.toString()}`);
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -84,7 +89,11 @@ export const updateProfile = async ({
   bio,
   profilePhoto,
   pronoun,
-}: Partial<NSUser.User>): NSCommon.Response<NSUser.User> => {
+}: Partial<
+  Omit<NSUser.User, "profilePhoto"> & {
+    profilePhoto: Omit<NSAuth.Media, "id">;
+  }
+>): NSCommon.Response<NSUser.User> => {
   try {
     const res = await api.patch(`/users/profile`, {
       gender,
@@ -93,6 +102,7 @@ export const updateProfile = async ({
       pronoun,
     });
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }

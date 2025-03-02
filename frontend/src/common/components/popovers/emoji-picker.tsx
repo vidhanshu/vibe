@@ -28,6 +28,7 @@ const EmojiPicker = ({
     setOpen(eOpen || false);
   }, [eOpen]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ref = React.useRef<any>(null);
 
   useOnClickOutside(ref, () => {

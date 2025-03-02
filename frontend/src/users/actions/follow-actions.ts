@@ -19,6 +19,7 @@ export const getFollowers = async ({
     if (search) query.append("search", search);
     const res = await api.get(`/users/${id}/followers?${query.toString()}`);
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -28,6 +29,7 @@ export const followUnfollow = async (userId: string) => {
   try {
     const res = await api.post(`/users/${userId}/follows`);
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }

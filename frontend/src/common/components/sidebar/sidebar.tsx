@@ -44,12 +44,13 @@ const Sidebar = () => {
     }
   };
 
-  const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ref = useRef<any>(null);
   const handleClickOutside = () => {
     if (collapsed) setCollapsed(false);
   };
 
-  useOnClickOutside(ref as any, handleClickOutside);
+  useOnClickOutside(ref, handleClickOutside);
 
   return (
     <div ref={ref} className="h-full">

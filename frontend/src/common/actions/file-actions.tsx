@@ -16,6 +16,7 @@ export const uploadFiles = async (
       },
     });
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       message: error.response?.data?.message ?? error.message,
@@ -28,6 +29,7 @@ export const deleteFiles = async (keys: string[]): NSCommon.Response<null> => {
   try {
     await api.post("/medias/delete", { keys });
     return { data: null };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }

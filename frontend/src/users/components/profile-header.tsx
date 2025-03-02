@@ -40,23 +40,22 @@ const ProfileHeader = () => {
     queryFn: () => getUserByUsername(params.username as string),
   });
 
-  const { mutate: handleFollowUnfollow, isPending: isFollowPending } =
-    useMutation({
-      mutationKey: ["follows"],
-      mutationFn: async (userId: string) => {
-        const res = await followUnfollow(userId);
-        if (res.message) {
-          toast.error(res.message);
-        } else {
-          toast.success(
-            `${data?.data?.follows ? "Unfollowed" : "Followed"} successfully`
-          );
-          qc.invalidateQueries({ queryKey: ["profile", params.username] });
-          qc.invalidateQueries({ queryKey: ["followers"] });
-        }
-        return res.data;
-      },
-    });
+  const { mutate: handleFollowUnfollow } = useMutation({
+    mutationKey: ["follows"],
+    mutationFn: async (userId: string) => {
+      const res = await followUnfollow(userId);
+      if (res.message) {
+        toast.error(res.message);
+      } else {
+        toast.success(
+          `${data?.data?.follows ? "Unfollowed" : "Followed"} successfully`
+        );
+        qc.invalidateQueries({ queryKey: ["profile", params.username] });
+        qc.invalidateQueries({ queryKey: ["followers"] });
+      }
+      return res.data;
+    },
+  });
 
   if (isLoading || isUserLoading) {
     return <ProfileHeaderSkeleton />;
@@ -160,17 +159,19 @@ const ProfileHeader = () => {
             <h1>
               <b>{currentUser?._count.posts}</b> Posts
             </h1>
-            <FollowersModal id={data?.data?.id!}>
-              <h1 className="cursor-pointer">
-                <b>{getShortNumber(currentUser?._count.followers ?? 0)}</b>{" "}
-                Followers
-              </h1>
-            </FollowersModal>
+            {data?.data?.id && (
+              <FollowersModal id={data.data.id}>
+                <h1 className="cursor-pointer">
+                  <b>{getShortNumber(currentUser?._count.followers ?? 0)}</b>{" "}
+                  Followers
+                </h1>
+              </FollowersModal>
+            )}
             <h1>
               <b>{currentUser?._count.followings}</b> Followings
             </h1>
           </div>
-          <pre>{currentUser?.bio}</pre>
+          <pre className="text-sm">{currentUser?.bio}</pre>
         </div>
       </div>
       <div className="border-t max-w-[900px] flex justify-center mx-auto">

@@ -1,0 +1,109 @@
+import Button from "@/components/ui/button";
+import UserAvatar from "@/src/auth/components/user-avatar";
+import { NSPost } from "@/src/posts/types";
+import NoContent from "@/src/users/components/no-content";
+import { MessageCircle, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React from "react";
+import ShowMore from "../../show-more";
+import Comment from "./comment";
+
+const PostComments = ({
+  post,
+  setOpen,
+  comments,
+  handleDeleteComment,
+  isCommentDeleting,
+  setEditCommentId,
+  setComment,
+  editCommentId,
+}: {
+  post: NSPost.DetailedPost;
+  comments: NSPost.Comment[];
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  handleDeleteComment: (id: string) => void;
+  isCommentDeleting: boolean;
+  setEditCommentId: React.Dispatch<React.SetStateAction<string | null>>;
+  setComment: React.Dispatch<React.SetStateAction<string>>;
+  editCommentId: string | null;
+}) => {
+  const router = useRouter();
+  const p = usePathname();
+
+  return (
+    <>
+      <div className="border-b px-4 py-2 flex items-center gap-x-4 justify-between">
+        <Link
+          href={`users/${post?.user?.username}`}
+          className="flex items-center gap-x-4"
+        >
+          <UserAvatar
+            className="size-6"
+            fallbackClassName="text-base"
+            username={post?.user?.username}
+            url={post?.user?.profilePhoto?.url}
+          />
+          {post?.user?.username}
+        </Link>
+        <Button
+          onClick={() => {
+            if (setOpen) {
+              setOpen(false);
+            } else router.push(p);
+          }}
+          size="icon-xs"
+          variant="secondary"
+        >
+          <X className="size-4" />
+        </Button>
+      </div>
+      <div className="flex-1 overflow-y-auto max-h-[calc(100%-200px)]">
+        <div className="p-4">
+          <div className="flex gap-x-4">
+            <UserAvatar
+              className="size-6"
+              fallbackClassName="text-base"
+              username={post?.user?.username}
+              url={post?.user?.profilePhoto?.url}
+            />
+            <div>
+              <h1 className="font-bold">{post?.title}</h1>
+              <ShowMore text={post?.content ?? ""} />
+            </div>
+          </div>
+          <h1 className="font-bold text-muted-foreground mt-6 mb-2">
+            Comments
+          </h1>
+          <div className="space-y-4">
+            {comments.length === 0 ? (
+              <NoContent
+                icon={MessageCircle}
+                title="No comments found"
+                subtitle="Be the first one to comment!"
+                titleClassName="text-lg"
+                containerClassName="gap-1"
+              />
+            ) : (
+              comments.map((comment) => (
+                <Comment
+                  handleDeleteComment={handleDeleteComment}
+                  isDeletingComment={isCommentDeleting}
+                  setEditCommentId={(id) => {
+                    setEditCommentId(id);
+                    setComment(id ? comment.content : "");
+                  }}
+                  editCommentId={editCommentId}
+                  key={comment.id}
+                  {...comment}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default PostComments;

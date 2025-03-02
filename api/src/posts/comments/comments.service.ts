@@ -21,7 +21,13 @@ export class CommentsService {
       where: { postId },
       skip: (page - 1) * limit,
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profilePhoto: true,
+          },
+        },
       },
       take: limit,
       orderBy: { createdAt: 'desc' },

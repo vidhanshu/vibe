@@ -1,56 +1,37 @@
 "use client";
 
-import Button from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import usePost from "@/src/posts/hooks/use-post";
 import NoContent from "@/src/users/components/no-content";
-import dayjs from "dayjs";
-import {
-  Bookmark,
-  Forward,
-  Heart,
-  MessageCircle,
-  Smile,
-  X,
-} from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import { useCopyToClipboard } from "usehooks-ts";
+import { useEffect, useState } from "react";
 import useSessionStore from "../../../stores/session-store";
-import EmojiPicker from "../../popovers/emoji-picker";
-import ShowMore from "../../show-more";
-import Comment from "./comment";
+import PostComments from "./post-comments";
+import PostFooter from "./post-footer";
 import PostMediaCarousel from "./post-media-carousel";
 import PostSkeleton from "./post-skeleton";
 
 interface ViewPostModalProps {
   postId: string;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  skipPostFetch?: boolean;
 }
-const ViewPostModal = ({ postId }: ViewPostModalProps) => {
+const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
   const router = useRouter();
   const p = usePathname();
   const sp = useSearchParams();
-
   const pathname = window.location.href + p + sp.toString();
-
   const currentUserId = useSessionStore((select) => select.user?.id);
   const [comment, setComment] = useState("");
   const [liked, setLiked] = useState(false);
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
-
-  const commentInputRef = useRef<HTMLInputElement>(null);
-  const [_copiedText, copyText] = useCopyToClipboard();
 
   const {
     comments,
@@ -67,6 +48,7 @@ const ViewPostModal = ({ postId }: ViewPostModalProps) => {
     editCommentId,
     setComment,
     setEditCommentId,
+    skipPostFetch: false,
   });
 
   useEffect(() => {
@@ -76,14 +58,23 @@ const ViewPostModal = ({ postId }: ViewPostModalProps) => {
   }, [post, currentUserId]);
 
   return (
-    <Dialog open>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
-        overlayProps={{ onClick: () => router.back() }}
         hideCloseBtn
+        overlayProps={{
+          onClick: () => {
+            if (setOpen) {
+              setOpen(false);
+            } else {
+              router.push(p);
+            }
+          },
+        }}
         className="w-full h-full max-w-screen-xl max-h-[calc(100vh-32px)] p-0 bg-black"
       >
         <DialogHeader className="hidden">
           <DialogTitle> </DialogTitle>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
 
         {isPostLoading ? (
@@ -91,162 +82,32 @@ const ViewPostModal = ({ postId }: ViewPostModalProps) => {
         ) : post ? (
           <div className="grid grid-cols-12">
             <PostMediaCarousel
-              title={post?.title!}
+              title={post?.title ?? ""}
               medias={post?.medias ?? []}
             />
-
             <div className="col-span-5 flex flex-col max-h-[calc(100vh-32px)]">
-              <div className="border-b px-4 py-2 flex items-center gap-x-4 justify-between">
-                <Link
-                  href={`users/${post?.user?.username}`}
-                  className="flex items-center gap-x-4"
-                >
-                  <UserAvatar
-                    className="size-6"
-                    fallbackClassName="text-base"
-                    username={post?.user?.username}
-                    url={post?.user?.profilePhoto}
-                  />
-                  {post?.user?.username}
-                </Link>
-                <Button
-                  onClick={() => router.back()}
-                  size="icon-xs"
-                  variant="secondary"
-                >
-                  <X className="size-4" />
-                </Button>
-              </div>
-              <div className="flex-1 overflow-y-auto max-h-[calc(100%-200px)]">
-                <div className="p-4">
-                  <div className="flex gap-x-4">
-                    <UserAvatar
-                      className="size-6"
-                      fallbackClassName="text-base"
-                      username={post?.user?.username}
-                      url={post?.user?.profilePhoto}
-                    />
-                    <div>
-                      <h1 className="font-bold">{post?.title}</h1>
-                      <ShowMore text={post?.content ?? ""} />
-                    </div>
-                  </div>
-                  <h1 className="font-bold text-muted-foreground mt-6 mb-2">
-                    Comments
-                  </h1>
-                  <div className="space-y-4">
-                    {comments?.items.map((comment) => (
-                      <Comment
-                        handleDeleteComment={handleDeleteComment}
-                        isDeletingComment={isCommentDeleting}
-                        setEditCommentId={(id) => {
-                          setEditCommentId(id);
-                          setComment(id ? comment.content : "");
-                        }}
-                        editCommentId={editCommentId}
-                        key={comment.id}
-                        {...comment}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="border-t py-2 space-y-2">
-                <div className="px-4 space-y-4">
-                  <div className="flex gap-x-2 items-center justify-between">
-                    <div className="flex gap-x-2 items-center">
-                      <Button
-                        size="icon-xs"
-                        variant={liked ? "destructive" : "secondary"}
-                        onClick={() => {
-                          handleLike();
-                          setLiked((prev) => !prev);
-                        }}
-                      >
-                        <Heart className="size-4" />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="icon-xs"
-                        onClick={() => commentInputRef?.current?.focus()}
-                      >
-                        <MessageCircle className="size-4" />
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          copyText(pathname);
-                          toast.success("Link copied to clipboard");
-                        }}
-                        variant="secondary"
-                        size="icon-xs"
-                      >
-                        <Forward className="size-4" />
-                      </Button>
-                    </div>
-                    {post?.userId !== currentUserId && (
-                      <Button variant="secondary" size="icon-xs">
-                        <Bookmark className="size-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <div>
-                    <h1 className="font-bold">{post?._count.likes} likes</h1>
-                    <p className="text-sm text-muted-foreground">
-                      {dayjs(post?.createdAt).format("MMMM D, YYYY")}
-                    </p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!comment.trim().length)
-                      return toast.error("Comment cannot be empty");
-                    if (editCommentId) {
-                      handleUpdateComment();
-                    } else {
-                      handleComment();
-                    }
-                  }}
-                  className="flex items-center px-4"
-                >
-                  <EmojiPicker
-                    onEmojiClick={(e) => setComment((p) => `${p}${e}`)}
-                  >
-                    {({ open, setOpen }) => (
-                      <Button
-                        type="button"
-                        size="icon-xs"
-                        variant="secondary"
-                        className="min-w-7"
-                        onClick={() => setOpen((p) => !p)}
-                      >
-                        <Smile
-                          className={cn("size-4", open && "text-blue-500")}
-                        />
-                      </Button>
-                    )}
-                  </EmojiPicker>
-                  <Input
-                    ref={commentInputRef}
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    className="focus-visible:outline-none focus-visible:ring-0 border-none text-base bg-black"
-                  />
-                  <button
-                    disabled={!comment.trim().length}
-                    className={cn(
-                      "text-blue-400 font-bold",
-                      !comment.trim().length && "text-blue-500/50"
-                    )}
-                  >
-                    {editCommentId ? "Update" : "Post"}
-                  </button>
-                </form>
-              </div>
+              <PostComments
+                post={post}
+                comments={comments?.items ?? []}
+                editCommentId={editCommentId}
+                handleDeleteComment={handleDeleteComment}
+                isCommentDeleting={isCommentDeleting}
+                setEditCommentId={setEditCommentId}
+                setComment={setComment}
+                setOpen={setOpen}
+              />
+              <PostFooter
+                post={post}
+                comment={comment}
+                setComment={setComment}
+                editCommentId={editCommentId}
+                handleComment={handleComment}
+                handleLike={handleLike}
+                handleUpdateComment={handleUpdateComment}
+                liked={liked}
+                setLiked={setLiked}
+                pathToCopy={pathname}
+              />
             </div>
           </div>
         ) : (

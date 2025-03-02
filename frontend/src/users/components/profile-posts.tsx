@@ -36,7 +36,9 @@ const ProfilePosts = () => {
 
   return (
     <div>
-      {data?.data?.items?.length ? (
+      {isPending ? (
+        <div>Loading...</div>
+      ) : data?.data?.items?.length ? (
         <div className="grid grid-cols-3 gap-4">
           {data.data.items.map((item) => (
             <ProfilePostCard post={item} key={item.id} />
@@ -59,7 +61,7 @@ const ProfilePosts = () => {
           )}
         </NoContent>
       )}
-      {postId ? <ViewPostModal postId={postId} /> : null}
+      {postId ? <ViewPostModal open postId={postId} /> : null}
     </div>
   );
 };

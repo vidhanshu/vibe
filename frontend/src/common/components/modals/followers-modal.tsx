@@ -50,7 +50,7 @@ const FollowersModal = ({
     refetch().finally(() => {
       setIsLoading(false);
     });
-  }, [search, qc]);
+  }, [search, qc, refetch]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

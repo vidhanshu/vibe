@@ -25,6 +25,7 @@ export const signUp = async (
     await setAuthToken(accessToken);
 
     return { data: accessToken, message };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -47,6 +48,7 @@ export const signIn = async (
     setAuthToken(accessToken);
 
     return { data: accessToken };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }
@@ -58,6 +60,7 @@ export const signOut = async (): NSCommon.Response<null> => {
     await clearAuthToken(); // clear the token no matter what
     if (res.status !== 200) return { message: res.data.message, data: null };
     return { data: null };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { message: error.message, data: null };
   }

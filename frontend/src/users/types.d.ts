@@ -1,14 +1,16 @@
+import { NSCommon } from "../common/types";
+
 export namespace NSUser {
   export interface User {
     id: string;
     username: string;
     email: string | null;
     bio: string | null;
-    pronoun: string | null;
-    gender: string | null;
+    pronoun: "he" | "she" | "they" | null;
+    gender: "male" | "female" | "other" | "prefer_not_to_say" | null;
     createdAt: Date;
     updatedAt: Date;
-    profilePhoto?: Media;
+    profilePhoto?: NSCommon.Media;
     _count: {
       followers: number;
       followings: number;

@@ -26,7 +26,7 @@ const Comment = ({
 
   return (
     <div className="flex gap-x-4">
-      <UserAvatar username={user?.username} url={user.profilePhoto} />
+      <UserAvatar username={user?.username} url={user.profilePhoto?.url} />
       <div className="space-y-2">
         <div>
           <Link
