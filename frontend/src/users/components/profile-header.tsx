@@ -8,7 +8,7 @@ import useSessionStore from "@/src/common/stores/session-store";
 import { getShortNumber } from "@/src/common/utils/number";
 import { getUserByUsername } from "@/src/users/actions/user-actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bookmark, Grid3X3, Tag, Youtube } from "lucide-react";
+import { Bookmark, Grid3X3, Youtube } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";

@@ -11,7 +11,6 @@ import {
   Paperclip,
   Pencil,
   Share,
-  SquareX,
   Star,
   Trash,
   UserMinus,
@@ -19,6 +18,17 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,13 +39,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const FeedPostCard = (detailedPost: NSPost.DetailedPost) => {
+import { deletePost } from "@/src/posts/actions/posts-actions";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useCopyToClipboard } from "usehooks-ts";
+
+const FeedPostCard = ({
+  detailedPost,
+  setEditPostId,
+}: {
+  detailedPost: NSPost.DetailedPost;
+  setEditPostId: (id: string) => void;
+}) => {
   const { id, createdAt, medias, title, user } = detailedPost;
+
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [comment, setComment] = useState("");
+  const [editCommentId, setEditCommentId] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_copiedText, copyText] = useCopyToClipboard();
+
+  const { mutate } = useMutation({
+    mutationFn: async () => {
+      const res = await deletePost(id);
+      if (res.message) toast.error(res.message);
+      else toast.success("Post deleted successfully");
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
 
   const currentUserId = useSessionStore((select) => select.user?.id);
-  const [editCommentId, setEditCommentId] = useState<string | null>(null);
 
   return (
     <>
@@ -59,57 +96,89 @@ const FeedPostCard = (detailedPost: NSPost.DetailedPost) => {
               . {getShortRelativeTime(createdAt)}
             </p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon-xs" variant="ghost">
-                <Ellipsis className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Post options</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {user?.id !== currentUserId ? (
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="text-rose-500">
-                    <SquareX />
-                    <span>Report</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-rose-500">
-                    <UserMinus />
-                    <span>Unfollow</span>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              ) : (
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="text-blue-500">
-                    <Pencil />
-                    <span>Edit post</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-rose-500">
-                    <Trash />
-                    <span>Delete post</span>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                {user?.id !== currentUserId && (
-                  <DropdownMenuItem>
-                    <Star />
-                    <span>Add to favorites</span>
-                  </DropdownMenuItem>
+          <AlertDialog>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete post &ldquo;{title}&rdquo;</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure? This action is irreversible
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => mutate()}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon-xs" variant="ghost">
+                  <Ellipsis className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Post options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {user?.id !== currentUserId ? (
+                  <DropdownMenuGroup>
+                    {/* <DropdownMenuItem className="text-rose-500">
+                      <SquareX />
+                      <span>Report</span>
+                    </DropdownMenuItem> */}
+                    <DropdownMenuItem className="text-rose-500">
+                      <UserMinus />
+                      <span>Unfollow</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                ) : (
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={() => setEditPostId(id)}
+                      className="text-blue-500"
+                    >
+                      <Pencil />
+                      <span>Edit post</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="text-rose-500">
+                      <AlertDialogTrigger className="flex gap-x-2 items-center">
+                        <>
+                          <Trash />
+                          <span>Delete post</span>
+                        </>
+                      </AlertDialogTrigger>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 )}
-                <DropdownMenuItem>
-                  <Share />
-                  <span>Share to...</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Paperclip />
-                  <span>Copy link</span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  {user?.id !== currentUserId && (
+                    <DropdownMenuItem>
+                      <Star />
+                      <span>Add to favorites</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem>
+                    <Share />
+                    <span>Share to...</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      copyText(
+                        window.location.href +
+                          `/users/${user.username}?postId=${id}`
+                      );
+                      toast.success("Link copied to clipboard");
+                    }}
+                  >
+                    <Paperclip />
+                    <span>Copy link</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </AlertDialog>
         </div>
         <div className="border h-[585px] flex items-center justify-center">
           <PostMediaCarousel

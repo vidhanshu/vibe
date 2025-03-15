@@ -6,7 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import { getUsers } from "@/src/users/actions/user-actions";
-import { NSUser } from "@/src/users/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -22,11 +21,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  useDebounceValue,
-  useLocalStorage,
-  useOnClickOutside,
-} from "usehooks-ts";
+import { useDebounceValue, useOnClickOutside } from "usehooks-ts";
 import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal";
 import SearchDrawer, { SearchDrawerContent } from "./search-drawer";
@@ -226,11 +221,6 @@ export const NavbarMobile = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const popoverRef = useRef<any>(null);
   const [debounced, updateDebounced] = useDebounceValue("", 1000);
-
-  const [recentSearches, setRecentSearches] = useLocalStorage<NSUser.User[]>(
-    "recent-searches",
-    []
-  );
 
   const qc = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);

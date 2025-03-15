@@ -47,6 +47,40 @@ export const createPost = async ({
   }
 };
 
+export const deletePost = async (postId: string): NSCommon.Response<null> => {
+  try {
+    const response = await api.delete(`/posts/${postId}`);
+    if (response.status !== 200)
+      return { message: response.data.message, data: null };
+    return { data: null };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
+export const updatePost = async (
+  postId: string,
+  title: string,
+  content: string
+): NSCommon.Response<NSPost.Comment> => {
+  try {
+    const response = await api.patch(`/posts/${postId}`, {
+      title,
+      content,
+    });
+    const resJson = response.data;
+
+    if (response.status !== 200)
+      return { message: resJson.message, data: null };
+
+    return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
 export const getPosts = async ({
   username,
   page,
@@ -70,7 +104,6 @@ export const getPostById = async (
   id: string
 ): NSCommon.Response<NSPost.DetailedPost> => {
   try {
-    console.log("[calllll----->]");
     const response = await api.get(`/posts/${id}`);
     const resJson = response.data;
 
