@@ -87,7 +87,7 @@ const VideoPreview = React.memo(
     const [play, setPlay] = useState(false);
     const [mute, setMute] = useState(false);
     const [progress, setProgress] = useState("0");
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(true);
     const videoRef = useRef<HTMLVideoElement>(null);
 
     React.useEffect(() => {
@@ -110,7 +110,9 @@ const VideoPreview = React.memo(
     const togglePlay = () => {
       setPlay((e) => !e);
       setVisible(true);
-      setTimeout(() => setVisible(false), 1000);
+      if (!play) {
+        setTimeout(() => setVisible(false), 1000);
+      }
     };
 
     const toggleMute = () => {
@@ -147,9 +149,9 @@ const VideoPreview = React.memo(
             )}
           >
             {play ? (
-              <Pause className="size-12" />
+              <Pause className="size-12 fill-white" />
             ) : (
-              <Play className="size-12" />
+              <Play className="size-12 fill-white" />
             )}
           </button>
         </div>

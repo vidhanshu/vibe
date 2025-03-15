@@ -1,9 +1,13 @@
 "use client";
 
 import Button, { ButtonProps } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
+import { getUsers } from "@/src/users/actions/user-actions";
+import { NSUser } from "@/src/users/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Compass,
@@ -16,11 +20,16 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PropsWithChildren, useRef, useState } from "react";
-import { useOnClickOutside } from "usehooks-ts";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import {
+  useDebounceValue,
+  useLocalStorage,
+  useOnClickOutside,
+} from "usehooks-ts";
 import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal";
-import SearchDrawer from "./search-drawer";
+import SearchDrawer, { SearchDrawerContent } from "./search-drawer";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -161,6 +170,140 @@ const Sidebar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+};
+
+export const SidebarMobile = () => {
+  const { user } = useSessionStore();
+
+  return (
+    <div className="border-t px-4 py-2 bg-black flex items-center justify-between">
+      <Link href="/">
+        <Button
+          size="icon"
+          variant="ghost"
+          endContent={<Home className="size-6" />}
+        />
+      </Link>
+      <Button
+        size="icon"
+        variant="ghost"
+        endContent={<Compass className="size-6" />}
+      />
+      <CreatePostModal asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="w-10"
+          endContent={<PlusSquare className="size-6" />}
+        />
+      </CreatePostModal>
+      <Button
+        size="icon"
+        variant="ghost"
+        endContent={<MessageCircle className="size-6" />}
+      />
+      <Link href={`/users/${user?.username}`}>
+        <Button
+          size="icon"
+          variant="ghost"
+          endContent={
+            <UserAvatar
+              url={user?.profilePhoto?.url}
+              username={user?.username}
+            />
+          }
+        />
+      </Link>
+    </div>
+  );
+};
+
+export const NavbarMobile = () => {
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const popoverRef = useRef<any>(null);
+  const [debounced, updateDebounced] = useDebounceValue("", 1000);
+
+  const [recentSearches, setRecentSearches] = useLocalStorage<NSUser.User[]>(
+    "recent-searches",
+    []
+  );
+
+  const qc = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const { data, refetch } = useQuery({
+    queryKey: ["search"],
+    queryFn: async () => {
+      setIsLoading(true);
+      const { data, message } = await getUsers({
+        search: debounced,
+      });
+      setIsLoading(false);
+      if (message) toast.error(message);
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (!debounced.trim().length) {
+      qc?.setQueryData(["search"], null); // Set data to null
+      return;
+    }
+    setIsLoading(true);
+    refetch().finally(() => {
+      setIsLoading(false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debounced, qc]);
+
+  useOnClickOutside(popoverRef, () => {
+    setOpen(false);
+  });
+
+  return (
+    <div>
+      <div className="flex gap-x-2 items-center py-2 px-2 border-b">
+        <Link href="/">
+          <Image
+            src="/logo.svg"
+            className=""
+            alt="logo"
+            width={40}
+            height={40}
+          />
+        </Link>
+        <div ref={popoverRef} className="flex-1 relative">
+          <Input
+            ref={inputRef}
+            onFocus={() => {
+              setOpen(true);
+            }}
+            onChange={(e) => updateDebounced(e.target.value)}
+            type="search"
+            placeholder="Search"
+            className="bg-secondary"
+          />
+          {open && (
+            <div className="absolute left-0 right-0 mx-auto top-[calc(100%+4px)] bg-secondary rounded-md">
+              <SearchDrawerContent
+                data={data}
+                debounced={debounced}
+                isLoading={isLoading}
+                closeCollapse={() => setOpen(false)}
+              />
+            </div>
+          )}
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="min-w-10"
+          endContent={<Heart className="size-6" />}
+        />
+      </div>
     </div>
   );
 };

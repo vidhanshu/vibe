@@ -16,10 +16,6 @@ import { useDebounceValue, useLocalStorage } from "usehooks-ts";
 
 const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
   const [debounced, updateDebounced] = useDebounceValue("", 1000);
-  const [recentSearches, setRecentSearches] = useLocalStorage<NSUser.User[]>(
-    "recent-searches",
-    []
-  );
 
   const qc = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,8 +41,8 @@ const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
     refetch().finally(() => {
       setIsLoading(false);
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [debounced, qc]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debounced, qc]);
 
   return (
     <>
@@ -62,105 +58,131 @@ const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
         />
       </div>
       <Separator className="mt-6" />
-      <div className="px-6">
-        {!debounced.trim().length ? (
-          <>
-            {recentSearches.length ? (
-              <div>
-                <div className="flex items-center justify-between">
-                  <h1 className="mt-4 font-bold text-sm text-muted-foreground">
-                    Recent searches
-                  </h1>
-                  <button
-                    onClick={() => setRecentSearches([])}
-                    className="text-blue-500 font-bold text-sm"
-                  >
-                    Clear All
-                  </button>
-                </div>
-                <div className="space-y-4 mt-6">
-                  {recentSearches.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between"
-                    >
-                      <Link
-                        onClick={closeCollapse}
-                        href={`/users/${user.username}`}
-                      >
-                        <div className="flex gap-x-4 items-center">
-                          <UserAvatar
-                            className="size-8"
-                            url={user.profilePhoto?.url}
-                            username={user.username}
-                          />
-                          {user.username}
-                        </div>
-                      </Link>
-                      <X
-                        className="size-4 cursor-pointer"
-                        onClick={() =>
-                          setRecentSearches((rs) =>
-                            rs.filter((s) => s.id !== user.id)
-                          )
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="py-6 text-muted-foreground">
-                <p>Type something to search...</p>
-              </div>
-            )}
-          </>
-        ) : isLoading ? (
-          <div className="space-y-4 mt-4">
-            <Skeleton className="h-10" />
-            <Skeleton className="h-10" />
-            <Skeleton className="h-10" />
-            <Skeleton className="h-10" />
-            <Skeleton className="h-10" />
-          </div>
-        ) : !data?.items?.length && debounced.trim().length ? (
-          <div className="py-16">
-            <NoContent
-              titleClassName="text-xl"
-              iconContainerClassName="size-10"
-              icon={User}
-              title="No users found"
-              subtitle=""
-            />
-          </div>
-        ) : (
-          data?.items?.map((user) => (
-            <Link
-              key={user.id}
-              onClick={() => {
-                closeCollapse();
-                setRecentSearches((prev) => {
-                  if (prev.some((u) => u.id === user.id)) return prev;
-                  return [...prev, user];
-                });
-              }}
-              href={`/users/${user.username}`}
-              className={`px-6 py-4`}
-            >
-              <div className="flex gap-x-4 items-center">
-                <UserAvatar
-                  className="size-8"
-                  url={user.profilePhoto?.url}
-                  username={user.username}
-                />
-                {user.username}
-              </div>
-            </Link>
-          ))
-        )}
-      </div>
+      <SearchDrawerContent
+        closeCollapse={closeCollapse}
+        debounced={debounced}
+        data={data}
+        isLoading={isLoading}
+      />
     </>
   );
 };
 
 export default SearchDrawer;
+
+export const SearchDrawerContent = ({
+  debounced,
+  closeCollapse,
+  isLoading,
+  data,
+}: {
+  debounced: string;
+  closeCollapse?: () => void;
+  isLoading?: boolean;
+  data?: null | { items: NSUser.User[] };
+}) => {
+  const [recentSearches, setRecentSearches] = useLocalStorage<NSUser.User[]>(
+    "recent-searches",
+    []
+  );
+
+  return (
+    <div className="px-4 md:px-6">
+      {!debounced.trim().length ? (
+        <>
+          {recentSearches.length ? (
+            <div className="py-4">
+              <div className="flex items-center justify-between">
+                <h1 className="font-bold text-sm text-muted-foreground">
+                  Recent searches
+                </h1>
+                <button
+                  onClick={() => setRecentSearches([])}
+                  className="text-blue-500 font-bold text-sm"
+                >
+                  Clear All
+                </button>
+              </div>
+              <div className="space-y-4 mt-6">
+                {recentSearches.map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between"
+                  >
+                    <Link
+                      onClick={closeCollapse}
+                      href={`/users/${user.username}`}
+                    >
+                      <div className="flex gap-x-4 items-center">
+                        <UserAvatar
+                          className="size-8"
+                          url={user.profilePhoto?.url}
+                          username={user.username}
+                        />
+                        {user.username}
+                      </div>
+                    </Link>
+                    <X
+                      className="size-4 cursor-pointer"
+                      onClick={() =>
+                        setRecentSearches((rs) =>
+                          rs.filter((s) => s.id !== user.id)
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="py-6 text-muted-foreground">
+              <p>Type something to search...</p>
+            </div>
+          )}
+        </>
+      ) : isLoading ? (
+        <div className="space-y-4 mt-4">
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+        </div>
+      ) : !data?.items?.length && debounced.trim().length ? (
+        <div className="py-4 md:py-16">
+          <NoContent
+            titleClassName="text-xl"
+            iconContainerClassName="size-10"
+            icon={User}
+            title="No users found"
+            subtitle=""
+          />
+        </div>
+      ) : (
+        data?.items?.map((user) => (
+          <Link
+            key={user.id}
+            onClick={() => {
+              closeCollapse?.();
+              setRecentSearches((prev) => {
+                if (prev.some((u) => u.id === user.id)) return prev;
+                return [...prev, user];
+              });
+            }}
+            href={`/users/${user.username}`}
+            className={`px-6 py-4`}
+          >
+            <div className="flex gap-x-4 items-center">
+              <UserAvatar
+                className="size-8"
+                url={user.profilePhoto?.url}
+                username={user.username}
+              />
+              {user.username}
+            </div>
+          </Link>
+        ))
+      )}
+    </div>
+  );
+};

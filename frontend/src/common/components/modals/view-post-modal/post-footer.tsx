@@ -95,7 +95,6 @@ const PostFooter = ({
             </Button>
             <Button
               onClick={() => {
-                console.log({ pathToCopy });
                 if (pathToCopy) {
                   copyText(pathToCopy);
                   toast.success("Link copied to clipboard");

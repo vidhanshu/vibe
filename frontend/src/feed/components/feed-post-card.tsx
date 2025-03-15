@@ -31,12 +31,10 @@ import {
 
 const FeedPostCard = (detailedPost: NSPost.DetailedPost) => {
   const { id, createdAt, medias, title, user } = detailedPost;
-  // const router = useRouter();
   const [open, setOpen] = useState(false);
-  const currentUserId = useSessionStore((select) => select.user?.id);
   const [comment, setComment] = useState("");
-  // const sp = useSearchParams();
-  // const postId = sp.get("postId");
+
+  const currentUserId = useSessionStore((select) => select.user?.id);
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
 
   return (
@@ -131,6 +129,9 @@ const FeedPostCard = (detailedPost: NSPost.DetailedPost) => {
             editCommentId={editCommentId}
             setEditCommentId={setEditCommentId}
             post={detailedPost}
+            pathToCopy={
+              window.location.href + `/users/${user.username}?postId=${id}`
+            }
             onCommentClick={() => {
               setOpen(true);
             }}

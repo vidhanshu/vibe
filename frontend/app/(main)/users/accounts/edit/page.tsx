@@ -234,8 +234,7 @@ const EditPage = () => {
             <DialogTitle>Change Profile Photo</DialogTitle>
           </DialogHeader>
           <Separator />
-          <button>Remove current photo</button>
-          <button>Remove current photo</button>
+          <button className="text-rose-500">Remove current photo</button>
           <DialogClose asChild>
             <button>Cancel</button>
           </DialogClose>

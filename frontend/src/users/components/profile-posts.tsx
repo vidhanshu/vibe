@@ -39,7 +39,7 @@ const ProfilePosts = () => {
       {isPending ? (
         <div>Loading...</div>
       ) : data?.data?.items?.length ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid px-4 md:px-0 md:grid-cols-3 gap-4">
           {data.data.items.map((item) => (
             <ProfilePostCard post={item} key={item.id} />
           ))}

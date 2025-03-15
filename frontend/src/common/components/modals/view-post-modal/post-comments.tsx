@@ -48,7 +48,7 @@ const PostComments = ({
     <>
       <div className="border-b px-4 py-2 flex items-center gap-x-4 justify-between">
         <Link
-          href={`users/${post?.user?.username}`}
+          href={`/users/${post?.user?.username}`}
           className="flex items-center gap-x-4"
         >
           <UserAvatar

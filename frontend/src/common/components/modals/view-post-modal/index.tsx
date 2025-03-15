@@ -2,6 +2,7 @@
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -11,6 +12,7 @@ import usePost from "@/src/posts/hooks/use-post";
 import NoContent from "@/src/users/components/no-content";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 import PostComments from "./post-comments";
 import PostFooter from "./post-footer";
 import PostMediaCarousel from "./post-media-carousel";
@@ -35,6 +37,8 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
     skipPostFetch: false,
   });
 
+  const isMobile = useMediaQuery("(max-width: 640px)");
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
@@ -48,7 +52,7 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
             }
           },
         }}
-        className="w-full h-full max-w-screen-xl max-h-[calc(100vh-32px)] p-0 bg-black"
+        className="md:w-full h-full md:max-w-screen-xl max-h-[calc(100vh-32px)] p-0 py-2 md:p-0 bg-black overflow-y-auto md:overflow-hidden"
       >
         <DialogHeader className="hidden">
           <DialogTitle> </DialogTitle>
@@ -58,7 +62,8 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
         {isPostLoading ? (
           <PostSkeleton />
         ) : post ? (
-          <div className="grid grid-cols-12">
+          <div className="flex flex-col md:grid md:grid-cols-12">
+            {/* <div>Hello world</div> */}
             <PostMediaCarousel
               title={post?.title ?? ""}
               medias={post?.medias ?? []}
@@ -78,6 +83,7 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
                 setComment={setComment}
                 pathToCopy={pathname}
                 editCommentId={editCommentId}
+                autoFocusComment={!isMobile}
                 setEditCommentId={setEditCommentId}
               />
             </div>

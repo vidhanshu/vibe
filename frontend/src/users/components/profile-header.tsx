@@ -8,15 +8,7 @@ import useSessionStore from "@/src/common/stores/session-store";
 import { getShortNumber } from "@/src/common/utils/number";
 import { getUserByUsername } from "@/src/users/actions/user-actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Bookmark,
-  Grid3X3,
-  MoreHorizontal,
-  Settings,
-  Tag,
-  UserPlus2,
-  Youtube,
-} from "lucide-react";
+import { Bookmark, Grid3X3, Tag, Youtube } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
@@ -84,21 +76,21 @@ const ProfileHeader = () => {
       href: `/users/${params.username}/reels`,
       name: "Reels",
     },
-    {
-      icon: Tag,
-      href: `/users/${params.username}/tagged`,
-      name: "Tagged",
-    },
+    // {
+    //   icon: Tag,
+    //   href: `/users/${params.username}/tagged`,
+    //   name: "Tagged",
+    // },
   ];
 
   return (
     <>
-      <div className="flex gap-x-16 max-w-[700px] mx-auto">
+      <div className="px-4 md:px-0 flex gap-x-4 md:gap-x-16 max-w-[700px] mx-auto">
         <UserAvatar
           username={currentUser?.username}
-          fallbackClassName="text-6xl font-bold"
+          fallbackClassName="text-4xl md:text-6xl font-bold"
           url={currentUser?.profilePhoto?.url}
-          className="size-40"
+          className="size-28 md:size-40"
         />
         <div className="flex-1 flex flex-col justify-between py-2 gap-2">
           <div className="flex gap-x-4 items-center">
@@ -139,7 +131,7 @@ const ProfileHeader = () => {
                 </Button>
               </Link>
             )}
-            {!isUserSelf && (
+            {/* {!isUserSelf && (
               <Button size="icon-sm" variant="secondary" className="rounded-md">
                 <UserPlus2 className="size-5" />
               </Button>
@@ -148,20 +140,20 @@ const ProfileHeader = () => {
               <Button size="icon-sm" variant="ghost" className="rounded-md">
                 <MoreHorizontal className="size-5" />
               </Button>
-            )}
-            {isUserSelf && (
+            )} */}
+            {/* {isUserSelf && (
               <Button size="icon" variant="ghost">
                 <Settings className="size-6" />
               </Button>
-            )}
+            )} */}
           </div>
           <div className="flex justify-between items-center text-lg max-w-[300px]">
-            <h1>
+            <h1 className="text-sm font-bold md:text-base cursor-pointer">
               <b>{currentUser?._count.posts}</b> Posts
             </h1>
             {data?.data?.id && (
               <FollowersFollowingsModal id={data.data.id}>
-                <h1 className="cursor-pointer">
+                <h1 className="text-sm font-bold md:text-base cursor-pointer">
                   <b>{getShortNumber(currentUser?._count.followers ?? 0)}</b>{" "}
                   Followers
                 </h1>
@@ -169,7 +161,7 @@ const ProfileHeader = () => {
             )}
             {data?.data?.id && (
               <FollowersFollowingsModal forFollowers={false} id={data.data.id}>
-                <h1 className="cursor-pointer">
+                <h1 className="text-sm font-bold md:text-base cursor-pointer">
                   <b>{getShortNumber(currentUser?._count.followings ?? 0)}</b>{" "}
                   Followings
                 </h1>

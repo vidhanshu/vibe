@@ -1,6 +1,7 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
+import SuggestedForYou from "@/src/common/components/suggested";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import { getPosts } from "@/src/posts/actions/posts-actions";
 import { NSPost } from "@/src/posts/types";
@@ -29,6 +30,19 @@ const FeedList = () => {
       ) : (
         <div className="space-y-6 max-w-[29rem] mx-auto">
           {paginatedResponse?.map((post: NSPost.DetailedPost, idx: number) => {
+            if (paginatedResponse.length === 1 ? idx == 0 : idx === 1) {
+              return (
+                <React.Fragment key={post.id}>
+                  <React.Fragment key={post.id}>
+                    {idx > 0 && <Separator className="opacity-70" />}
+                    <FeedPostCard key={post.id} {...post} />
+                  </React.Fragment>
+                  <div className="border p-4 rounded-md">
+                    <SuggestedForYou variant="feed" />
+                  </div>
+                </React.Fragment>
+              );
+            }
             return (
               <React.Fragment key={post.id}>
                 {idx > 0 && <Separator className="opacity-70" />}
