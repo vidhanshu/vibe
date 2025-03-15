@@ -2,7 +2,6 @@
 
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -37,7 +36,7 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
     skipPostFetch: false,
   });
 
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

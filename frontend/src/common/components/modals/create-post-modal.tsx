@@ -52,6 +52,7 @@ import Dropzone from "react-dropzone";
 import { toast } from "sonner";
 import useSessionStore from "../../stores/session-store";
 import ConfirmDialog from "../dialogs/confirm-dialog";
+import { useMediaQuery } from "usehooks-ts";
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -157,7 +158,7 @@ const CreatePostModal = ({
                 loading={isPending}
                 onClick={() => setOpen(false)}
                 size="icon-sm"
-                className="absolute top-8 right-8"
+                className="absolute md:top-8 right-8"
               >
                 <X className="size-6" />
               </Button>
@@ -237,7 +238,7 @@ const CreatePostModal = ({
         <div
           className={cn(
             "py-16 bg-neutral-800 h-[576px] flex justify-center items-center",
-            step !== "caption" && "w-[576px]"
+            step !== "caption" && "w-full px-4 md:px-0 md:w-[576px]"
           )}
         >
           {Steps()}
@@ -262,7 +263,7 @@ const UploadMediaStep = ({ onDrop }: { onDrop: (files: File[]) => void }) => {
         <div
           {...getRootProps()}
           className={cn(
-            "flex flex-col items-center justify-center gap-4 rounded-md border-dashed border-2 border-spacing-4 border-neutral-600 p-6 bg-transparent w-[400px]",
+            "flex flex-col items-center justify-center gap-4 rounded-md border-dashed border-2 border-spacing-4 border-neutral-600 p-6 bg-transparent md:w-[400px]",
             isDragReject && "bg-primary/20",
             isDragAccept && "bg-blue-500/20"
           )}
@@ -334,7 +335,7 @@ const ViewCropStep = ({
     <motion.div
       // initial={{ x: 200 }}
       // animate={{ x: 0 }}
-      className="flex-1 relative flex items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden border-r border-white/10"
+      className="flex-1 relative flex md:flex-row items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden md:border-r border-white/10"
     >
       {mediaElements[active]}
       {medias.length > 1 && (
@@ -386,7 +387,7 @@ const ViewCropStep = ({
             <PopoverContent
               align="end"
               side="top"
-              className="p-2 bg-background/70 flex gap-x-4 w-fit overflow-y-auto"
+              className="p-2 bg-background/70 flex gap-x-4 md:w-fit overflow-y-auto max-w-screen"
             >
               {medias.map(({ isImage, src }, key) => {
                 const closeButton = (
@@ -444,7 +445,7 @@ const ViewCropStep = ({
                       {...getRootProps()}
                       size="icon-sm"
                       variant="secondary"
-                      className="flex items-center justify-center bg-background/50 rounded-full cursor-pointer"
+                      className="flex items-center justify-center bg-background/50 rounded-full cursor-pointer p-1 md:p-0 h-fit md:h-9"
                     >
                       <input {...getInputProps()} />
                       <PlusCircle className="stroke-1 size-6 text-white" />
@@ -472,18 +473,23 @@ const CaptionStep = ({
   isLoading?: boolean;
 }) => {
   const { user } = useSessionStore();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <div className="flex gap-x-2">
-      <div className="w-[576px] h-[576px] flex items-center">
+    <div className="flex flex-col overflow-y-auto max-h-full md:max-h-max md:flex-row md:gap-x-2">
+      <div className="md:w-[576px] h-[576px] flex items-center">
         <ViewCropStep files={files} />
       </div>
       <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: "300px" }}
-        exit={{ width: 0 }}
+        {...(isMobile
+          ? {}
+          : {
+              initial: { width: 0 },
+              animate: { width: "300px" },
+              exit: { width: 0 },
+            })}
       >
-        <div className="w-[300px] max-h-[576px] overflow-y-auto flex-1 p-4 space-y-4">
+        <div className="md:w-[300px] md:max-h-[576px] overflow-y-auto flex-1 p-4 space-y-4">
           <div className="flex gap-x-4">
             <UserAvatar url={user?.profilePhoto?.url} /> {user?.username}
           </div>
