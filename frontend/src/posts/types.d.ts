@@ -37,4 +37,20 @@ export namespace NSPost {
     createdAt: Date;
     updatedAt: Date;
   }
+
+  export interface Status {
+    id: string;
+    message: null | string;
+    backgroundColor: string;
+    userId: string;
+    statusType: "MEDIA" | "TEXT";
+    createdAt: Date;
+    updatedAt: Date;
+    user: Pick<NSUser.User, "id" | "username" | "profilePhoto">;
+    medias: NSCommon.Media[];
+    _count: {
+      views: 0;
+    };
+    viewed: boolean;
+  }
 }

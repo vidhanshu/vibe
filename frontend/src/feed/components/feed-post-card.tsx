@@ -186,7 +186,7 @@ const FeedPostCard = ({
             </DropdownMenu>
           </AlertDialog>
         </div>
-        <div className="border h-[585px] flex items-center justify-center">
+        <div className="md:h-[585px] flex items-center justify-center">
           <PostMediaCarousel
             containerClassName="flex-1"
             imageClassName="w-full max-h-[585px]"
@@ -199,6 +199,7 @@ const FeedPostCard = ({
           <PostFooter
             autoFocusComment={false}
             variant="feed"
+            className="px-2 md:px-0"
             comment={comment}
             setComment={setComment}
             editCommentId={editCommentId}

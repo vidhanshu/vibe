@@ -254,7 +254,6 @@ export const NavbarMobile = () => {
   });
 
   return (
-    <div>
       <div className="flex gap-x-2 items-center py-2 px-2 border-b">
         <Link href="/">
           <Image
@@ -294,7 +293,6 @@ export const NavbarMobile = () => {
           endContent={<Heart className="size-6" />}
         />
       </div>
-    </div>
   );
 };
 

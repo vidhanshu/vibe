@@ -85,7 +85,7 @@ const ProfileHeader = () => {
 
   return (
     <>
-      <div className="px-4 md:px-0 flex gap-x-4 md:gap-x-16 max-w-[700px] mx-auto">
+      <div className="px-4 md:px-0 flex flex-col gap-y-4 md:flex-row gap-x-4 md:gap-x-16 max-w-[700px] mx-auto">
         <UserAvatar
           username={currentUser?.username}
           fallbackClassName="text-4xl md:text-6xl font-bold"

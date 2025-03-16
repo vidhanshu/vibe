@@ -7,10 +7,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { StatusesService } from './statuses.service';
-import { CreateStatusDto } from './dto/create-status.dto';
 import { User } from 'src/common/decorators/user.decorator';
+import { CreateStatusDto } from './dto/create-status.dto';
 import { FilterStatusesDto } from './dto/filter-statuses.dto';
+import { StatusesService } from './statuses.service';
 
 @Controller('statuses')
 export class StatusesController {

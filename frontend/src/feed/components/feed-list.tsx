@@ -13,7 +13,7 @@ import React, { useMemo, useState } from "react";
 import FeedListSkeleton from "./feed-list-skeleton";
 import FeedPostCard from "./feed-post-card";
 import FeedPostViewDrawer from "./feed-post-view-drawer";
-import FeedStatuses from "./feed-statuses";
+import FeedStatuses from "./status/feed-statuses";
 
 const FeedList = () => {
   const [editPostId, setEditPostId] = useState<string | null>(null);
@@ -56,7 +56,7 @@ const FeedList = () => {
                           setViewPostId={setViewPostId}
                         />
                       </React.Fragment>
-                      <div className="border p-4 rounded-md">
+                      <div className="border p-4 rounded-md mx-2 md:mx-0">
                         <SuggestedForYou variant="feed" />
                       </div>
                     </React.Fragment>

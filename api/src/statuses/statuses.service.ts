@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Status, StatusType } from '@prisma/client';
+import { PaginatedResponse } from 'src/common/types/return-type';
+import { MediasService } from 'src/medias/medias.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { FilterStatusesDto } from './dto/filter-statuses.dto';
-import { PaginatedResponse } from 'src/common/types/return-type';
-import { Status, StatusType } from '@prisma/client';
-import { MediasService } from 'src/medias/medias.service';
 
 @Injectable()
 export class StatusesService {
@@ -63,6 +63,14 @@ export class StatusesService {
               profilePhoto: { select: { url: true } },
             },
           },
+          medias: {
+            select: {
+              id: true,
+              key: true,
+              url: true,
+              mediaType: true,
+            },
+          },
           views: { select: { viewerId: true } },
           _count: {
             select: {
@@ -102,6 +110,8 @@ export class StatusesService {
         data: {
           userId,
           statusType: StatusType.MEDIA,
+          backgroundColor,
+          message,
           medias: {
             create: medias,
           },
