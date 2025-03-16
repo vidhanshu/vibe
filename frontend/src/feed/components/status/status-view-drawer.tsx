@@ -92,7 +92,7 @@ const StatusViewDrawer = ({
                 totalStatuses={statuses.length}
                 setViewStatusIdx={setViewStatusIdx}
                 status={status}
-              />{" "}
+              />
             </div>
           )}
           {isDesktop && (

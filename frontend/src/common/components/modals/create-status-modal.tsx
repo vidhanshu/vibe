@@ -132,7 +132,7 @@ const CreateStatusModal = ({
         aria-describedby="modal-description"
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
-        className="p-0 border-none gap-0 rounded-md overflow-hidden max-w-max"
+        className="p-0 border-none gap-0 rounded-md overflow-hidden w-full md:max-w-max"
         overlayProps={{
           children:
             step === "media_select" || isPending ? (
@@ -140,7 +140,7 @@ const CreateStatusModal = ({
                 loading={isPending}
                 onClick={() => setOpen(false)}
                 size="icon-sm"
-                className="absolute md:top-8 right-8"
+                className="absolute top-4 md:top-8 right-8"
               >
                 <X className="size-6" />
               </Button>
@@ -213,8 +213,9 @@ const CreateStatusModal = ({
         </DialogHeader>
         <div
           className={cn(
-            "md:py-16 h-[576px] flex justify-center items-center",
-            step !== "caption" && "w-full px-4 md:px-0 md:w-[576px]"
+            "md:py-16 flex justify-center items-center",
+            step !== "caption" && "w-full px-4 md:px-0 md:w-[576px]",
+            step !== "media_select" ? "h-[576px]" : "h-[300px]"
           )}
           style={{ background: value.backgroundColor }}
         >

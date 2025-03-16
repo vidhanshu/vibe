@@ -150,7 +150,7 @@ const CreatePostModal = ({
         aria-describedby="modal-description"
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
-        className="p-0 border-none gap-0 rounded-md overflow-hidden max-w-max"
+        className="p-0 border-none gap-0 rounded-md overflow-hidden w-full md:max-w-max"
         overlayProps={{
           children:
             step === "media_select" || isPending ? (
@@ -158,7 +158,7 @@ const CreatePostModal = ({
                 loading={isPending}
                 onClick={() => setOpen(false)}
                 size="icon-sm"
-                className="absolute md:top-8 right-8"
+                className="absolute top-4 md:top-8 right-8"
               >
                 <X className="size-6" />
               </Button>
@@ -237,7 +237,7 @@ const CreatePostModal = ({
         </DialogHeader>
         <div
           className={cn(
-            "py-16 bg-neutral-800 h-[576px] flex justify-center items-center",
+            "md:py-16 bg-neutral-800 h-[576px] flex justify-center items-center py-0",
             step !== "caption" && "w-full px-4 md:px-0 md:w-[576px]"
           )}
         >
@@ -477,7 +477,7 @@ const CaptionStep = ({
 
   return (
     <div className="flex flex-col overflow-y-auto max-h-full md:max-h-max md:flex-row md:gap-x-2">
-      <div className="md:w-[576px] h-[576px] flex items-center">
+      <div className="md:w-[576px]  h-[576px] flex items-center">
         <ViewCropStep files={files} />
       </div>
       <motion.div

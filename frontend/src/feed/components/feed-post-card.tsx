@@ -81,7 +81,7 @@ const FeedPostCard = ({
   return (
     <>
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center px-2 md:px-0">
           <div className="flex gap-x-2 items-center">
             <Link
               href={`/users/${user.username}`}
@@ -110,8 +110,8 @@ const FeedPostCard = ({
                   Are you sure? This action is irreversible
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogFooter className="flex flex-row justify-end gap-x-4">
+                <AlertDialogCancel className="m-0">Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={() => mutate()}>
                   Continue
                 </AlertDialogAction>

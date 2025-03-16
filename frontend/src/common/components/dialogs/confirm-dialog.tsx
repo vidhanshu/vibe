@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import React, { PropsWithChildren } from "react";
+import { PropsWithChildren } from "react";
 
 const ConfirmDialog = ({
   children,
@@ -29,13 +29,13 @@ const ConfirmDialog = ({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{subtitle}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2">
-          <Button onClick={onConfirm} type="submit">
-            Confirm
-          </Button>
+        <DialogFooter className="gap-2 flex-row justify-end items-center">
           <DialogClose asChild>
             <Button variant="secondary">Cancel</Button>
           </DialogClose>
+          <Button onClick={onConfirm} type="submit">
+            Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

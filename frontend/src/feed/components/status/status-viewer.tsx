@@ -37,6 +37,7 @@ import {
   Pause,
   Play,
   Send,
+  Share,
   Volume2,
   VolumeX,
   X,
@@ -168,15 +169,15 @@ const StatusViewer = ({
       )}
       {...swipeProps}
     >
-      {status.medias[active].mediaType === "IMAGE" &&
-        status.medias[active].url && (
+      {status?.medias[active]?.mediaType === "IMAGE" &&
+        status?.medias[active].url && (
           <div className="absolute inset-0 blur-lg z-0">
             <img src={status.medias[active].url} className="h-full w-full" />
           </div>
         )}
 
-      {status.medias[active].mediaType === "VIDEO" &&
-        status.medias[active].url && (
+      {status?.medias[active]?.mediaType === "VIDEO" &&
+        status?.medias[active].url && (
           <div className="absolute inset-0 blur-lg z-0 bg-rose-500" />
         )}
 
@@ -233,51 +234,53 @@ const StatusViewer = ({
             <span className="font-normal text-muted-foreground">
               {getShortRelativeTime(status.createdAt)}
             </span>
+            <span className="text-muted-foreground">●</span>
             <span className="font-bold text-sm text-muted-foreground">
               {getShortNumber(status._count.views)} View(s)
             </span>
           </div>
 
           <div className="flex gap-x-1 items-center">
-            {isMyStatus && (
-              <AlertDialog>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete status</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure? This action is irreversible
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => mutate()}>
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
+            <AlertDialog>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete status</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure? This action is irreversible
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => mutate()}>
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      endContent={
-                        <MoreVertical className="size-5 fill-white" />
-                      }
-                      size="icon-sm"
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>Status Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    endContent={<MoreVertical className="size-5 fill-white" />}
+                    size="icon-sm"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Status Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {isMyStatus && (
                     <DropdownMenuItem className="text-rose-500">
                       <AlertDialogTrigger>
                         <div>Delete</div>
                       </AlertDialogTrigger>
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </AlertDialog>
-            )}
+                  )}
+                  <DropdownMenuItem>
+                    <Share className="size-2" /> Share
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </AlertDialog>
 
             {status.medias[active].mediaType === "VIDEO" && (
               <Button
