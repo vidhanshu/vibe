@@ -1,6 +1,5 @@
 import Button from "@/components/ui/button";
 import UserAvatar from "@/src/auth/components/user-avatar";
-import ViewPostModal from "@/src/common/components/modals/view-post-modal";
 import PostFooter from "@/src/common/components/modals/view-post-modal/post-footer";
 import PostMediaCarousel from "@/src/common/components/modals/view-post-modal/post-media-carousel";
 import useSessionStore from "@/src/common/stores/session-store";
@@ -39,6 +38,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import ViewPostModal from "@/src/common/components/modals/view-post-modal";
+import useIsMobile from "@/src/common/hooks/use-is-mobile";
 import { deletePost } from "@/src/posts/actions/posts-actions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -47,9 +48,11 @@ import { useCopyToClipboard } from "usehooks-ts";
 const FeedPostCard = ({
   detailedPost,
   setEditPostId,
+  setViewPostId,
 }: {
   detailedPost: NSPost.DetailedPost;
   setEditPostId: (id: string) => void;
+  setViewPostId: (id: string) => void;
 }) => {
   const { id, createdAt, medias, title, user } = detailedPost;
 
@@ -73,6 +76,7 @@ const FeedPostCard = ({
   });
 
   const currentUserId = useSessionStore((select) => select.user?.id);
+  const isMobile = useIsMobile();
 
   return (
     <>
@@ -99,7 +103,9 @@ const FeedPostCard = ({
           <AlertDialog>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete post &ldquo;{title}&rdquo;</AlertDialogTitle>
+                <AlertDialogTitle>
+                  Delete post &ldquo;{title}&rdquo;
+                </AlertDialogTitle>
                 <AlertDialogDescription>
                   Are you sure? This action is irreversible
                 </AlertDialogDescription>
@@ -202,12 +208,17 @@ const FeedPostCard = ({
               window.location.href + `/users/${user.username}?postId=${id}`
             }
             onCommentClick={() => {
-              setOpen(true);
+              if (isMobile) {
+                setViewPostId(id);
+              } else {
+                setOpen(true);
+              }
             }}
           />
         )}
       </div>
-      {open && (
+
+      {open && !isMobile && (
         <ViewPostModal
           skipPostFetch
           open={open}

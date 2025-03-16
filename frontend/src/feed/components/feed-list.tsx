@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import EditPostDrawer from "@/src/common/components/drawers/edit-post-drawer";
 import SuggestedForYou from "@/src/common/components/suggested";
 import useInfinite from "@/src/common/hooks/use-infinite";
+import useIsMobile from "@/src/common/hooks/use-is-mobile";
 import { getPosts } from "@/src/posts/actions/posts-actions";
 import { NSPost } from "@/src/posts/types";
 import NoContent from "@/src/users/components/no-content";
@@ -11,10 +12,12 @@ import { CircleCheckBig, Loader } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import FeedListSkeleton from "./feed-list-skeleton";
 import FeedPostCard from "./feed-post-card";
+import FeedPostViewDrawer from "./feed-post-view-drawer";
 import FeedStatuses from "./feed-statuses";
 
 const FeedList = () => {
   const [editPostId, setEditPostId] = useState<string | null>(null);
+  const [viewPostId, setViewPostId] = useState<string | null>(null);
   const { data, isFetchingNextPage, hasNextPage, isLoading, ref } = useInfinite(
     {
       fetcher: getPosts,
@@ -28,6 +31,8 @@ const FeedList = () => {
     if (!editPostId) return null;
     return paginatedResponse?.find((post) => post.id === editPostId);
   }, [editPostId]);
+
+  const isMobile = useIsMobile();
 
   return (
     <>
@@ -48,6 +53,7 @@ const FeedList = () => {
                           key={post.id}
                           detailedPost={post}
                           setEditPostId={setEditPostId}
+                          setViewPostId={setViewPostId}
                         />
                       </React.Fragment>
                       <div className="border p-4 rounded-md">
@@ -63,6 +69,7 @@ const FeedList = () => {
                       key={post.id}
                       detailedPost={post}
                       setEditPostId={setEditPostId}
+                      setViewPostId={setViewPostId}
                     />
                   </React.Fragment>
                 );
@@ -84,6 +91,14 @@ const FeedList = () => {
           </div>
         )}
       </div>
+
+      {isMobile && (
+        <FeedPostViewDrawer
+          postId={viewPostId}
+          cancelView={() => setViewPostId(null)}
+        />
+      )}
+
       <EditPostDrawer
         cancelEdit={() => setEditPostId(null)}
         editPostId={editPostId}

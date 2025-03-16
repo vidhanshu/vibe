@@ -17,6 +17,7 @@ const PostComments = ({
   comment,
   setComment,
   editCommentId,
+  hideClose = false,
 }: {
   post: NSPost.DetailedPost;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,6 +25,7 @@ const PostComments = ({
   setComment: React.Dispatch<React.SetStateAction<string>>;
   editCommentId: string | null;
   comment: string;
+  hideClose?: boolean;
 }) => {
   const router = useRouter();
   const p = usePathname();
@@ -59,17 +61,19 @@ const PostComments = ({
           />
           {post?.user?.username}
         </Link>
-        <Button
-          onClick={() => {
-            if (setOpen) {
-              setOpen(false);
-            } else router.push(p);
-          }}
-          size="icon-xs"
-          variant="secondary"
-        >
-          <X className="size-4" />
-        </Button>
+        {!hideClose && (
+          <Button
+            onClick={() => {
+              if (setOpen) {
+                setOpen(false);
+              } else router.push(p);
+            }}
+            size="icon-xs"
+            variant="secondary"
+          >
+            <X className="size-4" />
+          </Button>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto max-h-[calc(100%-200px)] pb-8">
         <div className="p-4">

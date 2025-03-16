@@ -3,7 +3,7 @@ import { PropsWithChildren } from "react";
 
 const ProfileLayout = async ({ children }: PropsWithChildren) => {
   return (
-    <div className="py-8 space-y-16 h-screen">
+    <div className="py-8 space-y-16 min-h-screen">
       <ProfileHeader />
       <div className="max-w-[900px] mx-auto">{children}</div>
     </div>

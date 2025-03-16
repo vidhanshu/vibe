@@ -50,9 +50,9 @@ import React, {
 } from "react";
 import Dropzone from "react-dropzone";
 import { toast } from "sonner";
+import useIsMobile from "../../hooks/use-is-mobile";
 import useSessionStore from "../../stores/session-store";
 import ConfirmDialog from "../dialogs/confirm-dialog";
-import { useMediaQuery } from "usehooks-ts";
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -473,7 +473,7 @@ const CaptionStep = ({
   isLoading?: boolean;
 }) => {
   const { user } = useSessionStore();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   return (
     <div className="flex flex-col overflow-y-auto max-h-full md:max-h-max md:flex-row md:gap-x-2">

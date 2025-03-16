@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import useIsMobile from "@/src/common/hooks/use-is-mobile";
 import usePost from "@/src/posts/hooks/use-post";
 import NoContent from "@/src/users/components/no-content";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useMediaQuery } from "usehooks-ts";
 import PostComments from "./post-comments";
 import PostFooter from "./post-footer";
 import PostMediaCarousel from "./post-media-carousel";
@@ -36,7 +36,7 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
     skipPostFetch: false,
   });
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

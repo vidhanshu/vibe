@@ -8,7 +8,7 @@ import { PropsWithChildren } from "react";
 const MainLayout = ({ children }: PropsWithChildren) => {
   return (
     <SessionProvider>
-      <main className="relative min-h-screen md:grid md:grid-cols-[250px_1fr] md:gap-x-4">
+      <main className="relative min-h-screen md:grid md:grid-cols-[250px_1fr] md:gap-x-4 pb-[40px] md:pb-0">
         {/* Sidebar */}
         <aside className="hidden md:block sticky top-0 h-screen z-[20]">
           <Sidebar />
@@ -20,7 +20,7 @@ const MainLayout = ({ children }: PropsWithChildren) => {
         {/* Main Content */}
         {children}
 
-        <aside className="md:hidden sticky bottom-0 inset-x-0 z-[20]">
+        <aside className="md:hidden fixed bottom-0 inset-x-0 z-[20]">
           <SidebarMobile />
         </aside>
       </main>
