@@ -70,7 +70,6 @@ const StatusCircle = ({
     </CreateStatusModal>
   );
   if (onlyCreate) return myCreateCard;
-  console.log(idx, status?.user?.id, user?.id);
   if (idx === 0 && status?.user.id !== user?.id) {
     return (
       <>
