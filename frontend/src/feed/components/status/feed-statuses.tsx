@@ -29,21 +29,21 @@ const FeedStatuses = () => {
       allData.unshift(myStatus);
     }
     return allData;
-  }, [data]);
+  }, [data, user?.id]);
 
   return (
     <>
       <div className="flex max-w-2xl overflow-x-auto gap-x-4">
-        {allData.length === 0 ? (
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, idx) => (
+            <Skeleton key={idx} className="size-16 min-w-16 rounded-full" />
+          ))
+        ) : allData.length === 0 ? (
           <StatusCircle
             idx={0}
             onlyCreate
             selectStatus={(idx) => setViewStatusIdx(idx)}
           />
-        ) : isLoading ? (
-          Array.from({ length: 5 }).map((_, idx) => (
-            <Skeleton key={idx} className="size-16 min-w-16 rounded-full" />
-          ))
         ) : (
           allData.map((status, idx) => {
             return (

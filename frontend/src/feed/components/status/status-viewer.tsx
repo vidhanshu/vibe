@@ -282,7 +282,7 @@ const StatusViewer = ({
               </DropdownMenu>
             </AlertDialog>
 
-            {status.medias[active].mediaType === "VIDEO" && (
+            {status?.medias?.[active]?.mediaType === "VIDEO" && (
               <Button
                 onClick={toggleMute}
                 variant="ghost"
