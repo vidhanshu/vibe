@@ -19,6 +19,7 @@ export namespace NSPost {
   export interface DetailedPost extends Post {
     user: NSUser.User;
     likes: { userId: string }[];
+    savedBy: { id: string }[];
   }
 
   export interface Like {

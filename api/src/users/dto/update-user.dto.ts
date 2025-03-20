@@ -16,6 +16,10 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
+  name: string;
+
+  @IsString()
+  @IsOptional()
   @IsIn(['male', 'female', 'other', 'prefer_not_to_say'])
   gender: string;
 

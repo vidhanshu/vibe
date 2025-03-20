@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Post, Prisma } from '@prisma/client';
 import { PaginatedResponse } from 'src/common/types/return-type';
 import { MediasService } from 'src/medias/medias.service';
@@ -47,7 +51,8 @@ export class PostsService {
           },
         },
         medias: true,
-        likes: true,
+        likes: { select: { userId: true } },
+        savedBy: { select: { id: true } },
         _count: {
           select: { likes: true, comments: true },
         },
@@ -83,6 +88,52 @@ export class PostsService {
     };
   }
 
+  async getAllSavedPosts(
+    { limit: take = 10, page = 1, search }: FilterPostDto,
+    userId: string,
+  ): Promise<PaginatedResponse<Post>> {
+    const skip = (page - 1) * take;
+
+    const baseWhere: Prisma.PostWhereInput = {
+      savedBy: { some: { id: userId } },
+      ...(search && {
+        title: { contains: search, mode: 'insensitive' },
+      }),
+    };
+
+    const filter: Prisma.PostFindManyArgs = {
+      take,
+      skip,
+      where: baseWhere,
+      include: {
+        user: {
+          select: { id: true, profilePhoto: true, username: true },
+        },
+        medias: true,
+        likes: { select: { userId: true } },
+        savedBy: { select: { id: true } },
+        _count: { select: { likes: true, comments: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    };
+
+    const [posts, count] = await Promise.all([
+      this.prisma.post.findMany(filter),
+      this.prisma.post.count({ where: baseWhere }),
+    ]);
+
+    return {
+      items: posts,
+      metadata: {
+        totalItems: count,
+        itemsCount: posts.length,
+        totalPages: Math.ceil(count / take),
+        currentPage: page,
+        limit: take,
+      },
+    };
+  }
+
   async getPostById(id: string): Promise<Post> {
     const post = await this.prisma.post.findUnique({
       where: { id },
@@ -90,6 +141,7 @@ export class PostsService {
         medias: true,
         user: true,
         _count: true,
+        savedBy: { select: { id: true } },
         likes: {
           select: {
             userId: true,
@@ -139,5 +191,44 @@ export class PostsService {
     }
 
     return { statusCode: 200, message: 'Post deleted successfully' };
+  }
+
+  async toggleSavePost(
+    postId: string,
+    userId: string,
+  ): Promise<{ statusCode: number; message: string }> {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (post?.userId === userId) {
+      throw new BadRequestException("You can't save your own posts");
+    }
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    const alreadySaved = await this.prisma.post.findUnique({
+      where: { id: postId },
+      select: {
+        userId: true,
+        savedBy: {
+          where: { id: userId },
+          select: { id: true },
+        },
+      },
+    });
+
+    const operation = alreadySaved?.savedBy.length ? 'disconnect' : 'connect';
+    await this.prisma.post.update({
+      where: { id: postId },
+      data: {
+        savedBy: {
+          [operation]: { id: userId },
+        },
+      },
+    });
+
+    return {
+      statusCode: 200,
+      message: `Post ${operation === 'connect' ? 'saved' : 'un saved'} successfully`,
+    };
   }
 }

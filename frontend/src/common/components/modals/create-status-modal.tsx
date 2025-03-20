@@ -13,7 +13,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import { createStatus } from "@/src/feed/actions/status-action";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -39,6 +38,7 @@ import { toast } from "sonner";
 import useIsMobile from "../../hooks/use-is-mobile";
 import useSessionStore from "../../stores/session-store";
 import ConfirmDialog from "../dialogs/confirm-dialog";
+import UserChip from "../user-chip";
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -157,7 +157,7 @@ const CreateStatusModal = ({
             ),
         }}
       >
-        <DialogHeader className="p-4 bg-black border-b border-neutral-700">
+        <DialogHeader className="p-4 border-b border-neutral-700">
           {step === "media_select" && (
             <DialogTitle className="text-center">Add to status</DialogTitle>
           )}
@@ -217,7 +217,6 @@ const CreateStatusModal = ({
             step !== "caption" && "w-full px-4 md:px-0 md:w-[576px]",
             step !== "media_select" ? "h-[576px]" : "h-[300px]"
           )}
-          style={{ background: value.backgroundColor }}
         >
           {Steps()}
         </div>
@@ -313,7 +312,7 @@ const ViewCropStep = ({
     <motion.div
       // initial={{ x: 200 }}
       // animate={{ x: 0 }}
-      className="flex-1 relative flex md:flex-row items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden md:border-r border-white/10"
+      className="flex-1 relative flex md:flex-row items-center h-[576px] justify-center gap-x-4 max-w-full overflow-hidden border-white/10"
     >
       {mediaElements[active]}
       {medias.length > 1 && (
@@ -454,7 +453,7 @@ const CaptionStep = ({
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex flex-col border overflow-y-auto max-h-full md:max-h-max md:flex-row">
+    <div className="flex flex-col overflow-y-auto max-h-full md:max-h-max md:flex-row">
       <div className="md:w-[576px]  flex items-center">
         <ViewCropStep files={files} />
       </div>
@@ -469,12 +468,10 @@ const CaptionStep = ({
             })}
       >
         <div className="md:w-[300px] md:max-h-[576px] overflow-y-auto flex-1 p-4 space-y-4">
-          <div className="flex gap-x-4">
-            <UserAvatar url={user?.profilePhoto?.url} /> {user?.username}
-          </div>
-          <div>
+          <UserChip size="xs" user={user!} noLink />
+          <div className="space-y-1">
             <label htmlFor="message" className="text-sm font-bold">
-              Caption
+              Caption<span className="text-xs"> (optional)</span>
             </label>
             <input
               id="message"
@@ -487,7 +484,7 @@ const CaptionStep = ({
               placeholder="eg. My first status"
             />
           </div>
-          <div className="flex gap-x-2 items-center">
+          {/* <div className="flex gap-x-2 items-center">
             <label
               htmlFor="backgroundColor"
               className="text-sm font-bold flex items-center gap-x-4"
@@ -507,7 +504,7 @@ const CaptionStep = ({
                 setValue((p) => ({ ...p, backgroundColor: e.target.value }))
               }
             />
-          </div>
+          </div> */}
         </div>
       </motion.div>
     </div>

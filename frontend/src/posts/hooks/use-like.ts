@@ -12,6 +12,7 @@ const useLike = ({ postId }: { postId: string }) => {
       return data;
     },
     onSuccess: () => {
+      // TODO: Optimize this fetches, as just a single like/unlike refetching all posts
       qc.invalidateQueries({ queryKey: ["post", postId] });
       qc.invalidateQueries({ queryKey: ["posts"] });
     },

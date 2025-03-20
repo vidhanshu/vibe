@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import EmojiPicker from "../../popovers/emoji-picker";
 import ShowMore from "../../show-more";
+import useBookmarkPost from "@/src/posts/hooks/use-save-post";
 
 const PostFooter = ({
   post,
@@ -39,6 +40,7 @@ const PostFooter = ({
   setComment: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const currentUserId = useSessionStore((select) => select.user?.id);
 
@@ -59,11 +61,24 @@ const PostFooter = ({
   const { handleLike } = useLike({
     postId: post.id,
   });
+  const { handleSave } = useBookmarkPost({
+    postId: post.id,
+  });
 
   useEffect(() => {
     if (!currentUserId) return;
-    if (post?.likes?.some(({ userId }) => userId === currentUserId))
+
+    if (post?.likes?.some(({ userId }) => userId === currentUserId)) {
       setLiked(true);
+    } else {
+      setLiked(false);
+    }
+
+    if (post?.savedBy?.some(({ id }) => id === currentUserId)) {
+      setSaved(true);
+    } else {
+      setSaved(false);
+    }
   }, [post, currentUserId]);
 
   return (
@@ -107,8 +122,12 @@ const PostFooter = ({
             </Button>
           </div>
           {post.userId !== currentUserId && (
-            <Button variant="secondary" size="icon-xs">
-              <Bookmark className="size-4" />
+            <Button
+              onClick={() => handleSave()}
+              variant="secondary"
+              size="icon-xs"
+            >
+              <Bookmark className={cn("size-4", saved && "fill-white")} />
             </Button>
           )}
         </div>

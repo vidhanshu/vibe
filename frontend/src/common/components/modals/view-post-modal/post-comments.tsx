@@ -4,11 +4,11 @@ import useComments from "@/src/posts/hooks/use-comments";
 import { NSPost } from "@/src/posts/types";
 import NoContent from "@/src/users/components/no-content";
 import { CircleCheckBig, Loader, MessageCircle, X } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import ShowMore from "../../show-more";
 import Comment from "./comment";
+import UserChip from "../../user-chip";
 
 const PostComments = ({
   post,
@@ -49,18 +49,7 @@ const PostComments = ({
   return (
     <>
       <div className="border-b px-4 py-2 flex items-center gap-x-4 justify-between">
-        <Link
-          href={`/users/${post?.user?.username}`}
-          className="flex items-center gap-x-4"
-        >
-          <UserAvatar
-            className="size-6"
-            fallbackClassName="text-base"
-            username={post?.user?.username}
-            url={post?.user?.profilePhoto?.url}
-          />
-          {post?.user?.username}
-        </Link>
+        <UserChip size="xs" user={post.user!} />
         {!hideClose && (
           <Button
             onClick={() => {

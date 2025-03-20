@@ -11,6 +11,7 @@ import { User } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import useSessionStore from "../stores/session-store";
+import UserChip from "./user-chip";
 
 const SuggestedForYou = ({
   variant = "default",
@@ -52,19 +53,7 @@ const SuggestedForYou = ({
 
   return (
     <div className={cn("space-y-4", isFeedVariant ? "" : "max-w-xs")}>
-      {!isFeedVariant && (
-        <Link
-          href={`/users/${user?.username}`}
-          className="flex gap-x-2 items-center"
-        >
-          <UserAvatar
-            className="size-10"
-            username={user?.username}
-            url={user?.profilePhoto?.url}
-          />
-          <span className="font-bold text-lg">{user?.username}</span>
-        </Link>
-      )}
+      {!isFeedVariant && <UserChip user={user!} size="md" />}
       <div className="flex justify-between items-center">
         <h1 className="text-muted-foreground font-bold">Suggested for you</h1>
         <button className="font-semibold text-sm">See All</button>

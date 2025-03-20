@@ -23,7 +23,7 @@ export const userById = async (id: string): NSCommon.Response<NSUser.User> => {
 
 export const getUserByUsername = async (
   username: string
-): NSCommon.Response<NSUser.UserWithFollows> => {
+): NSCommon.Response<NSUser.DetailedUser> => {
   try {
     const response = await api.get(AUTH_API_ROUTES.USER_BY_USERNAME(username));
     const resJson = response.data;
@@ -113,6 +113,7 @@ export const updateProfile = async ({
   bio,
   profilePhoto,
   pronoun,
+  name,
 }: Partial<
   Omit<NSUser.User, "profilePhoto"> & {
     profilePhoto: Omit<NSAuth.Media, "id">;
@@ -124,6 +125,7 @@ export const updateProfile = async ({
       bio,
       profilePhoto,
       pronoun,
+      name,
     });
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

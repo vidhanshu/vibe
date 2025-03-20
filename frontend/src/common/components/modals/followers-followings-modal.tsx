@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import {
   getFollowers,
   getFollowings,
@@ -15,10 +14,10 @@ import {
 import NoContent from "@/src/users/components/no-content";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User, X } from "lucide-react";
-import Link from "next/link";
 import React, { PropsWithChildren, useEffect } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
+import UserChip from "../user-chip";
 
 const FollowersFollowingsModal = ({
   id,
@@ -109,20 +108,7 @@ const FollowersFollowingsModal = ({
                 subtitle=""
               />
             ) : (
-              data?.items?.map((user) => (
-                <div key={user.id}>
-                  <Link href={`/users/${user.username}`}>
-                    <div className="flex gap-x-4 items-center">
-                      <UserAvatar
-                        className="size-8"
-                        url={user.profilePhoto?.url}
-                        username={user.username}
-                      />
-                      {user.username}
-                    </div>
-                  </Link>
-                </div>
-              ))
+              data?.items?.map((user) => <UserChip key={user.id} user={user} size="sm" />)
             )}
           </div>
         </div>

@@ -76,11 +76,6 @@ const ProfileHeader = () => {
       href: `/users/${params.username}/reels`,
       name: "Reels",
     },
-    // {
-    //   icon: Tag,
-    //   href: `/users/${params.username}/tagged`,
-    //   name: "Tagged",
-    // },
   ];
 
   return (
@@ -94,21 +89,24 @@ const ProfileHeader = () => {
         />
         <div className="flex-1 flex flex-col justify-between py-2 gap-2">
           <div className="flex gap-x-4 items-center">
-            <p className="text-2xl">
-              {currentUser?.username}
-              {currentUser?.pronoun && (
-                <>
-                  .{" "}
-                  <span className="text-muted-foreground text-lg">
-                    {
-                      PRONOUN_MAP[
-                        currentUser?.pronoun as keyof typeof PRONOUN_MAP
-                      ]
-                    }
-                  </span>
-                </>
-              )}
-            </p>
+            <div className="">
+              <p className="text-2xl">
+                {currentUser?.username}
+                {currentUser?.pronoun && (
+                  <>
+                    .{" "}
+                    <span className="text-muted-foreground text-lg">
+                      {
+                        PRONOUN_MAP[
+                          currentUser?.pronoun as keyof typeof PRONOUN_MAP
+                        ]
+                      }
+                    </span>
+                  </>
+                )}
+              </p>
+              <p className="font-bold text-muted-foreground">{user?.name}</p>
+            </div>
             {!isUserSelf && (
               <Button
                 onClick={() =>
@@ -148,7 +146,7 @@ const ProfileHeader = () => {
             )} */}
           </div>
           <div className="flex justify-between items-center text-lg max-w-[300px]">
-            <h1 className="text-sm font-bold md:text-base cursor-pointer">
+            <h1 className="text-sm font-bold md:text-base">
               <b>{currentUser?._count.posts}</b> Posts
             </h1>
             {data?.data?.id && (
@@ -174,6 +172,32 @@ const ProfileHeader = () => {
               __html: currentUser?.bio?.replaceAll("\n", "<br />") ?? "",
             }}
           />
+          <div>
+            {data?.data?.followers?.length ? (
+              <FollowersFollowingsModal forFollowers={false} id={data.data.id}>
+                <p className="text-sm cursor-pointer">
+                  <span className="font-bold text-muted-foreground">
+                    Followed by&nbsp;
+                  </span>
+                  {data.data.followers
+                    .map(({ follower }) => follower.username)
+                    .join(", ")}
+                  {data.data._count.followers - data.data.followers.length >
+                  0 ? (
+                    <span className="font-bold text-muted-foreground">
+                      &nbsp;and&nbsp;
+                      {data.data._count.followers - data.data.followers.length}
+                      &nbsp;more
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                </p>
+              </FollowersFollowingsModal>
+            ) : (
+              ""
+            )}
+          </div>
         </div>
       </div>
       <div className="border-t max-w-[900px] flex justify-center mx-auto">

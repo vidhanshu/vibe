@@ -100,6 +100,22 @@ export const getPosts = async ({
   }
 };
 
+export const getSavedPosts = async ({
+  page,
+}: {
+  page?: number;
+}): NSCommon.Response<NSCommon.PaginatedResponse<NSPost.Post>> => {
+  try {
+    const sp = new URLSearchParams();
+    if (page) sp.append("page", page.toString());
+    const res = await api.get(`/posts/saved?${sp.toString()}`);
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
 export const getPostById = async (
   id: string
 ): NSCommon.Response<NSPost.DetailedPost> => {
@@ -122,9 +138,26 @@ export const likeUnLike = async (
   postId: string
 ): NSCommon.Response<NSPost.Like> => {
   try {
-    const response = await api.post(`/posts/${postId}/like-unlike`);
+    const response = await api.patch(`/posts/${postId}/like-unlike`);
     const resJson = response.data;
 
+    if (response.status !== 200)
+      return { message: resJson.message, data: null };
+
+    return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return { message: error.message, data: null };
+  }
+};
+
+export const saveUnsave = async (
+  postId: string
+): NSCommon.Response<{ statusCode: number; message: string }> => {
+  try {
+    const response = await api.patch(`/posts/${postId}/save-unsave`);
+    const resJson = response.data;
+    console.log(response.status);
     if (response.status !== 200)
       return { message: resJson.message, data: null };
 

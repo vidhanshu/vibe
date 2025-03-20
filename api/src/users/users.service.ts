@@ -171,6 +171,25 @@ export class UsersService {
             posts: true,
           },
         },
+        followers: {
+          where: {
+            follower: {
+              followers: {
+                some: {
+                  followerId: currentUserId,
+                },
+              },
+            },
+          },
+          select: {
+            follower: {
+              select: {
+                username: true,
+              },
+            },
+          },
+          take: 2,
+        },
         profilePhoto: true,
       },
     });

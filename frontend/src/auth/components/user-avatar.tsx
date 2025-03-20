@@ -24,7 +24,7 @@ const UserAvatar = ({
         alt="@vibe"
         className="object-cover object-center"
       />
-      <AvatarFallback className={fallbackClassName}>
+      <AvatarFallback className={cn("font-bold", fallbackClassName)}>
         {username?.[0].toUpperCase() ?? "V"}
       </AvatarFallback>
     </Avatar>

@@ -13,15 +13,17 @@ const ProfileReels = () => {
 
   return (
     <div>
+      <h1 className="text-center text-lg border p-2">Feature Yet To Be Implemented</h1>
       <NoContent
         icon={Youtube}
         {...(!isSelf
           ? {
               title: "No reels",
               subtitle: "",
-              titleClassName:"text-muted-foreground"
+              titleClassName: "text-muted-foreground",
             }
           : {
+              title: "Share reels",
               subtitle:
                 "When you share reels, they will appear on your profile.",
             })}

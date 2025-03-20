@@ -26,7 +26,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import { createPost } from "@/src/posts/actions/posts-actions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -53,6 +52,7 @@ import { toast } from "sonner";
 import useIsMobile from "../../hooks/use-is-mobile";
 import useSessionStore from "../../stores/session-store";
 import ConfirmDialog from "../dialogs/confirm-dialog";
+import UserChip from "../user-chip";
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -490,9 +490,7 @@ const CaptionStep = ({
             })}
       >
         <div className="md:w-[300px] md:max-h-[576px] overflow-y-auto flex-1 p-4 space-y-4">
-          <div className="flex gap-x-4">
-            <UserAvatar url={user?.profilePhoto?.url} /> {user?.username}
-          </div>
+          <UserChip noLink size="xs" user={user!} />
           <input
             disabled={isLoading}
             className="w-full bg-white/5 px-2 rounded-sm outline-none border-none py-1"

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -32,6 +33,11 @@ export class PostsController {
     return this.postsService.getAllPosts(filterPostDto);
   }
 
+  @Get('/saved')
+  getAllSavedPosts(@User('sub') userId, @Query() filterPostDto: FilterPostDto) {
+    return this.postsService.getAllSavedPosts(filterPostDto, userId);
+  }
+
   @Get(':id')
   getPostById(@Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.getPostById(id);
@@ -44,6 +50,14 @@ export class PostsController {
     @User('sub') userId: string,
   ) {
     return this.postsService.updatePost(id, userId, updatePostDto);
+  }
+
+  @Patch(':id/save-unsave')
+  toggleSavePost(
+    @Param('id', ParseUUIDPipe) id: string,
+    @User('sub') userId: string,
+  ) {
+    return this.postsService.toggleSavePost(id, userId);
   }
 
   @Delete(':id')

@@ -3,7 +3,6 @@
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import { getUsers } from "@/src/users/actions/user-actions";
 import NoContent from "@/src/users/components/no-content";
 import { NSUser } from "@/src/users/types";
@@ -13,6 +12,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue, useLocalStorage } from "usehooks-ts";
+import UserChip from "../user-chip";
 
 const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
   const [debounced, updateDebounced] = useDebounceValue("", 1000);
@@ -109,19 +109,7 @@ export const SearchDrawerContent = ({
                     key={user.id}
                     className="flex items-center justify-between"
                   >
-                    <Link
-                      onClick={closeCollapse}
-                      href={`/users/${user.username}`}
-                    >
-                      <div className="flex gap-x-4 items-center">
-                        <UserAvatar
-                          className="size-8"
-                          url={user.profilePhoto?.url}
-                          username={user.username}
-                        />
-                        {user.username}
-                      </div>
-                    </Link>
+                    <UserChip user={user} size="xs" />
                     <X
                       className="size-4 cursor-pointer"
                       onClick={() =>
@@ -172,14 +160,7 @@ export const SearchDrawerContent = ({
             href={`/users/${user.username}`}
             className={`px-6 py-4`}
           >
-            <div className="flex gap-x-4 items-center">
-              <UserAvatar
-                className="size-8"
-                url={user.profilePhoto?.url}
-                username={user.username}
-              />
-              {user.username}
-            </div>
+            <UserChip noLink user={user} size="xs" />
           </Link>
         ))
       )}

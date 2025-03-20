@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import useSwipe from "@/src/common/hooks/use-swipe";
 import useSessionStore from "@/src/common/stores/session-store";
 import { getShortRelativeTime } from "@/src/common/utils/dayjs";
@@ -43,10 +42,11 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { deleteStatus } from "../../actions/status-action";
+import UserChip from "@/src/common/components/user-chip";
+import { NSUser } from "@/src/users/types";
 
 const StatusViewer = ({
   status,
@@ -220,22 +220,12 @@ const StatusViewer = ({
 
         <div className="flex justify-between items-center">
           <div className="flex gap-x-2 items-center">
-            <Link
-              href={`/users/${status.user.username}`}
-              className="flex gap-x-2 items-center font-bold w-fit"
-            >
-              <UserAvatar
-                className="size-8"
-                username={status.user.username}
-                url={status.user.profilePhoto?.url}
-              />
-              {status.user.username}
-            </Link>
-            <span className="font-normal text-muted-foreground">
+            <UserChip user={status.user as NSUser.User} size="sm" />
+            <span className="font-normal">
               {getShortRelativeTime(status.createdAt)}
             </span>
-            <span className="text-muted-foreground">●</span>
-            <span className="font-bold text-sm text-muted-foreground">
+            <span className="text-xs">●</span>
+            <span className="font-bold text-sm">
               {getShortNumber(status._count.views)} View(s)
             </span>
           </div>
@@ -297,6 +287,7 @@ const StatusViewer = ({
               />
             )}
             <Button
+              className="md:hidden"
               size="icon-sm"
               variant="ghost"
               onClick={() => setViewStatusIdx(null)}
@@ -380,3 +371,5 @@ const VideoPreview = React.memo(
     );
   }
 );
+
+VideoPreview.displayName = "VideoPreview";

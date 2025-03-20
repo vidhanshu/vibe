@@ -9,6 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -17,8 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import { uploadFiles } from "@/src/common/actions/file-actions";
+import UserChip from "@/src/common/components/user-chip";
 import useSessionStore from "@/src/common/stores/session-store";
 import { NSCommon } from "@/src/common/types";
 import { updateProfile } from "@/src/users/actions/user-actions";
@@ -30,6 +31,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 const userFormSchema = z.object({
+  name: z.string(),
   pronoun: z.enum(["he", "she", "they"]),
   gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
   bio: z.string().max(150),
@@ -45,6 +47,7 @@ const EditPage = () => {
       pronoun: user?.pronoun ? user.pronoun : "he",
       gender: user?.gender ? user.gender : "male",
       bio: user?.bio ? user.bio : "",
+      name: user?.name ? user.name : "",
     },
     resolver: zodResolver(userFormSchema),
   });
@@ -73,6 +76,7 @@ const EditPage = () => {
       pronoun: user?.pronoun ? user.pronoun : "he",
       gender: user?.gender ? user.gender : "male",
       bio: user?.bio ? user.bio : "",
+      name: user?.name ? user.name : "",
     });
   }, [user, form]);
 
@@ -85,18 +89,7 @@ const EditPage = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="bg-muted rounded-xl p-6 flex items-center justify-between">
-            <div className="flex gap-x-4">
-              <UserAvatar
-                className="size-16"
-                username={user?.username}
-                url={
-                  user?.profilePhoto?.url
-                    ? user.profilePhoto.url
-                    : "/no-user.jpeg"
-                }
-              />
-              <h1 className="text-lg font-bold">{user?.username}</h1>
-            </div>
+            <UserChip size="2xl" user={user!} noLink />
 
             <Button
               onClick={() => {
@@ -143,6 +136,20 @@ const EditPage = () => {
                       {field.value.length}/150
                     </div>
                   </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="name"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-lg font-bold">Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Enter your name" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

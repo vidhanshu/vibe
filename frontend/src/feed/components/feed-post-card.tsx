@@ -1,5 +1,4 @@
 import Button from "@/components/ui/button";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import PostFooter from "@/src/common/components/modals/view-post-modal/post-footer";
 import PostMediaCarousel from "@/src/common/components/modals/view-post-modal/post-media-carousel";
 import useSessionStore from "@/src/common/stores/session-store";
@@ -14,7 +13,6 @@ import {
   Trash,
   UserMinus,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import {
@@ -44,6 +42,7 @@ import { deletePost } from "@/src/posts/actions/posts-actions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
+import UserChip from "@/src/common/components/user-chip";
 
 const FeedPostCard = ({
   detailedPost,
@@ -83,18 +82,7 @@ const FeedPostCard = ({
       <div className="space-y-4">
         <div className="flex justify-between items-center px-2 md:px-0">
           <div className="flex gap-x-2 items-center">
-            <Link
-              href={`/users/${user.username}`}
-              className="flex gap-x-2 items-center"
-            >
-              <UserAvatar
-                className="size-8"
-                fallbackClassName="text-2xl"
-                url={user?.profilePhoto?.url}
-                username={user?.username}
-              />
-              <span className="font-bold">{user?.username}</span>
-            </Link>
+            <UserChip size="sm" user={user} hideName />
             <p className="font-bold text-muted-foreground text-sm">
               {" "}
               . {getShortRelativeTime(createdAt)}
