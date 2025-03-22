@@ -28,6 +28,11 @@ export class ChatsController {
     return this.chatsService.getChats(userId, filterChatsDto);
   }
 
+  @Get(':id')
+  getChat(@User('sub') userId: string, @Param('id') chatId: string) {
+    return this.chatsService.getChat(chatId);
+  }
+
   @Post()
   createChat(@Body() createChatDto: CreateChatDto, @User('sub') id: string) {
     return this.chatsService.createChat(id, createChatDto);

@@ -16,7 +16,6 @@ const useInfinite = ({
   enabled?: boolean;
 }) => {
   const { ref, inView } = useInView();
-
   const {
     data: d,
     isLoading,
@@ -26,7 +25,7 @@ const useInfinite = ({
     status,
     //eslint-disable-next-line
   } = useInfiniteQuery<any>({
-    queryKey: [...queryKey, filters],
+    queryKey: [...queryKey, ...(filters ? [filters] : [])],
     queryFn: async (props) => {
       const result = (
         await fetcher({ page: props.pageParam!.toString(), ...filters })
@@ -46,7 +45,6 @@ const useInfinite = ({
 
   useEffect(() => {
     if (inView && hasNextPage) {
-      console.log("[inView]");
       fetchNextPage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

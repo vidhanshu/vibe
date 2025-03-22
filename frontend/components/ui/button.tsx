@@ -27,6 +27,7 @@ const buttonVariants = cva(
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        info: "bg-blue-500 text-white hover:bg-blue-600",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -85,7 +86,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </span>
         ) : (
           <div
-            className={cn("flex gap-x-4 items-center cursor-pointer", containerClassName)}
+            className={cn(
+              "flex gap-x-4 items-center cursor-pointer",
+              containerClassName
+            )}
             {...restProps}
           >
             {startContent}

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
@@ -42,7 +43,7 @@ export class ChatsService {
         },
       });
       if (existingChat) {
-        throw new BadRequestException('Chat already exists');
+        return { ...existingChat, existsAlready: true };
       }
 
       return this.prisma.chat.create({
@@ -87,6 +88,42 @@ export class ChatsService {
     });
   }
 
+  async getChat(chatId: string): Promise<Chat | null> {
+    const chat = this.prisma.chat.findUnique({
+      where: { id: chatId },
+      include: {
+        participants: {
+          select: {
+            user: {
+              select: {
+                profilePhoto: true,
+                username: true,
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            sender: {
+              select: {
+                username: true,
+                id: true,
+                profilePhoto: true,
+              },
+            },
+            media: true,
+          },
+        },
+      },
+    });
+    if (!chat) throw new NotFoundException('Chat not found!');
+    return chat;
+  }
+
   async getChats(
     userId: string,
     { chatType, limit = 20, page = 1, search }: FilterChatsDto,
@@ -103,11 +140,27 @@ export class ChatsService {
                 profilePhoto: true,
                 username: true,
                 id: true,
+                name: true,
               },
             },
           },
         },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            sender: {
+              select: {
+                username: true,
+                id: true,
+                profilePhoto: true,
+              },
+            },
+            media: true,
+          },
+        },
       },
+      orderBy: { updatedAt: 'desc' },
       where: {
         participants: {
           some: { userId },
@@ -149,7 +202,7 @@ export class ChatsService {
   async getChatMessages(
     userId: string,
     chatId: string,
-    { limit = 50, page = 1 }: FilterMessagesDto,
+    { limit = 10, page = 1 }: FilterMessagesDto,
   ): Promise<PaginatedResponse<Message>> {
     const chat = await this.prisma.chat.findUnique({
       where: { id: chatId },
@@ -216,6 +269,12 @@ export class ChatsService {
     if (!chat.participants.map(({ userId }) => userId).includes(userId)) {
       throw new BadRequestException('You are not a participant of this chat');
     }
+
+    // update the chat's last updated at to sort it up
+    await this.prisma.chat.update({
+      where: { id: chatId },
+      data: { updatedAt: new Date() },
+    });
 
     return this.prisma.message.create({
       data: {

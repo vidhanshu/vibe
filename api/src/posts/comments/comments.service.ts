@@ -26,6 +26,7 @@ export class CommentsService {
             id: true,
             username: true,
             profilePhoto: true,
+            name:true,
           },
         },
       },

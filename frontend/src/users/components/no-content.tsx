@@ -16,6 +16,7 @@ const NoContent = ({
   iconContainerClassName,
   containerClassName,
   iconClassName,
+  buttonClassName,
   size = "sm",
 }: {
   icon?: LucideIcon;
@@ -30,6 +31,7 @@ const NoContent = ({
   iconClassName?: string;
   containerClassName?: string;
   size?: "sm" | "lg";
+  buttonClassName?: string;
 } & PropsWithChildren) => {
   return (
     <div
@@ -76,7 +78,10 @@ const NoContent = ({
         </Link>
       )}
       {onClick && (
-        <button className="text-blue-500" onClick={onClick}>
+        <button
+          className={cn("text-blue-500", buttonClassName)}
+          onClick={onClick}
+        >
           {linkText}
         </button>
       )}

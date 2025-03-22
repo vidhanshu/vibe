@@ -37,7 +37,7 @@ const EmojiPicker = ({
   });
 
   return (
-    <div className="relative z-10">
+    <div className="relative z-10 w-fit h-fit">
       {typeof children === "function" ? children({ open, setOpen }) : children}
       <div ref={ref} className="absolute bottom-full left-full">
         <Picker

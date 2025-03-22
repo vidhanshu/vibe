@@ -48,6 +48,7 @@ export class PostsService {
             id: true,
             profilePhoto: true,
             username: true,
+            name: true,
           },
         },
         medias: true,
@@ -107,7 +108,7 @@ export class PostsService {
       where: baseWhere,
       include: {
         user: {
-          select: { id: true, profilePhoto: true, username: true },
+          select: { id: true, profilePhoto: true, username: true, name: true },
         },
         medias: true,
         likes: { select: { userId: true } },

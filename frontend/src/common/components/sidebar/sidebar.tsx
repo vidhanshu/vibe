@@ -19,17 +19,30 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue, useOnClickOutside } from "usehooks-ts";
 import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal";
 import SearchDrawer, { SearchDrawerContent } from "./search-drawer";
+import { usePathname } from "next/navigation";
 
 const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mode, setMode] = useState<"search" | "notification">("search");
+  const pathname = usePathname();
   const { user } = useSessionStore();
+  const isChatPage = pathname.startsWith("/chats");
+
+  const [collapsed, setCollapsed] = useState(isChatPage ? true : false);
+  const [mode, setMode] = useState<"search" | "notification" | null>(null);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ref = useRef<any>(null);
+  const handleClickOutside = () => {
+    if (isChatPage) return setMode(null);
+    if (collapsed) setCollapsed(false);
+  };
+
+  useOnClickOutside(ref, handleClickOutside);
 
   const drawerContent = () => {
     switch (mode) {
@@ -48,16 +61,16 @@ const Sidebar = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ref = useRef<any>(null);
-  const handleClickOutside = () => {
-    if (collapsed) setCollapsed(false);
-  };
-
-  useOnClickOutside(ref, handleClickOutside);
+  useEffect(() => {
+    if (isChatPage) setCollapsed(true);
+    else setCollapsed(false);
+  }, [isChatPage]);
 
   return (
-    <div ref={ref} className="h-full">
+    <div
+      ref={ref}
+      className={cn("h-full", isChatPage ? "w-fit border-r" : "w-[250px]")}
+    >
       <div
         className={cn(
           "pr-6 pl-4 py-8 space-y-8 h-full",
@@ -98,9 +111,10 @@ const Sidebar = () => {
           <SidebarItem
             buttonProps={{
               onClick: () => {
-                setMode("search");
+                setMode((p) => (p === "search" ? null : "search"));
                 if (collapsed && mode === "notification") return;
-                setCollapsed((p) => !p);
+                if (isChatPage) setCollapsed(true);
+                else setCollapsed((p) => !p);
               },
             }}
             collapsed={collapsed}
@@ -111,17 +125,22 @@ const Sidebar = () => {
           <SidebarItem collapsed={collapsed} icon={Compass}>
             Explore
           </SidebarItem>
-          <SidebarItem collapsed={collapsed} icon={MessageCircle}>
-            Messages
-          </SidebarItem>
+          <div>
+            <Link href="/chats">
+              <SidebarItem collapsed={collapsed} icon={MessageCircle}>
+                Messages
+              </SidebarItem>
+            </Link>
+          </div>
           <SidebarItem
             collapsed={collapsed}
             icon={Heart}
             buttonProps={{
               onClick: () => {
-                setMode("notification");
+                setMode((p) => (p === "notification" ? null : "notification"));
                 if (mode === "search" && collapsed) return;
-                setCollapsed((p) => !p);
+                if (isChatPage) setCollapsed(true);
+                else setCollapsed((p) => !p);
               },
             }}
           >
@@ -154,11 +173,11 @@ const Sidebar = () => {
         </div>
       </div>
       <AnimatePresence>
-        {collapsed && (
+        {collapsed && mode && (
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: "400px" }}
-            exit={{ width: 0 }}
+            exit={{ width: "20px" }}
             className="fixed inset-y-0 m-auto left-[68px] border-y border-r w-[400px] rounded-r-2xl bg-background z-[1000] overflow-hidden"
           >
             <div className="w-[400px] py-8">{drawerContent()}</div>
@@ -254,45 +273,39 @@ export const NavbarMobile = () => {
   });
 
   return (
-      <div className="flex gap-x-2 items-center py-2 px-2 border-b">
-        <Link href="/">
-          <Image
-            src="/logo.svg"
-            className=""
-            alt="logo"
-            width={40}
-            height={40}
-          />
-        </Link>
-        <div ref={popoverRef} className="flex-1 relative">
-          <Input
-            ref={inputRef}
-            onFocus={() => {
-              setOpen(true);
-            }}
-            onChange={(e) => updateDebounced(e.target.value)}
-            type="search"
-            placeholder="Search"
-            className="bg-secondary"
-          />
-          {open && (
-            <div className="absolute left-0 right-0 mx-auto top-[calc(100%+4px)] bg-secondary rounded-md">
-              <SearchDrawerContent
-                data={data}
-                debounced={debounced}
-                isLoading={isLoading}
-                closeCollapse={() => setOpen(false)}
-              />
-            </div>
-          )}
-        </div>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="min-w-10"
-          endContent={<Heart className="size-6" />}
+    <div className="flex gap-x-2 items-center py-2 px-2 border-b">
+      <Link href="/">
+        <Image src="/logo.svg" className="" alt="logo" width={40} height={40} />
+      </Link>
+      <div ref={popoverRef} className="flex-1 relative">
+        <Input
+          ref={inputRef}
+          onFocus={() => {
+            setOpen(true);
+          }}
+          onChange={(e) => updateDebounced(e.target.value)}
+          type="search"
+          placeholder="Search"
+          className="bg-secondary"
         />
+        {open && (
+          <div className="absolute left-0 right-0 mx-auto top-[calc(100%+4px)] bg-secondary rounded-md">
+            <SearchDrawerContent
+              data={data}
+              debounced={debounced}
+              isLoading={isLoading}
+              closeCollapse={() => setOpen(false)}
+            />
+          </div>
+        )}
       </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="min-w-10"
+        endContent={<Heart className="size-6" />}
+      />
+    </div>
   );
 };
 
