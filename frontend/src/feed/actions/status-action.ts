@@ -45,7 +45,6 @@ export const createStatus = async ({
     if (uploadedFiles.length) {
       newPayload.medias = uploadedFiles;
     }
-    console.log(newPayload);
     const res = await api.post("/statuses", newPayload);
     if (res.status !== 201) {
       // delete uploaded files, if error

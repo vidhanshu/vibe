@@ -3,6 +3,8 @@
 import { NSCommon } from "@/src/common/types";
 import { NSChat } from "../types";
 import api from "@/src/common/utils/axios";
+import { deleteFiles, uploadFiles } from "@/src/common/actions/file-actions";
+import { NSAuth } from "@/src/auth/types";
 
 export const getChats = async ({
   page,
@@ -23,12 +25,46 @@ export const getChats = async ({
 export const sendMessage = async ({
   chatId,
   message,
+  media,
 }: {
   chatId: string;
-  message: string;
+  message?: string;
+  media: File | null;
+}) => {
+  let uploadedFiles: Omit<NSAuth.Media, "id">[] = [];
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let payload: Record<string, any> = { message };
+    if (media) {
+      const res = await uploadFiles([media]);
+      if (res.message) {
+        return { message: res.message, data: null };
+      }
+      uploadedFiles = res.data ?? [];
+    }
+    if (uploadedFiles.length) {
+      payload["media"] = uploadedFiles[0];
+    }
+    const res = await api.post(`/chats/${chatId}/messages`, payload);
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    // delete uploaded files, if error
+    if (uploadedFiles.length)
+      await deleteFiles(uploadedFiles.map(({ key }) => key));
+    return { message: error.message, data: null };
+  }
+};
+
+export const unSendMessage = async ({
+  chatId,
+  messageId,
+}: {
+  chatId: string;
+  messageId: string;
 }) => {
   try {
-    const res = await api.post(`/chats/${chatId}/messages`, { message });
+    const res = await api.delete(`/chats/${chatId}/messages/${messageId}`);
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

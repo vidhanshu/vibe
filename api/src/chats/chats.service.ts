@@ -12,10 +12,14 @@ import { PaginatedResponse } from 'src/common/types/return-type';
 import { SendMessageDto } from './dto/send-message.dto';
 import { FilterMessagesDto } from './dto/filter-messages.dto';
 import { AddParticipantDto } from './dto/add-participant.dto';
+import { MediasService } from 'src/medias/medias.service';
 
 @Injectable()
 export class ChatsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mediaService: MediasService,
+  ) {}
 
   async createChat(
     userId: string,
@@ -289,12 +293,16 @@ export class ChatsService {
   async deleteMessage(userId: string, messageId: string) {
     const message = await this.prisma.message.findUnique({
       where: { id: messageId },
+      include: { media: { select: { key: true } } },
     });
     if (!message) {
       throw new BadRequestException('Message not found');
     }
     if (message.senderId !== userId) {
       throw new UnauthorizedException();
+    }
+    if (message.media?.key) {
+      await this.mediaService.deleteFiles([message.media.key]);
     }
     return this.prisma.message.delete({
       where: { id: messageId },

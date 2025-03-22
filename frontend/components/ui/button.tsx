@@ -12,6 +12,7 @@ export interface ButtonProps
   endContent?: React.ReactNode;
   loading?: boolean;
   containerProps?: React.HTMLAttributes<HTMLDivElement>;
+  loaderClassName?: string;
 }
 
 const buttonVariants = cva(
@@ -40,6 +41,7 @@ const buttonVariants = cva(
         icon: "h-10 w-10 rounded-full",
         "icon-sm": "size-9 rounded-full",
         "icon-xs": "size-7 rounded-full p-0",
+        "icon-xxs": "size-5 rounded-full p-0",
       },
     },
     defaultVariants: {
@@ -62,6 +64,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       startContent,
       endContent,
       containerProps: { className: containerClassName, ...restProps } = {},
+      loaderClassName,
       ...props
     },
     ref
@@ -76,7 +79,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <span className="relative">
-            <Loader2 className="w-5 h-5 animate-spin absolute left-0 right-0 mx-auto" />
+            <Loader2
+              className={cn(
+                "w-5 h-5 animate-spin absolute left-0 right-0 mx-auto",
+                loaderClassName
+              )}
+            />
             {/* to keep width same as it has */}
             <div className="invisible flex gap-x-4 items-center">
               {startContent}

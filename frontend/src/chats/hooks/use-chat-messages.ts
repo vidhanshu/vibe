@@ -14,6 +14,7 @@ const useChatMessages = () => {
   const chatId = params.chatId as string;
 
   const [message, setMessage] = useState("");
+  // const [mediaFile, setMediaFile] = useState<File | null>(null);
 
   const prevHeightRef = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -142,6 +143,8 @@ const useChatMessages = () => {
     // message state
     message,
     setMessage,
+    // mediaFile,
+    // setMediaFile,
   };
 };
 
