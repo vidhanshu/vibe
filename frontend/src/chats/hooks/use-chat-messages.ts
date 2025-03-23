@@ -14,6 +14,8 @@ const useChatMessages = () => {
   const chatId = params.chatId as string;
 
   const [message, setMessage] = useState("");
+  const [editingMessageId, setEditingMessageId] = useState<null | string>(null);
+  const [replyMessage, setReplyMessage] = useState<NSChat.Message | null>(null);
   // const [mediaFile, setMediaFile] = useState<File | null>(null);
 
   const prevHeightRef = useRef(0);
@@ -143,6 +145,10 @@ const useChatMessages = () => {
     // message state
     message,
     setMessage,
+    editingMessageId,
+    setEditingMessageId,
+    replyMessage,
+    setReplyMessage,
     // mediaFile,
     // setMediaFile,
   };

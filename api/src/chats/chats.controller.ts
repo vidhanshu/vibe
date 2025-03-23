@@ -15,6 +15,7 @@ import { FilterChatsDto } from './dto/filter-chats.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { FilterMessagesDto } from './dto/filter-messages.dto';
 import { AddParticipantDto } from './dto/add-participant.dto';
+import { UpdateMessageDto } from './dto/update-message-dto';
 
 @Controller('chats')
 export class ChatsController {
@@ -45,6 +46,14 @@ export class ChatsController {
     @User('sub') userId: string,
   ) {
     return this.chatsService.sendMessage(userId, chatId, sendMessageDto);
+  }
+  @Patch('/messages/:messageId')
+  updateMessage(
+    @Body() updateMessageDto: UpdateMessageDto,
+    @Param('messageId') messageId: string,
+    @User('sub') userId: string,
+  ) {
+    return this.chatsService.updateMessage(userId, messageId, updateMessageDto);
   }
 
   @Get(':id/messages')

@@ -6,6 +6,7 @@ import {
   ValidateNested,
   ValidateIf,
   MinLength,
+  IsUUID,
 } from 'class-validator';
 import { MediaDto } from 'src/medias/dto/media.dto';
 
@@ -20,4 +21,8 @@ export class SendMessageDto {
   @ValidateNested()
   @IsOptional()
   media: MediaDto;
+
+  @IsUUID()
+  @IsOptional()
+  repliedMessageId: string;
 }

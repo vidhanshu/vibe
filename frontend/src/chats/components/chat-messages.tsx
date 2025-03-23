@@ -42,8 +42,8 @@ const DateSeparator = ({ date }: { date: string }) => {
 const ChatMessages = () => {
   const userId = useSessionStore((s) => s.user?.id);
   const {
-    allMessages,
     chat,
+    allMessages,
     isChatLoading,
     scrollContainerRef,
     isFetchingNextPage,
@@ -53,6 +53,10 @@ const ChatMessages = () => {
     isMessagesLoading,
     message,
     setMessage,
+    editingMessageId,
+    setEditingMessageId,
+    replyMessage,
+    setReplyMessage,
   } = useChatMessages();
 
   return (
@@ -90,7 +94,7 @@ const ChatMessages = () => {
           <div
             ref={scrollContainerRef}
             className={cn(
-              "flex-1 max-h-[calc(100vh-65px-70px)] overflow-y-auto w-full"
+              "flex-1 max-h-[calc(100vh-65px-70px)] overflow-y-auto w-full scroll-smooth"
             )}
           >
             {isFetchingNextPage && (
@@ -126,6 +130,11 @@ const ChatMessages = () => {
                     if (Array.isArray(item)) {
                       return (
                         <MessageGroup
+                          setReplyToMessage={(message) =>
+                            setReplyMessage(message)
+                          }
+                          setEditingMessageId={setEditingMessageId}
+                          setMessageValue={(val) => setMessage(val)}
                           key={`message-${idx}`}
                           messages={item}
                           userId={userId!}
@@ -152,7 +161,14 @@ const ChatMessages = () => {
             </div>
           </div>
 
-          <MessageInput message={message} setMessage={setMessage} />
+          <MessageInput
+            replyMessage={replyMessage}
+            setReplyToMessage={(message) => setReplyMessage(message)}
+            editingMessageId={editingMessageId}
+            setEditingMessageId={setEditingMessageId}
+            message={message}
+            setMessage={setMessage}
+          />
         </>
       )}
     </div>

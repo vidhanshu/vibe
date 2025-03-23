@@ -13,6 +13,7 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { FilterMessagesDto } from './dto/filter-messages.dto';
 import { AddParticipantDto } from './dto/add-participant.dto';
 import { MediasService } from 'src/medias/medias.service';
+import { UpdateMessageDto } from './dto/update-message-dto';
 
 @Injectable()
 export class ChatsService {
@@ -21,6 +22,7 @@ export class ChatsService {
     private readonly mediaService: MediasService,
   ) {}
 
+  // chat
   async createChat(
     userId: string,
     {
@@ -203,112 +205,7 @@ export class ChatsService {
     };
   }
 
-  async getChatMessages(
-    userId: string,
-    chatId: string,
-    { limit = 10, page = 1 }: FilterMessagesDto,
-  ): Promise<PaginatedResponse<Message>> {
-    const chat = await this.prisma.chat.findUnique({
-      where: { id: chatId },
-      include: { participants: { select: { userId: true } } },
-    });
-    if (!chat) {
-      throw new BadRequestException('Chat not found');
-    }
-    if (!chat.participants.map(({ userId }) => userId).includes(userId)) {
-      throw new BadRequestException('You are not a participant of this chat');
-    }
-
-    // we are sure that the user is a participant
-    const skip = (page - 1) * limit;
-    const messages = await this.prisma.chat.findUnique({
-      where: { id: chatId },
-      include: {
-        messages: {
-          skip,
-          take: limit,
-          include: {
-            media: true,
-            sender: {
-              select: { username: true, id: true, profilePhoto: true },
-            },
-          },
-          orderBy: { createdAt: 'desc' },
-        },
-        _count: {
-          select: {
-            messages: true,
-          },
-        },
-      },
-    });
-
-    return {
-      items: messages?.messages ?? [],
-      metadata: {
-        limit,
-        currentPage: page,
-        totalItems: messages?._count.messages ?? 0,
-        itemsCount: messages?.messages.length ?? 0,
-        totalPages: Math.ceil((messages?._count.messages ?? 0) / limit),
-      },
-    };
-  }
-
-  async sendMessage(
-    userId: string,
-    chatId: string,
-    { media, message }: SendMessageDto = {} as SendMessageDto,
-  ) {
-    if (!media && !message) {
-      throw new BadRequestException('message or media is required');
-    }
-    const chat = await this.prisma.chat.findUnique({
-      where: { id: chatId },
-      include: { participants: { select: { userId: true } } },
-    });
-    if (!chat) {
-      throw new BadRequestException('Chat not found');
-    }
-    if (!chat.participants.map(({ userId }) => userId).includes(userId)) {
-      throw new BadRequestException('You are not a participant of this chat');
-    }
-
-    // update the chat's last updated at to sort it up
-    await this.prisma.chat.update({
-      where: { id: chatId },
-      data: { updatedAt: new Date() },
-    });
-
-    return this.prisma.message.create({
-      data: {
-        chatId,
-        senderId: userId,
-        text: message,
-        media: media ? { create: media } : undefined,
-      },
-    });
-  }
-
-  async deleteMessage(userId: string, messageId: string) {
-    const message = await this.prisma.message.findUnique({
-      where: { id: messageId },
-      include: { media: { select: { key: true } } },
-    });
-    if (!message) {
-      throw new BadRequestException('Message not found');
-    }
-    if (message.senderId !== userId) {
-      throw new UnauthorizedException();
-    }
-    if (message.media?.key) {
-      await this.mediaService.deleteFiles([message.media.key]);
-    }
-    return this.prisma.message.delete({
-      where: { id: messageId },
-    });
-  }
-
+  // group chat
   async addParticipantToChat(
     userId: string,
     chatId: string,
@@ -352,6 +249,163 @@ export class ChatsService {
           create: { userId: addParticipantDto.participantId, role: 'MEMBER' },
         },
       },
+    });
+  }
+
+  // messages
+  async getChatMessages(
+    userId: string,
+    chatId: string,
+    { limit = 50, page = 1 }: FilterMessagesDto,
+  ): Promise<PaginatedResponse<Message>> {
+    const chat = await this.prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { participants: { select: { userId: true } } },
+    });
+    if (!chat) {
+      throw new BadRequestException('Chat not found');
+    }
+    if (!chat.participants.map(({ userId }) => userId).includes(userId)) {
+      throw new BadRequestException('You are not a participant of this chat');
+    }
+
+    // we are sure that the user is a participant
+    const skip = (page - 1) * limit;
+    const messages = await this.prisma.chat.findUnique({
+      where: { id: chatId },
+      include: {
+        messages: {
+          skip,
+          take: limit,
+          include: {
+            media: true,
+            sender: {
+              select: {
+                username: true,
+                id: true,
+                name: true,
+                profilePhoto: true,
+              },
+            },
+            repliedToMessage: {
+              select: {
+                id: true,
+                text: true,
+                senderId: true,
+                sender: {
+                  select: { id: true, username: true, name: true },
+                },
+                media: {
+                  select: {
+                    id: true,
+                    key: true,
+                    url: true,
+                    mediaType: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+        _count: {
+          select: {
+            messages: true,
+          },
+        },
+      },
+    });
+
+    return {
+      items: messages?.messages ?? [],
+      metadata: {
+        limit,
+        currentPage: page,
+        totalItems: messages?._count.messages ?? 0,
+        itemsCount: messages?.messages.length ?? 0,
+        totalPages: Math.ceil((messages?._count.messages ?? 0) / limit),
+      },
+    };
+  }
+
+  async sendMessage(
+    userId: string,
+    chatId: string,
+    { media, message, repliedMessageId }: SendMessageDto = {} as SendMessageDto,
+  ) {
+    if (!media && !message) {
+      throw new BadRequestException('message or media is required');
+    }
+    const chat = await this.prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { participants: { select: { userId: true } } },
+    });
+    if (!chat) {
+      throw new BadRequestException('Chat not found');
+    }
+    if (!chat.participants.map(({ userId }) => userId).includes(userId)) {
+      throw new BadRequestException('You are not a participant of this chat');
+    }
+
+    // update the chat's last updated at to sort it up
+    await this.prisma.chat.update({
+      where: { id: chatId },
+      data: { updatedAt: new Date() },
+    });
+
+    return this.prisma.message.create({
+      data: {
+        chatId,
+        senderId: userId,
+        text: message,
+        media: media ? { create: media } : undefined,
+        ...(repliedMessageId ? { repliedToMessageId: repliedMessageId } : {}),
+      },
+    });
+  }
+
+  async updateMessage(
+    userId: string,
+    messageId: string,
+    { message }: UpdateMessageDto = {} as UpdateMessageDto,
+  ) {
+    if (!message) {
+      throw new BadRequestException('message is required');
+    }
+    const messageInstance = await this.prisma.message.findUnique({
+      where: { id: messageId },
+    });
+
+    if (!messageInstance) throw new NotFoundException('Message not found');
+    if (messageInstance.senderId !== userId)
+      throw new UnauthorizedException(
+        'You are not allowed to delete this message',
+      );
+
+    return this.prisma.message.update({
+      where: { id: messageId },
+      data: {
+        text: message,
+      },
+    });
+  }
+
+  async deleteMessage(userId: string, messageId: string) {
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      include: { media: { select: { key: true } } },
+    });
+    if (!message) {
+      throw new BadRequestException('Message not found');
+    }
+    if (message.senderId !== userId) {
+      throw new UnauthorizedException();
+    }
+    if (message.media?.key) {
+      await this.mediaService.deleteFiles([message.media.key]);
+    }
+    return this.prisma.message.delete({
+      where: { id: messageId },
     });
   }
 }

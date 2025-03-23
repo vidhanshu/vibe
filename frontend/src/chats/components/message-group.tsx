@@ -9,6 +9,7 @@ import {
   Clipboard,
   MessageSquareOff,
   MoreVertical,
+  Pencil,
   Play,
   Reply,
 } from "lucide-react";
@@ -29,15 +30,22 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import MediaViewerModal from "./media-viewer-modal";
 import { useState } from "react";
+import { getShortRelativeTime } from "@/src/common/utils/dayjs";
 
 const Message = ({
   message,
   total,
   index,
+  setEditingMessageId,
+  setMessageValue,
+  setReplyToMessage,
 }: {
   message: NSChat.Message;
   total: number;
   index: number;
+  setMessageValue: (val: string) => void;
+  setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>;
+  setReplyToMessage: (val: NSChat.Message | null) => void;
 }) => {
   const qc = useQueryClient();
   const chatId = useParams().chatId as string;
@@ -63,9 +71,86 @@ const Message = ({
     },
   });
 
+  const replyMessage = message.repliedToMessage;
+
   return (
-    <div className="group">
-      <div className={cn("w-fit relative", isMyMessage && "ml-auto space-y-1")}>
+    <div id={message.id} className="group">
+      <div
+        className={cn(
+          "w-fit relative max-w-[70%] space-y-1",
+          isMyMessage && "ml-auto"
+        )}
+      >
+        {/* replied to */}
+        {!!replyMessage && (
+          <a href={`#${replyMessage.id}`}>
+            <>
+              <div
+                className={cn(
+                  "space-y-2 mt-4 mb-2",
+                  isMyMessage ? "border-r-4 pr-2" : "border-l-4 pl-2"
+                )}
+              >
+                <div
+                  className={cn(
+                    "text-xs text-muted-foreground",
+                    isMyMessage ? "text-right" : ""
+                  )}
+                >
+                  {isMyMessage
+                    ? `You Replied to ${
+                        replyMessage.senderId == userId
+                          ? "Yourself"
+                          : replyMessage.sender.name ||
+                            replyMessage.sender.username
+                      }`
+                    : `${
+                        message.sender.name || message.sender.username
+                      } Replied to ${
+                        replyMessage.senderId === message.senderId
+                          ? "Themselves"
+                          : replyMessage.senderId === userId
+                          ? "You"
+                          : replyMessage.sender.name ||
+                            replyMessage.sender.username
+                      }`}
+                </div>
+                {replyMessage?.media && (
+                  <>
+                    {replyMessage.media.mediaType === "IMAGE" ? (
+                      <Image
+                        src={replyMessage.media.url}
+                        alt="media-file"
+                        width={150}
+                        height={150}
+                        className={cn(
+                          "rounded-md cursor-pointer",
+                          isMyMessage && "ml-auto"
+                        )}
+                      />
+                    ) : (
+                      <div className="relative group/video cursor-pointer">
+                        <video
+                          className={cn(
+                            "rounded-md max-w-[150px]",
+                            isMyMessage && "ml-auto"
+                          )}
+                          src={replyMessage.media.url}
+                        />
+                        <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
+                      </div>
+                    )}
+                  </>
+                )}
+                <blockquote className="bg-secondary mr-auto px-4 py-1 rounded-3xl text-white/70">
+                  {replyMessage.text?.slice(0, 60)}...
+                </blockquote>
+              </div>
+            </>
+          </a>
+        )}
+
+        {/* text */}
         <div
           id={message.id}
           className={cn(
@@ -127,10 +212,17 @@ const Message = ({
           </div>
         )}
 
+        {/* actions */}
         <div
           className={cn(
             "text-[.6rem] absolute bottom-0 md:invisible md:group-hover:visible flex gap-x-2 items-end",
-            isMyMessage ? "-left-32" : "-right-32"
+            isMyMessage
+              ? message.createdAt !== message.updatedAt
+                ? "-left-44"
+                : "-left-32"
+              : message.createdAt !== message.updatedAt
+              ? "-right-44"
+              : "-right-32"
           )}
         >
           <DropdownMenu>
@@ -157,6 +249,16 @@ const Message = ({
               >
                 <Clipboard /> Copy
               </DropdownMenuItem>
+              {message.text && message.senderId === userId && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setEditingMessageId(message.id);
+                    setMessageValue(message.text ?? "");
+                  }}
+                >
+                  <Pencil /> Edit
+                </DropdownMenuItem>
+              )}
               {isMyMessage && (
                 <>
                   <DropdownMenuSeparator />
@@ -173,6 +275,7 @@ const Message = ({
           </DropdownMenu>
           <ActionTooltip content="Reply">
             <Button
+              onClick={() => setReplyToMessage(message)}
               size="icon-xs"
               variant="secondary"
               endContent={<Reply size={14} />}
@@ -181,11 +284,16 @@ const Message = ({
           <span
             className={cn(
               "text-[.6rem] ",
-              isMyMessage ? "text-right -left-12" : "text-left -right-12"
+              isMyMessage ? "text-right" : "text-left"
             )}
           >
             {dayjs(message.createdAt).format("hh:mm a")}
           </span>
+          {message.createdAt !== message.updatedAt && (
+            <span className="text-[.6rem]">
+              (edited {getShortRelativeTime(message.updatedAt)})
+            </span>
+          )}
         </div>
       </div>
 
@@ -201,9 +309,15 @@ const Message = ({
 const MessageGroup = ({
   messages,
   userId,
+  setEditingMessageId,
+  setMessageValue,
+  setReplyToMessage,
 }: {
   messages: NSChat.Message[];
   userId: string;
+  setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>;
+  setMessageValue: (val: string) => void;
+  setReplyToMessage: (val: NSChat.Message | null) => void;
 }) => {
   const sender = messages[0].sender;
   const total = messages.length;
@@ -220,6 +334,9 @@ const MessageGroup = ({
       <div className="flex flex-col-reverse gap-y-1 flex-1">
         {messages.map((message, idx) => (
           <Message
+            setEditingMessageId={setEditingMessageId}
+            setMessageValue={setMessageValue}
+            setReplyToMessage={setReplyToMessage}
             key={message.id}
             message={message}
             total={total}

@@ -213,13 +213,16 @@ model ChatMember {
 }
 
 model Message {
-  id       String  @id @default(uuid())
-  chatId   String
-  senderId String
-  text     String?
-  media    Media?  @relation("message_media")
-  chat     Chat    @relation("chat_messages", fields: [chatId], references: [id], onDelete: Cascade)
-  sender   User    @relation("sent_messages", fields: [senderId], references: [id], onDelete: Cascade)
+  id                 String    @id @default(uuid())
+  chatId             String
+  senderId           String
+  text               String?
+  media              Media?    @relation("message_media")
+  chat               Chat      @relation("chat_messages", fields: [chatId], references: [id], onDelete: Cascade)
+  sender             User      @relation("sent_messages", fields: [senderId], references: [id], onDelete: Cascade)
+  repliedToMessage   Message?  @relation("message_replies", fields: [repliedToMessageId], references: [id])
+  repliedToMessageId String?
+  replies            Message[] @relation("message_replies")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

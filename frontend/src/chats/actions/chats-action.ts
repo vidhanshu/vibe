@@ -26,10 +26,12 @@ export const sendMessage = async ({
   chatId,
   message,
   media,
+  repliedMessageId,
 }: {
   chatId: string;
   message?: string;
   media: File | null;
+  repliedMessageId?: string;
 }) => {
   let uploadedFiles: Omit<NSAuth.Media, "id">[] = [];
   try {
@@ -45,6 +47,9 @@ export const sendMessage = async ({
     if (uploadedFiles.length) {
       payload["media"] = uploadedFiles[0];
     }
+    if (repliedMessageId) {
+      payload["repliedMessageId"] = repliedMessageId;
+    }
     const res = await api.post(`/chats/${chatId}/messages`, payload);
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,6 +57,22 @@ export const sendMessage = async ({
     // delete uploaded files, if error
     if (uploadedFiles.length)
       await deleteFiles(uploadedFiles.map(({ key }) => key));
+    return { message: error.message, data: null };
+  }
+};
+
+export const updateMessage = async ({
+  message,
+  messageId,
+}: {
+  messageId: string;
+  message: string;
+}): NSCommon.Response<NSChat.Message> => {
+  try {
+    const res = await api.patch(`/chats/messages/${messageId}`, { message });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return { data: res.data };
+  } catch (error: any) {
     return { message: error.message, data: null };
   }
 };

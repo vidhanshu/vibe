@@ -26,6 +26,7 @@ import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal";
 import SearchDrawer, { SearchDrawerContent } from "./search-drawer";
 import { usePathname } from "next/navigation";
+import { useSocketContext } from "../../contexts/socket-context";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -43,6 +44,7 @@ const Sidebar = () => {
   };
 
   useOnClickOutside(ref, handleClickOutside);
+  const { isConnected } = useSocketContext();
 
   const drawerContent = () => {
     switch (mode) {
@@ -73,12 +75,15 @@ const Sidebar = () => {
     >
       <div
         className={cn(
-          "pr-6 pl-4 py-8 space-y-8 h-full",
+          "pr-6 pl-4 py-8 space-y-8 h-full relative",
           collapsed
             ? "w-[82px] p-0 pt-8 flex flex-col items-center"
             : "border-r w-full"
         )}
       >
+        <div
+          className={cn("size-2 absolute rounded-full", isConnected ? "bg-green-500" : "bg-red-500")}
+        />
         {!collapsed ? (
           <Image
             src="/full-logo.svg"
