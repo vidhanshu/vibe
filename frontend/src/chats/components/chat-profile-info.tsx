@@ -3,6 +3,7 @@ import Link from "next/link";
 import GroupChip from "./group-chip";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import { NSChat } from "../types";
+import ShowMore from "@/src/common/components/show-more";
 
 const ChatProfileInfo = ({
   chat,
@@ -34,14 +35,20 @@ const ChatProfileInfo = ({
               ? otherParticipant?.user?.username
               : chat?.name}
           </p>
-          {otherParticipant?.user?.name && (
+          {otherParticipant?.user?.name && chat?.type !== "GROUP" && (
             <p className="text-sm text-muted-foreground text-center">
               {otherParticipant?.user?.name} . Vibe
             </p>
           )}
           {chat?.type === "GROUP" && chat?.description && (
-            <p className="text-xs text-muted-foreground text-center">
-              {chat?.description}
+            <ShowMore
+              className="text-center text-xs max-w-lg"
+              text={chat?.description ?? ""}
+            />
+          )}
+          {chat?.type === "GROUP" && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {chat.createdBy?.name || chat.createdBy?.username || "Unknown"} Created this group
             </p>
           )}
         </div>

@@ -9,12 +9,15 @@ export namespace NSChat {
     // group only
     name?: string;
     description?: string;
+    createdBy?: NSUser.User;
+    createdById?: string;
 
     participants: ChatMember[];
     messages: Message[];
 
     createdAt: Date;
     updatedAt: Date;
+    _count: { participants: number };
   }
 
   export type ChatType = "DM" | "GROUP";
@@ -43,5 +46,6 @@ export namespace NSChat {
     sender: NSUser.User;
     createdAt: Date;
     updatedAt: Date;
+    isLog: boolean;
   }
 }

@@ -52,6 +52,13 @@ const GroupChip = ({
             "size-14": xl,
             "size-16": xl_2,
           })}
+          fallbackClassName={cn({
+            "text-base": sm,
+            "text-xl": md,
+            "text-3xl": lg,
+            "text-4xl": xl,
+            "text-5xl": xl_2,
+          })}
           url={participantsExceptMe[0]?.user?.profilePhoto?.url}
           username={participantsExceptMe?.[0]?.user.username}
         />
@@ -62,6 +69,13 @@ const GroupChip = ({
             "size-12": lg,
             "size-14": xl,
             "size-16": xl_2,
+          })}
+          fallbackClassName={cn({
+            "text-base": sm,
+            "text-xl": md,
+            "text-3xl": lg,
+            "text-4xl": xl,
+            "text-5xl": xl_2,
           })}
           url={participantsExceptMe?.[1]?.user.profilePhoto?.url}
           username={participantsExceptMe?.[1]?.user.username}
@@ -76,7 +90,12 @@ const GroupChip = ({
                 {messageSender && messageSender + ": "}
                 {lastMessage}
               </p>
-              {messageSentAt && <span className="text-xs font-bold text-muted-foreground">{" · "}{getShortRelativeTime(messageSentAt)}</span>}
+              {messageSentAt && (
+                <span className="text-xs font-bold text-muted-foreground">
+                  {" · "}
+                  {getShortRelativeTime(messageSentAt)}
+                </span>
+              )}
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
-import { IsUUID } from 'class-validator';
+import { ArrayMinSize, IsUUID } from 'class-validator';
 
 export class AddParticipantDto {
-  @IsUUID()
-  participantId: string;
+  @IsUUID('4', { each: true })
+  @ArrayMinSize(1)
+  participantIds: string[];
 }

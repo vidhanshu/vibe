@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import { NSUser } from "@/src/users/types";
-import Link from "next/link";
+import Link, { LinkProps } from "next/link";
 import React from "react";
 import { getShortRelativeTime } from "../utils/dayjs";
 
@@ -17,6 +17,8 @@ const UserChip = ({
   avatarOnly = false,
   avatarFallbackClassName,
   createdAt,
+  linkProps,
+  endContent,
 }: {
   user: NSUser.User;
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
@@ -29,6 +31,8 @@ const UserChip = ({
   avatarClassName?: string;
   avatarFallbackClassName?: string;
   createdAt?: Date;
+  linkProps?: React.AnchorHTMLAttributes<HTMLAnchorElement>;
+  endContent?: React.ReactNode;
 }) => {
   const xs = size === "xs";
   const sm = size === "sm";
@@ -113,18 +117,27 @@ const UserChip = ({
 
   if (noLink) {
     return (
-      <div className={cn("flex gap-x-2 items-center w-fit", className)}>
-        {content}
+      <div className="flex justify-between items-center">
+        <div
+          className={cn("flex gap-x-2 items-center w-fit flex-1", className)}
+        >
+          {content}
+        </div>
+        {endContent}
       </div>
     );
   }
   return (
-    <Link
-      className={cn("flex gap-x-2 items-center w-fit", className)}
-      href={`/users/${user?.username}`}
-    >
-      {content}
-    </Link>
+    <div className="flex justify-between items-center">
+      <Link
+        className={cn("flex gap-x-2 items-center w-fit flex-1", className)}
+        href={`/users/${user?.username}`}
+        {...linkProps}
+      >
+        {content}
+      </Link>
+      {endContent}
+    </div>
   );
 };
 

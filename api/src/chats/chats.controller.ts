@@ -14,8 +14,11 @@ import { User } from 'src/common/decorators/user.decorator';
 import { FilterChatsDto } from './dto/filter-chats.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { FilterMessagesDto } from './dto/filter-messages.dto';
+import { RemoveParticipantDto } from './dto/remove-participant.dto';
+import { UpdateMessageDto } from './dto/update-message.dto';
 import { AddParticipantDto } from './dto/add-participant.dto';
-import { UpdateMessageDto } from './dto/update-message-dto';
+import { UpdateParticipantDto } from './dto/update-participant.dto';
+import { UpdateChatDto } from './dto/update-chat.dto';
 
 @Controller('chats')
 export class ChatsController {
@@ -27,6 +30,20 @@ export class ChatsController {
     @User('sub') userId: string,
   ) {
     return this.chatsService.getChats(userId, filterChatsDto);
+  }
+
+  @Patch(':id')
+  updateChat(
+    @User('sub') userId: string,
+    @Param('id') chatId: string,
+    @Body() updateChatDto: UpdateChatDto,
+  ) {
+    return this.chatsService.updateChat(userId, chatId, updateChatDto);
+  }
+
+  @Delete(':id')
+  deleteChat(@User('sub') userId: string, @Param('id') chatId: string) {
+    return this.chatsService.deleteChat(userId, chatId);
   }
 
   @Get(':id')
@@ -65,16 +82,44 @@ export class ChatsController {
     return this.chatsService.getChatMessages(userId, chatId, filterMessagesDto);
   }
 
-  @Get(':id/add-participant')
-  addParticipantToChat(
+  @Patch(':id/add-participants')
+  addParticipantsToChat(
     @Param('id') chatId: string,
     @User('sub') userId: string,
     @Body() addParticipantDto: AddParticipantDto,
   ) {
-    return this.chatsService.addParticipantToChat(
+    return this.chatsService.addParticipantsToChat(
       userId,
       chatId,
       addParticipantDto,
+    );
+  }
+
+  @Patch(':id/remove-participant')
+  removeParticipantFromChat(
+    @Param('id') chatId: string,
+    @User('sub') userId: string,
+    @Body() removeParticipantDto: RemoveParticipantDto,
+  ) {
+    return this.chatsService.removeParticipantFromChat(
+      userId,
+      chatId,
+      removeParticipantDto,
+    );
+  }
+
+  @Patch(':id/participant/:participantId')
+  updateParticipant(
+    @Param('id') chatId: string,
+    @Param('participantId') participantId: string,
+    @User('sub') userId: string,
+    @Body() updateParticipantDto: UpdateParticipantDto,
+  ) {
+    return this.chatsService.updateParticipant(
+      userId,
+      chatId,
+      participantId,
+      updateParticipantDto,
     );
   }
 

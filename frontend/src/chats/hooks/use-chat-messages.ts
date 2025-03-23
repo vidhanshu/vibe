@@ -1,6 +1,5 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { getChat, getChatMessages, sendMessage } from "../actions/chats-action";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import { NSChat } from "../types";
@@ -72,9 +71,20 @@ const useChatMessages = () => {
       // Group messages by sender
       let currentGroup: NSChat.Message[] = [];
       messages.forEach((message, index) => {
-        if (index === 0) {
+        if (message.isLog) {
+          // If there's an existing group, add it to messageGroups
+          if (currentGroup.length) {
+            messageGroups.push([...currentGroup]);
+            currentGroup = [];
+          }
+          // Add log message as a single message array
+          messageGroups.push([message]);
+        } else if (index === 0) {
           currentGroup = [message];
-        } else if (message.senderId === messages[index - 1].senderId) {
+        } else if (
+          message.senderId === messages[index - 1].senderId &&
+          !messages[index - 1].isLog
+        ) {
           currentGroup.push(message);
         } else {
           if (currentGroup.length) {
@@ -85,7 +95,7 @@ const useChatMessages = () => {
       });
 
       if (currentGroup.length) {
-        messageGroups.push(currentGroup);
+        messageGroups.push([...currentGroup]);
       }
 
       // Add date separator after the messages

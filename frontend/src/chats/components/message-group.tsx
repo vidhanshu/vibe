@@ -75,227 +75,233 @@ const Message = ({
 
   return (
     <div id={message.id} className="group">
-      <div
-        className={cn(
-          "w-fit relative max-w-[70%] space-y-1",
-          isMyMessage && "ml-auto"
-        )}
-      >
-        {/* replied to */}
-        {!!replyMessage && (
-          <a href={`#${replyMessage.id}`}>
-            <>
-              <div
-                className={cn(
-                  "space-y-2 mt-4 mb-2",
-                  isMyMessage ? "border-r-4 pr-2" : "border-l-4 pl-2"
-                )}
-              >
+      {message.isLog ? (
+        <p className="text-center text-muted-foreground text-sm">
+          {message.text}
+        </p>
+      ) : (
+        <div
+          className={cn(
+            "w-fit relative max-w-[70%] space-y-1",
+            isMyMessage && "ml-auto"
+          )}
+        >
+          {/* replied to */}
+          {!!replyMessage && (
+            <a href={`#${replyMessage.id}`}>
+              <>
                 <div
                   className={cn(
-                    "text-xs text-muted-foreground",
-                    isMyMessage ? "text-right" : ""
+                    "space-y-2 mt-4 mb-2",
+                    isMyMessage ? "border-r-4 pr-2" : "border-l-4 pl-2"
                   )}
                 >
-                  {isMyMessage
-                    ? `You Replied to ${
-                        replyMessage.senderId == userId
-                          ? "Yourself"
-                          : replyMessage.sender.name ||
-                            replyMessage.sender.username
-                      }`
-                    : `${
-                        message.sender.name || message.sender.username
-                      } Replied to ${
-                        replyMessage.senderId === message.senderId
-                          ? "Themselves"
-                          : replyMessage.senderId === userId
-                          ? "You"
-                          : replyMessage.sender.name ||
-                            replyMessage.sender.username
-                      }`}
-                </div>
-                {replyMessage?.media && (
-                  <>
-                    {replyMessage.media.mediaType === "IMAGE" ? (
-                      <Image
-                        src={replyMessage.media.url}
-                        alt="media-file"
-                        width={150}
-                        height={150}
-                        className={cn(
-                          "rounded-md cursor-pointer",
-                          isMyMessage && "ml-auto"
-                        )}
-                      />
-                    ) : (
-                      <div className="relative group/video cursor-pointer">
-                        <video
+                  <div
+                    className={cn(
+                      "text-xs text-muted-foreground",
+                      isMyMessage ? "text-right" : ""
+                    )}
+                  >
+                    {isMyMessage
+                      ? `You Replied to ${
+                          replyMessage.senderId == userId
+                            ? "Yourself"
+                            : replyMessage.sender.name ||
+                              replyMessage.sender.username
+                        }`
+                      : `${
+                          message.sender.name || message.sender.username
+                        } Replied to ${
+                          replyMessage.senderId === message.senderId
+                            ? "Themselves"
+                            : replyMessage.senderId === userId
+                            ? "You"
+                            : replyMessage.sender.name ||
+                              replyMessage.sender.username
+                        }`}
+                  </div>
+                  {replyMessage?.media && (
+                    <>
+                      {replyMessage.media.mediaType === "IMAGE" ? (
+                        <Image
+                          src={replyMessage.media.url}
+                          alt="media-file"
+                          width={150}
+                          height={150}
                           className={cn(
-                            "rounded-md max-w-[150px]",
+                            "rounded-md cursor-pointer",
                             isMyMessage && "ml-auto"
                           )}
-                          src={replyMessage.media.url}
                         />
-                        <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
-                      </div>
-                    )}
-                  </>
-                )}
-                <blockquote className="bg-secondary mr-auto px-4 py-1 rounded-3xl text-white/70">
-                  {replyMessage.text?.slice(0, 60)}...
-                </blockquote>
-              </div>
-            </>
-          </a>
-        )}
-
-        {/* text */}
-        <div
-          id={message.id}
-          className={cn(
-            "px-3 py-1 bg-secondary w-fit rounded-sm",
-            {
-              "bg-[#3697ef] text-white ml-auto rounded-l-3xl": isMyMessage,
-              "rounded-r-3xl": !isMyMessage,
-            },
-            total === 1
-              ? "rounded-3xl"
-              : total === 2
-              ? isMyMessage
-                ? index == 1
-                  ? "rounded-t-3xl"
-                  : "rounded-b-3xl"
-                : index == 1
-                ? "rounded-t-3xl rounded-r-3xl"
-                : "rounded-b-3xl rounded-r-3xl"
-              : isMyMessage
-              ? index == total - 1
-                ? "rounded-t-3xl"
-                : index === 0
-                ? "rounded-b-3xl"
-                : ""
-              : index == total - 1
-              ? "rounded-t-3xl rounded-r-3xl"
-              : index === 0
-              ? "rounded-b-3xl rounded-r-3xl"
-              : ""
+                      ) : (
+                        <div className="relative group/video cursor-pointer">
+                          <video
+                            className={cn(
+                              "rounded-md max-w-[150px]",
+                              isMyMessage && "ml-auto"
+                            )}
+                            src={replyMessage.media.url}
+                          />
+                          <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <blockquote className="bg-secondary mr-auto px-4 py-1 rounded-3xl text-white/70">
+                    {replyMessage.text?.slice(0, 60)}...
+                  </blockquote>
+                </div>
+              </>
+            </a>
           )}
-        >
+
+          {/* text */}
           <div
-            dangerouslySetInnerHTML={{
-              __html: message.text?.replaceAll("\n", "<br/>") || "",
-            }}
-          />
-        </div>
-
-        {/* medias */}
-        {message.media && (
-          <div onClick={() => setIsMediaViewerOpen(true)}>
-            {message.media.mediaType === "IMAGE" ? (
-              <Image
-                src={message.media.url}
-                alt="media-file"
-                width={200}
-                height={200}
-                className="rounded-md cursor-pointer"
-              />
-            ) : (
-              <div className="relative group/video cursor-pointer">
-                <video
-                  className="rounded-md max-w-[200px]"
-                  src={message.media.url}
-                />
-                <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* actions */}
-        <div
-          className={cn(
-            "text-[.6rem] absolute bottom-0 md:invisible md:group-hover:visible flex gap-x-2 items-end",
-            isMyMessage
-              ? message.createdAt !== message.updatedAt
-                ? "-left-44"
-                : "-left-32"
-              : message.createdAt !== message.updatedAt
-              ? "-right-44"
-              : "-right-32"
-          )}
-        >
-          <DropdownMenu>
-            <ActionTooltip content="More">
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon-xs"
-                  variant="secondary"
-                  endContent={<MoreVertical size={14} />}
-                />
-              </DropdownMenuTrigger>
-            </ActionTooltip>
-
-            <DropdownMenuContent>
-              <DropdownMenuLabel>
-                {dayjs(message.createdAt).format("hh:mm a")}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  if (message.text) copyText(message.text);
-                  toast.success("Copied to clipboard");
-                }}
-              >
-                <Clipboard /> Copy
-              </DropdownMenuItem>
-              {message.text && message.senderId === userId && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    setEditingMessageId(message.id);
-                    setMessageValue(message.text ?? "");
-                  }}
-                >
-                  <Pencil /> Edit
-                </DropdownMenuItem>
-              )}
-              {isMyMessage && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => deleteMessage()}
-                    className="text-rose-500"
-                  >
-                    <MessageSquareOff />
-                    Unsend
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <ActionTooltip content="Reply">
-            <Button
-              onClick={() => setReplyToMessage(message)}
-              size="icon-xs"
-              variant="secondary"
-              endContent={<Reply size={14} />}
-            />
-          </ActionTooltip>
-          <span
+            id={message.id}
             className={cn(
-              "text-[.6rem] ",
-              isMyMessage ? "text-right" : "text-left"
+              "px-3 py-1 bg-secondary w-fit rounded-sm",
+              {
+                "bg-[#3697ef] text-white ml-auto rounded-l-3xl": isMyMessage,
+                "rounded-r-3xl": !isMyMessage,
+              },
+              total === 1
+                ? "rounded-3xl"
+                : total === 2
+                ? isMyMessage
+                  ? index == 1
+                    ? "rounded-t-3xl"
+                    : "rounded-b-3xl"
+                  : index == 1
+                  ? "rounded-t-3xl rounded-r-3xl"
+                  : "rounded-b-3xl rounded-r-3xl"
+                : isMyMessage
+                ? index == total - 1
+                  ? "rounded-t-3xl"
+                  : index === 0
+                  ? "rounded-b-3xl"
+                  : ""
+                : index == total - 1
+                ? "rounded-t-3xl rounded-r-3xl"
+                : index === 0
+                ? "rounded-b-3xl rounded-r-3xl"
+                : ""
             )}
           >
-            {dayjs(message.createdAt).format("hh:mm a")}
-          </span>
-          {message.createdAt !== message.updatedAt && (
-            <span className="text-[.6rem]">
-              (edited {getShortRelativeTime(message.updatedAt)})
-            </span>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: message.text?.replaceAll("\n", "<br/>") || "",
+              }}
+            />
+          </div>
+
+          {/* medias */}
+          {message.media && (
+            <div onClick={() => setIsMediaViewerOpen(true)}>
+              {message.media.mediaType === "IMAGE" ? (
+                <Image
+                  src={message.media.url}
+                  alt="media-file"
+                  width={200}
+                  height={200}
+                  className="rounded-md cursor-pointer"
+                />
+              ) : (
+                <div className="relative group/video cursor-pointer">
+                  <video
+                    className="rounded-md max-w-[200px]"
+                    src={message.media.url}
+                  />
+                  <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
+                </div>
+              )}
+            </div>
           )}
+
+          {/* actions */}
+          <div
+            className={cn(
+              "text-[.6rem] absolute bottom-0 md:invisible md:group-hover:visible flex gap-x-2 items-end",
+              isMyMessage
+                ? message.createdAt !== message.updatedAt
+                  ? "-left-44"
+                  : "-left-32"
+                : message.createdAt !== message.updatedAt
+                ? "-right-44"
+                : "-right-32"
+            )}
+          >
+            <DropdownMenu>
+              <ActionTooltip content="More">
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="icon-xs"
+                    variant="secondary"
+                    endContent={<MoreVertical size={14} />}
+                  />
+                </DropdownMenuTrigger>
+              </ActionTooltip>
+
+              <DropdownMenuContent>
+                <DropdownMenuLabel>
+                  {dayjs(message.createdAt).format("hh:mm a")}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (message.text) copyText(message.text);
+                    toast.success("Copied to clipboard");
+                  }}
+                >
+                  <Clipboard /> Copy
+                </DropdownMenuItem>
+                {message.text && message.senderId === userId && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setEditingMessageId(message.id);
+                      setMessageValue(message.text ?? "");
+                    }}
+                  >
+                    <Pencil /> Edit
+                  </DropdownMenuItem>
+                )}
+                {isMyMessage && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => deleteMessage()}
+                      className="text-rose-500"
+                    >
+                      <MessageSquareOff />
+                      Unsend
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ActionTooltip content="Reply">
+              <Button
+                onClick={() => setReplyToMessage(message)}
+                size="icon-xs"
+                variant="secondary"
+                endContent={<Reply size={14} />}
+              />
+            </ActionTooltip>
+            <span
+              className={cn(
+                "text-[.6rem] ",
+                isMyMessage ? "text-right" : "text-left"
+              )}
+            >
+              {dayjs(message.createdAt).format("hh:mm a")}
+            </span>
+            {message.createdAt !== message.updatedAt && (
+              <span className="text-[.6rem]">
+                (edited {getShortRelativeTime(message.updatedAt)})
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <MediaViewerModal
         media={message.media}
@@ -312,14 +318,17 @@ const MessageGroup = ({
   setEditingMessageId,
   setMessageValue,
   setReplyToMessage,
+  chatType,
 }: {
   messages: NSChat.Message[];
   userId: string;
   setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>;
   setMessageValue: (val: string) => void;
   setReplyToMessage: (val: NSChat.Message | null) => void;
+  chatType: NSChat.ChatType;
 }) => {
   const sender = messages[0].sender;
+  const isMyMessage = sender.id === userId;
   const total = messages.length;
 
   return (
@@ -328,9 +337,14 @@ const MessageGroup = ({
         "self-end flex-row-reverse  w-full": sender.id === userId,
       })}
     >
-      <Link href={`/users/${sender.username}`} className="h-fit">
-        <UserAvatar username={sender.username} url={sender.profilePhoto?.url} />
-      </Link>
+      {!messages[0].isLog && (
+        <Link href={`/users/${sender.username}`} className="h-fit">
+          <UserAvatar
+            username={sender.username}
+            url={sender.profilePhoto?.url}
+          />
+        </Link>
+      )}
       <div className="flex flex-col-reverse gap-y-1 flex-1">
         {messages.map((message, idx) => (
           <Message
@@ -343,6 +357,11 @@ const MessageGroup = ({
             index={idx}
           />
         ))}
+        {chatType === "GROUP" && !isMyMessage && !messages[0].isLog && (
+          <span className="text-xs text-muted-foreground">
+            {sender.name || sender.username}
+          </span>
+        )}
       </div>
     </div>
   );

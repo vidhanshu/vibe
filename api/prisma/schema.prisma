@@ -36,6 +36,7 @@ model User {
   participatedChats ChatMember[] @relation("user_chats")
   messagesSent      Message[]    @relation("sent_messages")
   savedPosts        Post[]       @relation("saved_posts")
+  createdChats      Chat[]       @relation("chat_created_by")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -191,6 +192,8 @@ model Chat {
 
   participants ChatMember[] @relation("chat_members")
   messages     Message[]    @relation("chat_messages")
+  createdBy    User?        @relation("chat_created_by", references: [id], fields: [createdById])
+  createdById  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -206,7 +209,7 @@ model ChatMember {
   user     User          @relation("user_chats", fields: [userId], references: [id], onDelete: Cascade)
   joinedAt DateTime      @default(now())
   leftAt   DateTime?
-  role     ChatGroupRole
+  role     ChatGroupRole @default(MEMBER)
 
   @@unique([chatId, userId]) // Ensures a user can join a chat only once
   @@map("chat_members")
@@ -223,6 +226,7 @@ model Message {
   repliedToMessage   Message?  @relation("message_replies", fields: [repliedToMessageId], references: [id])
   repliedToMessageId String?
   replies            Message[] @relation("message_replies")
+  isLog              Boolean   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

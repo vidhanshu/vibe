@@ -3,28 +3,56 @@
 import UserChip from "@/src/common/components/user-chip";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import useSessionStore from "@/src/common/stores/session-store";
-import { NSUser } from "@/src/users/types";
 import { useParams, useRouter } from "next/navigation";
 import React, { useMemo } from "react";
-import { getChats } from "../actions/chats-action";
+import { createChat, getChats } from "../actions/chats-action";
 import { NSChat } from "../types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import NoContent from "@/src/users/components/no-content";
-import { Edit, Edit2, MessageCircle } from "lucide-react";
+import { Edit, Loader2, MessageCircle, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import UserAvatar from "@/src/auth/components/user-avatar";
 import GroupChip from "./group-chip";
 import Button from "@/components/ui/button";
 import ChatUsersModal from "./chat-users-modal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const ChatList = () => {
+  const qc = useQueryClient();
+  const router = useRouter();
   const { user } = useSessionStore();
-  const { data, hasNextPage, isFetchingNextPage, isLoading, ref, status } =
-    useInfinite({
-      queryKey: ["chats"],
-      fetcher: getChats,
-    });
+  const { isPending: isCreating, mutateAsync: mutateCreateChat } = useMutation({
+    mutationKey: ["create-chat-group"],
+    mutationFn: async ({
+      description,
+      name,
+      participantId,
+      participantIds,
+    }: {
+      description?: string;
+      name: string;
+      participantId: string;
+      participantIds: string[];
+    }) => {
+      const res = await createChat({
+        chatType: "GROUP",
+        description,
+        name,
+        participantId,
+        participantIds,
+      });
+      if (res.message) return toast.error(res.message);
+      await qc.resetQueries({ queryKey: ["chats"] });
+      if (res.data?.id) router.push(`/chats/${res.data.id}`);
+      return res.data;
+    },
+  });
+
+  const { data, isFetchingNextPage, isLoading, ref } = useInfinite({
+    queryKey: ["chats"],
+    fetcher: getChats,
+  });
 
   const [personal, group] = useMemo(() => {
     const allChats = data?.map((data) => data.items as NSChat.Chat[]).flat();
@@ -40,11 +68,40 @@ const ChatList = () => {
         <div className="border-b">
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">
             <UserChip user={user!} size="md" />
-            <ChatUsersModal>
-              <Button variant="secondary" size="icon-xs">
-                <Edit className="size-4" />
-              </Button>
-            </ChatUsersModal>
+            <div className="space-x-2">
+              <ChatUsersModal>
+                <Button variant="secondary" size="icon-xs">
+                  <Edit className="size-4" />
+                </Button>
+              </ChatUsersModal>
+              <ChatUsersModal
+                multiSelect
+                groupCreate
+                loading={isCreating}
+                confirmButtonText="Create Group"
+                dialogTitle="New Group"
+                searchInputLabel="Add to"
+                onSelect={async (users: string[], values) => {
+                  if (user?.id) {
+                    await mutateCreateChat({
+                      participantId: user?.id,
+                      participantIds: users,
+                      name: values?.name ?? `Group Created by ${user.username}`,
+                      description: values?.description,
+                    });
+                  }
+                }}
+              >
+                <Button
+                  loading={isCreating}
+                  loaderClassName="size-4"
+                  variant="secondary"
+                  size="icon-xs"
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </ChatUsersModal>
+            </div>
           </div>
           <TabsList className="w-full bg-background h-fit p-0">
             <TabsTrigger
@@ -107,6 +164,9 @@ const ChatList = () => {
             )}
           </TabsContent>
           <div ref={ref} />
+          {isFetchingNextPage && (
+            <Loader2 className="size-8 animate-spin mx-auto" />
+          )}
         </div>
       </Tabs>
     </div>
@@ -122,7 +182,7 @@ const ChatListItem = ({ chat }: { chat: NSChat.Chat }) => {
     (p) => p.user.id !== userId
   );
 
-  const lastMessage = chat.messages?.[0];
+  const lastMessage: NSChat.Message | undefined = chat.messages?.[0];
   const messageText = lastMessage?.text || "No messages yet";
   const messageSender = lastMessage?.sender.username;
 
@@ -149,7 +209,7 @@ const ChatListItem = ({ chat }: { chat: NSChat.Chat }) => {
           title={chat.name!}
           lastMessage={messageText}
           participants={chat.participants}
-          messageSentAt={lastMessage.createdAt}
+          messageSentAt={lastMessage?.createdAt}
           messageSender={messageSender}
         />
       )}

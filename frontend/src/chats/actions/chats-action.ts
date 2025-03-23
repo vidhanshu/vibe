@@ -18,7 +18,10 @@ export const getChats = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -57,7 +60,10 @@ export const sendMessage = async ({
     // delete uploaded files, if error
     if (uploadedFiles.length)
       await deleteFiles(uploadedFiles.map(({ key }) => key));
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -73,7 +79,10 @@ export const updateMessage = async ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return { data: res.data };
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -89,7 +98,10 @@ export const unSendMessage = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -103,7 +115,10 @@ export const getChat = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -121,7 +136,10 @@ export const getChatMessages = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -149,6 +167,116 @@ export const createChat = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+
+export const updateChat = async ({
+  name,
+  chatId,
+  description,
+}: {
+  chatId: string;
+  name?: string;
+  description?: string;
+}): NSCommon.Response<NSChat.Chat & { existsAlready?: boolean }> => {
+  try {
+    const res = await api.patch(`/chats/${chatId}`, {
+      name,
+      description,
+    });
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+
+export const deleteChat = async ({
+  chatId,
+}: {
+  chatId: string;
+}): NSCommon.Response<null> => {
+  try {
+    const res = await api.delete(`/chats/${chatId}`);
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+
+export const addParticipants = async ({
+  chatId,
+  participantIds,
+}: {
+  chatId: string;
+  participantIds: string[];
+}) => {
+  try {
+    const res = await api.patch(`/chats/${chatId}/add-participants`, {
+      participantIds,
+    });
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+
+export const removeParticipant = async ({
+  chatId,
+  participantId,
+}: {
+  chatId: string;
+  participantId: string;
+}) => {
+  try {
+    const res = await api.patch(`/chats/${chatId}/remove-participant`, {
+      participantId,
+    });
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+
+export const updateParticipant = async ({
+  chatId,
+  participantId,
+  role,
+}: {
+  chatId: string;
+  participantId: string;
+  role: NSChat.ChatGroupRole;
+}) => {
+  try {
+    const res = await api.patch(
+      `/chats/${chatId}/participant/${participantId}`,
+      { role }
+    );
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };

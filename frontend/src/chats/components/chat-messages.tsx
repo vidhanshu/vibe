@@ -13,9 +13,11 @@ import MessageInput from "./chat-message-input";
 import MessageGroup from "./message-group";
 import useChatMessages from "../hooks/use-chat-messages";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-
-dayjs.extend(relativeTime);
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import UserChip from "@/src/common/components/user-chip";
+import ChatActionSidebar from "./chat-action-sidebar";
 
 const DateSeparator = ({ date }: { date: string }) => {
   const today = dayjs().format("YYYY-MM-DD");
@@ -41,6 +43,7 @@ const DateSeparator = ({ date }: { date: string }) => {
 
 const ChatMessages = () => {
   const userId = useSessionStore((s) => s.user?.id);
+  const [chatInfoOpen, setChatInfoOpen] = useState(false);
   const {
     chat,
     allMessages,
@@ -59,15 +62,35 @@ const ChatMessages = () => {
     setReplyMessage,
   } = useChatMessages();
 
+  const myParticipant = chat?.participants?.find((p) => p.userId === userId);
+
   return (
-    <div
-      className={cn(
-        "h-screen flex flex-col",
-        !chat && "items-center justify-center"
-      )}
-    >
-      {!chat && !isChatLoading ? (
-        <div>
+    <div className="h-screen flex">
+      <div
+        className={cn(
+          "h-screen flex flex-col flex-1",
+          (!chat || (chat?.type === "GROUP" && !myParticipant)) &&
+            "items-center justify-center"
+        )}
+      >
+        {!chat && !isChatLoading ? (
+          <div>
+            <div className="flex flex-col items-center gap-4">
+              <NoContent
+                icon={MessageCircleOff}
+                iconClassName="size-12 stroke-1"
+                iconContainerClassName="size-20"
+                title="No chat found"
+                subtitle="Please click on below send message button and select user to chat"
+              />
+              <ChatUsersModal>
+                <Button variant="info" className="w-fit font-bold" size="xs">
+                  Send message
+                </Button>
+              </ChatUsersModal>
+            </div>
+          </div>
+        ) : chat?.type === "GROUP" && !myParticipant && !isChatLoading ? (
           <div className="flex flex-col items-center gap-4">
             <NoContent
               icon={MessageCircleOff}
@@ -82,94 +105,105 @@ const ChatMessages = () => {
               </Button>
             </ChatUsersModal>
           </div>
-        </div>
-      ) : (
-        <>
-          <ChatHeader
-            chat={chat || undefined}
-            isLoading={isChatLoading}
-            userId={userId!}
-          />
+        ) : (
+          <>
+            <ChatHeader
+              chatInfoOpen={chatInfoOpen}
+              setChatInfoOpen={setChatInfoOpen}
+              chat={chat || undefined}
+              isLoading={isChatLoading}
+              userId={userId!}
+            />
 
-          <div
-            ref={scrollContainerRef}
-            className={cn(
-              "flex-1 max-h-[calc(100vh-65px-70px)] overflow-y-auto w-full scroll-smooth"
-            )}
-          >
-            {isFetchingNextPage && (
-              <Loader2 className="text-muted-foreground size-12 mx-auto animate-spin" />
-            )}
-            <div ref={ref} />
-            <div className="min-h-[calc(100vh-65px-70px)] flex flex-col-reverse p-4 gap-2 w-full">
-              {isMessagesLoading
-                ? Array.from({ length: 10 }).map((_, idx) => {
-                    return (
-                      <div
-                        key={idx}
-                        className={cn(
-                          "flex gap-2 w-[40%]",
-                          idx & 1 && "self-end flex-row-reverse"
-                        )}
-                      >
-                        <Skeleton className="h-8 w-8 rounded-full" />
+            <div
+              ref={scrollContainerRef}
+              className={cn(
+                "flex-1 max-h-[calc(100vh-65px-70px)] overflow-y-auto w-full scroll-smooth"
+              )}
+            >
+              {isFetchingNextPage && (
+                <Loader2 className="text-muted-foreground size-12 mx-auto animate-spin" />
+              )}
+              <div ref={ref} />
+              <div className="min-h-[calc(100vh-65px-70px)] flex flex-col-reverse p-4 gap-2 w-full">
+                {isMessagesLoading
+                  ? Array.from({ length: 10 }).map((_, idx) => {
+                      return (
                         <div
+                          key={idx}
                           className={cn(
-                            "flex flex-col gap-1 flex-1",
-                            idx & 1 && "items-end"
+                            "flex gap-2 w-[40%]",
+                            idx & 1 && "self-end flex-row-reverse"
                           )}
                         >
-                          <Skeleton className="h-6 w-full rounded-full" />
-                          <Skeleton className="h-4 w-1/2 rounded-full" />
-                          <Skeleton className="h-4 w-24 rounded-full" />
-                        </div>
-                      </div>
-                    );
-                  })
-                : allMessages.map((item, idx) => {
-                    if (Array.isArray(item)) {
-                      return (
-                        <MessageGroup
-                          setReplyToMessage={(message) =>
-                            setReplyMessage(message)
-                          }
-                          setEditingMessageId={setEditingMessageId}
-                          setMessageValue={(val) => setMessage(val)}
-                          key={`message-${idx}`}
-                          messages={item}
-                          userId={userId!}
-                        />
-                      );
-                    }
-                    if ("type" in item && item.type === "date") {
-                      return (
-                        <div key={`date-${idx}`} className="flex-none">
-                          <DateSeparator date={item.date} />
+                          <Skeleton className="h-8 w-8 rounded-full" />
+                          <div
+                            className={cn(
+                              "flex flex-col gap-1 flex-1",
+                              idx & 1 && "items-end"
+                            )}
+                          >
+                            <Skeleton className="h-6 w-full rounded-full" />
+                            <Skeleton className="h-4 w-1/2 rounded-full" />
+                            <Skeleton className="h-4 w-24 rounded-full" />
+                          </div>
                         </div>
                       );
-                    }
-                    return null;
-                  })}
-              {!hasNextPage && (
-                <div className={cn(allMessages?.length === 0 ? "flex-1" : "")}>
-                  <ChatProfileInfo
-                    chat={chat || undefined}
-                    otherParticipant={otherParticipant}
-                  />
-                </div>
-              )}
+                    })
+                  : allMessages.map((item, idx) => {
+                      if (Array.isArray(item)) {
+                        return (
+                          <MessageGroup
+                            setReplyToMessage={(message) =>
+                              setReplyMessage(message)
+                            }
+                            setEditingMessageId={setEditingMessageId}
+                            setMessageValue={(val) => setMessage(val)}
+                            key={`message-${idx}`}
+                            messages={item}
+                            userId={userId!}
+                            chatType={chat?.type!}
+                          />
+                        );
+                      }
+                      if ("type" in item && item.type === "date") {
+                        return (
+                          <div key={`date-${idx}`} className="flex-none">
+                            <DateSeparator date={item.date} />
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                {!hasNextPage && (
+                  <div
+                    className={cn(allMessages?.length === 0 ? "flex-1" : "")}
+                  >
+                    <ChatProfileInfo
+                      chat={chat || undefined}
+                      otherParticipant={otherParticipant}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <MessageInput
-            replyMessage={replyMessage}
-            setReplyToMessage={(message) => setReplyMessage(message)}
-            editingMessageId={editingMessageId}
-            setEditingMessageId={setEditingMessageId}
-            message={message}
-            setMessage={setMessage}
-          />
-        </>
+            <MessageInput
+              replyMessage={replyMessage}
+              setReplyToMessage={(message) => setReplyMessage(message)}
+              editingMessageId={editingMessageId}
+              setEditingMessageId={setEditingMessageId}
+              message={message}
+              setMessage={setMessage}
+            />
+          </>
+        )}
+      </div>
+      {chatInfoOpen && chat && (
+        <ChatActionSidebar
+          closeActionSidebar={() => setChatInfoOpen(false)}
+          chat={chat}
+        />
       )}
     </div>
   );
