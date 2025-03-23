@@ -25,12 +25,15 @@ const FeedList = () => {
     }
   );
 
-  const paginatedResponse = data?.map((data) => data.items).flat();
+  const paginatedResponse = useMemo(
+    () => data?.map((data) => data.items).flat(),
+    [data]
+  );
 
   const postToEdit = useMemo(() => {
     if (!editPostId) return null;
     return paginatedResponse?.find((post) => post.id === editPostId);
-  }, [editPostId]);
+  }, [editPostId, paginatedResponse]);
 
   const isMobile = useIsMobile();
 

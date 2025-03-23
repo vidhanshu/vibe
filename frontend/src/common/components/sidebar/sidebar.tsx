@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PropsWithChildren, useEffect, useMemo, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue, useOnClickOutside } from "usehooks-ts";
 import useSessionStore from "../../stores/session-store";

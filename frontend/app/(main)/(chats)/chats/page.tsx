@@ -1,9 +1,7 @@
 import Button from "@/components/ui/button";
-import { createChat } from "@/src/chats/actions/chats-action";
 import ChatUsersModal from "@/src/chats/components/chat-users-modal";
 import NoContent from "@/src/users/components/no-content";
 import { MessageCircle } from "lucide-react";
-import React from "react";
 
 const Chats = () => {
   return (

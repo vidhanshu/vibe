@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import { NSUser } from "@/src/users/types";
-import Link, { LinkProps } from "next/link";
+import Link from "next/link";
 import React from "react";
 import { getShortRelativeTime } from "../utils/dayjs";
 

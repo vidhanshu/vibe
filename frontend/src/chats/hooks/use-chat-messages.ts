@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getChat, getChatMessages, sendMessage } from "../actions/chats-action";
+import { getChat, getChatMessages } from "../actions/chats-action";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import { NSChat } from "../types";
 import { useParams } from "next/navigation";
@@ -30,9 +30,10 @@ const useChatMessages = () => {
     enabled: !!chatId,
   });
 
-  const { data, hasNextPage, isFetchingNextPage, isLoading, ref, status } =
+  const { data, hasNextPage, isFetchingNextPage, isLoading, ref } =
     useInfinite({
       queryKey: ["chat-messages", chatId],
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       fetcher: async (props: any) => getChatMessages({ chatId, ...props }),
     });
 

@@ -39,7 +39,7 @@ export const sendMessage = async ({
   let uploadedFiles: Omit<NSAuth.Media, "id">[] = [];
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let payload: Record<string, any> = { message };
+    const payload: Record<string, any> = { message };
     if (media) {
       const res = await uploadFiles([media]);
       if (res.message) {
@@ -76,8 +76,8 @@ export const updateMessage = async ({
 }): NSCommon.Response<NSChat.Message> => {
   try {
     const res = await api.patch(`/chats/messages/${messageId}`, { message });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       message: error?.response?.data?.message || error.message,

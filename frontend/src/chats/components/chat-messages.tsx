@@ -14,9 +14,6 @@ import MessageGroup from "./message-group";
 import useChatMessages from "../hooks/use-chat-messages";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import UserChip from "@/src/common/components/user-chip";
 import ChatActionSidebar from "./chat-action-sidebar";
 
 const DateSeparator = ({ date }: { date: string }) => {
@@ -161,8 +158,7 @@ const ChatMessages = () => {
                             setMessageValue={(val) => setMessage(val)}
                             key={`message-${idx}`}
                             messages={item}
-                            userId={userId!}
-                            chatType={chat?.type!}
+                            chatType={chat?.type || "DM"}
                           />
                         );
                       }

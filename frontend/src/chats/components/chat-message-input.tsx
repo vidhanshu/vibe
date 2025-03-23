@@ -7,7 +7,7 @@ import EmojiPicker from "@/src/common/components/popovers/emoji-picker";
 import { useMutation } from "@tanstack/react-query";
 import { Smile, Image, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { sendMessage, updateMessage } from "../actions/chats-action";
 import { toast } from "sonner";
 import NImage from "next/image";
@@ -237,6 +237,7 @@ const MessageInput = ({
                 loading={isLoading}
                 loaderClassName="size-4"
               >
+                {/* eslint-disable-next-line  jsx-a11y/alt-text */}
                 <Image className="size-4" />
               </Button>
             </div>

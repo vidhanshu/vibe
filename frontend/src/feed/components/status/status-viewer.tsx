@@ -172,7 +172,8 @@ const StatusViewer = ({
       {status?.medias[active]?.mediaType === "IMAGE" &&
         status?.medias[active].url && (
           <div className="absolute inset-0 blur-lg z-0">
-            <img src={status.medias[active].url} className="h-full w-full" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img alt="status" src={status.medias[active].url} className="h-full w-full" />
           </div>
         )}
 
@@ -331,7 +332,7 @@ const VideoPreview = React.memo(
       } else {
         videoRef.current?.pause();
       }
-    }, [play]);
+    }, [play, videoRef]);
 
     const togglePlay = () => {
       setPlay((e) => !e);

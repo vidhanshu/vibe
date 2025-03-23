@@ -14,8 +14,8 @@ import { getAuthTokenSA } from "../actions/get-token";
 
 const SocketContext = createContext<{
   socket: Socket | null;
-  isConnected: Boolean;
-  isLoading: Boolean;
+  isConnected: boolean;
+  isLoading: boolean;
 }>({
   socket: null,
   isConnected: false,
@@ -24,7 +24,7 @@ const SocketContext = createContext<{
 
 export const SocketContextProvider = ({ children }: PropsWithChildren) => {
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState<Boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
   const { isLoading, data } = useQuery({
     queryKey: ["auth-token"],
     queryFn: async () => {

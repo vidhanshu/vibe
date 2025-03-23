@@ -70,7 +70,8 @@ const ChatActionSidebar = ({
 
   const myParticipant = chat.participants.find((p) => p.userId === userId);
   const isMeOwner = chat.createdById === userId;
-  const isLoading = isAdding || isRemoving || isUpdating || isChatUpdating;
+  const isLoading =
+    isAdding || isRemoving || isUpdating || isChatUpdating || isChatDeleting;
 
   return (
     <div className="max-w-[300px] w-full h-screen flex flex-col border-l">
@@ -143,6 +144,7 @@ const ChatActionSidebar = ({
                       value.description === chat.description
                     }
                     onClick={async () => {
+                      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
                       const payload: any = {};
                       if (value.name !== chat.name) {
                         payload.name = value.name;

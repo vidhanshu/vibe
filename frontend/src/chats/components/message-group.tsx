@@ -51,6 +51,7 @@ const Message = ({
   const chatId = useParams().chatId as string;
   const userId = useSessionStore((s) => s.user?.id);
   const isMyMessage = message.senderId === userId;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, copyText] = useCopyToClipboard();
   const [isMediaViewerOpen, setIsMediaViewerOpen] = useState(false);
 
@@ -314,19 +315,18 @@ const Message = ({
 
 const MessageGroup = ({
   messages,
-  userId,
   setEditingMessageId,
   setMessageValue,
   setReplyToMessage,
   chatType,
 }: {
   messages: NSChat.Message[];
-  userId: string;
   setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>;
   setMessageValue: (val: string) => void;
   setReplyToMessage: (val: NSChat.Message | null) => void;
   chatType: NSChat.ChatType;
 }) => {
+  const userId = useSessionStore((s) => s.user?.id);
   const sender = messages[0].sender;
   const isMyMessage = sender.id === userId;
   const total = messages.length;

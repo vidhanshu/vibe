@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
 import {
   addParticipants,
   deleteChat,
@@ -9,7 +8,6 @@ import {
 } from "../actions/chats-action";
 import { toast } from "sonner";
 import { NSChat } from "../types";
-import useSessionStore from "@/src/common/stores/session-store";
 
 const useChatGroupActions = ({ chatId }: { chatId: string }) => {
   const qc = useQueryClient();

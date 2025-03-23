@@ -52,7 +52,7 @@ const StatusViewDrawer = ({
 
   useEffect(() => {
     if (viewStatusIdx !== null) mutate();
-  }, [viewStatusIdx]);
+  }, [viewStatusIdx, mutate]);
 
   return (
     <Drawer open={viewStatusIdx !== null} onClose={close}>

@@ -194,13 +194,13 @@ const ChatListItem = ({ chat }: { chat: NSChat.Chat }) => {
         { "bg-secondary/40": param.chatId === chat.id }
       )}
     >
-      {chat.type === "DM" ? (
+      {chat.type === "DM" && chatMember?.user ? (
         <UserChip
           noLink
           size="xl"
           variant="chat"
           message={messageText}
-          user={chatMember?.user!}
+          user={chatMember.user}
           createdAt={lastMessage?.createdAt}
         />
       ) : (

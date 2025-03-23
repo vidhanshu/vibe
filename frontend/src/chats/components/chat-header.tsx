@@ -32,8 +32,8 @@ const ChatHeader = ({
               <Skeleton className="h-2 w-16" />
             </div>
           </div>
-        ) : chatType === "DM" ? (
-          <UserChip user={otherParticipant?.user!} />
+        ) : chatType === "DM" && otherParticipant?.user ? (
+          <UserChip user={otherParticipant.user} />
         ) : (
           <div className="flex gap-x-2 items-center">
             <GroupChip

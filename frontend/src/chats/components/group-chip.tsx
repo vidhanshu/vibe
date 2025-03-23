@@ -2,7 +2,6 @@ import UserAvatar from "@/src/auth/components/user-avatar";
 import useSessionStore from "@/src/common/stores/session-store";
 import { NSChat } from "../types";
 import { cn } from "@/lib/utils";
-import { NSUser } from "@/src/users/types";
 import { getShortRelativeTime } from "@/src/common/utils/dayjs";
 
 const GroupChip = ({
