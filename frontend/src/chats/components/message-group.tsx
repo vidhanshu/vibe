@@ -5,7 +5,13 @@ import UserAvatar from "@/src/auth/components/user-avatar";
 import dayjs from "dayjs";
 import useSessionStore from "@/src/common/stores/session-store";
 import Button from "@/components/ui/button";
-import { Clipboard, MessageSquareOff, MoreVertical, Play, Reply } from "lucide-react";
+import {
+  Clipboard,
+  MessageSquareOff,
+  MoreVertical,
+  Play,
+  Reply,
+} from "lucide-react";
 import ActionTooltip from "@/src/common/components/action-tooltip";
 import {
   DropdownMenu,
@@ -21,6 +27,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { unSendMessage } from "../actions/chats-action";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import MediaViewerModal from "./media-viewer-modal";
+import { useState } from "react";
 
 const Message = ({
   message,
@@ -36,6 +44,7 @@ const Message = ({
   const userId = useSessionStore((s) => s.user?.id);
   const isMyMessage = message.senderId === userId;
   const [_, copyText] = useCopyToClipboard();
+  const [isMediaViewerOpen, setIsMediaViewerOpen] = useState(false);
 
   const { mutate: deleteMessage } = useMutation({
     mutationKey: ["message-delete", message.id],
@@ -96,24 +105,27 @@ const Message = ({
         </div>
 
         {/* medias */}
-        {message.media &&
-          (message.media.mediaType === "IMAGE" ? (
-            <Image
-              src={message.media.url}
-              alt="media-file"
-              width={200}
-              height={200}
-              className="rounded-md cursor-pointer"
-            />
-          ) : (
-            <div className="relative group/video cursor-pointer">
-              <video
-                className="rounded-md max-w-[200px]"
+        {message.media && (
+          <div onClick={() => setIsMediaViewerOpen(true)}>
+            {message.media.mediaType === "IMAGE" ? (
+              <Image
                 src={message.media.url}
+                alt="media-file"
+                width={200}
+                height={200}
+                className="rounded-md cursor-pointer"
               />
-              <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10"/>
-            </div>
-          ))}
+            ) : (
+              <div className="relative group/video cursor-pointer">
+                <video
+                  className="rounded-md max-w-[200px]"
+                  src={message.media.url}
+                />
+                <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
+              </div>
+            )}
+          </div>
+        )}
 
         <div
           className={cn(
@@ -176,6 +188,12 @@ const Message = ({
           </span>
         </div>
       </div>
+
+      <MediaViewerModal
+        media={message.media}
+        isOpen={isMediaViewerOpen}
+        onClose={() => setIsMediaViewerOpen(false)}
+      />
     </div>
   );
 };
