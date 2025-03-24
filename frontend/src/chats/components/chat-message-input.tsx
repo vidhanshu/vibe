@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import NImage from "next/image";
 import { NSChat } from "../types";
 import useSessionStore from "@/src/common/stores/session-store";
+import { useSocketContext } from "@/src/common/contexts/socket-context";
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024;
 const MessageInput = ({
@@ -36,6 +37,7 @@ const MessageInput = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { onSendMessage } = useSocketContext();
 
   const { isPending: isSendingMessage, mutate } = useMutation({
     mutationKey: ["send-message", chatId],
@@ -49,11 +51,13 @@ const MessageInput = ({
       });
       if (res.message) {
         toast.error(res.message);
-        throw new Error(res.message);
+        return;
       }
       setMessage("");
       setMediaFile(null);
       setReplyToMessage(null);
+      onSendMessage(res.data);
+      // scrollToBottom?.();
     },
   });
 
@@ -68,20 +72,25 @@ const MessageInput = ({
       });
       if (res.message) {
         toast.error(res.message);
-        throw new Error(res.message);
+        return;
       }
       setMessage("");
       setEditingMessageId(null);
-    },
-    onSuccess: () => {
       toast.success("Message updated successfully");
+      // scrollToBottom?.();
     },
   });
 
-  // to autofocus on reply click/edit message
+  // to autofocus
   useEffect(() => {
-    if (editingMessageId || replyMessage) textareaRef.current?.focus();
-  }, [editingMessageId, textareaRef, replyMessage]);
+    textareaRef.current?.focus();
+  }, [
+    textareaRef,
+    editingMessageId,
+    replyMessage,
+    isSendingMessage,
+    isUpdatingMessage,
+  ]);
 
   const isLoading = isUpdatingMessage || isSendingMessage;
   const showPreview = editingMessageId || !!replyMessage;
@@ -190,6 +199,7 @@ const MessageInput = ({
             )}
           </EmojiPicker>
           <Textarea
+            autoFocus
             disabled={isLoading}
             ref={textareaRef}
             rows={1}
@@ -204,7 +214,9 @@ const MessageInput = ({
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                if (message.trim().length) {
+                if (editingMessageId) {
+                  update();
+                } else {
                   mutate();
                 }
               }

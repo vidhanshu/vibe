@@ -3,7 +3,7 @@
 import UserChip from "@/src/common/components/user-chip";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import useSessionStore from "@/src/common/stores/session-store";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 import { createChat, getChats } from "../actions/chats-action";
 import { NSChat } from "../types";
@@ -17,11 +17,13 @@ import Button from "@/components/ui/button";
 import ChatUsersModal from "./chat-users-modal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import useIsMobile from "@/src/common/hooks/use-is-mobile";
 
 const ChatList = () => {
   const qc = useQueryClient();
   const router = useRouter();
   const { user } = useSessionStore();
+  const pathname = usePathname();
   const { isPending: isCreating, mutateAsync: mutateCreateChat } = useMutation({
     mutationKey: ["create-chat-group"],
     mutationFn: async ({
@@ -62,8 +64,12 @@ const ChatList = () => {
     ];
   }, [data]);
 
+  const isMobile = useIsMobile();
+
+  if (isMobile && pathname.startsWith("/chats/")) return null;
+
   return (
-    <div className="border-r flex flex-col">
+    <div className={cn("border-r flex flex-col", isMobile && "border-none")}>
       <Tabs defaultValue="personal" className="w-full py-0">
         <div className="border-b">
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">

@@ -221,7 +221,7 @@ const Message = ({
           {/* actions */}
           <div
             className={cn(
-              "text-[.6rem] absolute bottom-0 md:invisible md:group-hover:visible flex gap-x-2 items-end",
+              "text-[.6rem] absolute bottom-0 invisible md:invisible md:group-hover:visible flex gap-x-2 items-end",
               isMyMessage
                 ? message.createdAt !== message.updatedAt
                   ? "-left-44"

@@ -1,56 +1,80 @@
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { getChat, getChatMessages } from "../actions/chats-action";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { getChatMessages } from "../actions/chats-action";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import { NSChat } from "../types";
-import { useParams } from "next/navigation";
-import useSessionStore from "@/src/common/stores/session-store";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import dayjs from "dayjs";
+import { useSocketContext } from "@/src/common/contexts/socket-context";
+import useMessageContainerScroll from "./user-message-container-scroll";
 
 const useChatMessages = () => {
   const params = useParams();
-  const userId = useSessionStore((s) => s.user?.id);
   const chatId = params.chatId as string;
+  const { joinChat, leaveChat, onNewMessage, offNewMessage } =
+    useSocketContext();
 
-  const [message, setMessage] = useState("");
-  const [editingMessageId, setEditingMessageId] = useState<null | string>(null);
-  const [replyMessage, setReplyMessage] = useState<NSChat.Message | null>(null);
-  // const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [messages, setMessages] = useState<NSChat.Message[]>([]);
 
-  const prevHeightRef = useRef(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const initialScrollDone = useRef(false);
-
-  const { data: chat, isLoading: isChatLoading } = useQuery({
-    queryKey: ["chat", chatId],
-    queryFn: async () => {
-      const res = await getChat({ chatId });
-      return res.data;
-    },
-    enabled: !!chatId,
+  const {
+    data,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    ref,
+    fetchNextPage,
+  } = useInfinite({
+    manualFetchNext: true,
+    queryKey: ["chat-messages", chatId],
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    fetcher: async (props: any) => getChatMessages({ chatId, ...props }),
   });
 
-  const { data, hasNextPage, isFetchingNextPage, isLoading, ref } =
-    useInfinite({
-      queryKey: ["chat-messages", chatId],
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      fetcher: async (props: any) => getChatMessages({ chatId, ...props }),
-    });
+  const { prevScrollHeight, scrollContainerRef } = useMessageContainerScroll({
+    isFetchingNextPage,
+    messages,
+  });
 
-  const otherParticipant = useMemo(
-    () => chat?.participants?.find((p) => p.user.id !== userId),
-    [chat, userId]
-  );
+  useEffect(() => {
+    if (data) {
+      const allMessages = data
+        .map((data) => data.items)
+        .flat() as NSChat.Message[];
+      setMessages(allMessages.reverse());
+    }
+  }, [data]);
+
+  // Join chat room when component mounts
+  useEffect(() => {
+    if (chatId) {
+      joinChat(chatId);
+    }
+    return () => {
+      if (chatId) {
+        leaveChat(chatId);
+      }
+    };
+  }, [chatId, joinChat, leaveChat]);
+
+  // Real-time message handler (already inside your socket effect)
+  useEffect(() => {
+    const handleNewMessage = (newMessage: NSChat.Message) => {
+      if (newMessage.chatId === chatId) {
+        setMessages((prev) => [...prev, newMessage]);
+      }
+    };
+
+    onNewMessage(handleNewMessage);
+    return () => {
+      offNewMessage(handleNewMessage);
+    };
+  }, [chatId, onNewMessage, offNewMessage]);
 
   const allMessages = useMemo(() => {
-    const allMessages = data
-      ?.map((data) => data.items)
-      .flat() as NSChat.Message[];
-    if (!allMessages?.length) return [];
+    if (!messages?.length) return [];
 
-    // First, group messages by date
+    // Group messages by date (messages are already sorted in desc)
     const messagesByDate = new Map<string, NSChat.Message[]>();
-    allMessages.forEach((message) => {
+    messages.forEach((message) => {
       const date = dayjs(message.createdAt).format("YYYY-MM-DD");
       if (!messagesByDate.has(date)) {
         messagesByDate.set(date, []);
@@ -60,7 +84,7 @@ const useChatMessages = () => {
 
     // Convert to array and sort by date (newest first)
     const sortedDates = Array.from(messagesByDate.keys()).sort(
-      (a, b) => dayjs(b).unix() - dayjs(a).unix()
+      (a, b) => dayjs(a).unix() - dayjs(b).unix()
     );
 
     const messageGroups: (NSChat.Message[] | { type: "date"; date: string })[] =
@@ -68,6 +92,9 @@ const useChatMessages = () => {
 
     sortedDates.forEach((date) => {
       const messages = messagesByDate.get(date)!;
+
+      // Add date separator after the messages
+      messageGroups.push({ type: "date", date });
 
       // Group messages by sender
       let currentGroup: NSChat.Message[] = [];
@@ -98,70 +125,29 @@ const useChatMessages = () => {
       if (currentGroup.length) {
         messageGroups.push([...currentGroup]);
       }
-
-      // Add date separator after the messages
-      messageGroups.push({ type: "date", date });
     });
 
-    return messageGroups;
-  }, [data]);
-
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-
-    if (isFetchingNextPage) {
-      prevHeightRef.current = el.scrollHeight;
-    }
-  }, [isFetchingNextPage]);
-
-  // To scroll to the extreme bottom on first load
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-
-    if (!initialScrollDone.current && data?.length && !isFetchingNextPage) {
-      el.scrollTop = el.scrollHeight;
-      initialScrollDone.current = true;
-    }
-  }, [data?.length, isFetchingNextPage]);
-
-  // to preserver the scroll position upon next page fetches
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-
-    if (!isFetchingNextPage && prevHeightRef.current) {
-      const newHeight = el.scrollHeight;
-      const delta = newHeight - prevHeightRef.current;
-      el.scrollTop += delta;
-      prevHeightRef.current = 0;
-    }
-  }, [data?.length, isFetchingNextPage]);
+    return messageGroups.map((gp) => {
+      if (Array.isArray(gp)) {
+        // sort messages in desc
+        return gp.sort(
+          (m1, m2) =>
+            new Date(m2.createdAt).getTime() - new Date(m1.createdAt).getTime()
+        );
+      }
+      return gp;
+    });
+  }, [messages]);
 
   return {
-    //chat
-    chat,
-    isChatLoading,
-    // infinite messages
     allMessages,
     hasNextPage,
     isFetchingNextPage,
     infiniteRef: ref,
     isMessagesLoading: isLoading,
-    // other participant of the chat
-    otherParticipant,
-    // to handle the scroll position upon infinite load
+    fetchNextPage,
     scrollContainerRef,
-    // message state
-    message,
-    setMessage,
-    editingMessageId,
-    setEditingMessageId,
-    replyMessage,
-    setReplyMessage,
-    // mediaFile,
-    // setMediaFile,
+    prevScrollHeight,
   };
 };
 

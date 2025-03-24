@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { Message } from '@prisma/client';
 
 // TODO: add proper origins later
 @WebSocketGateway({ namespace: '/', cors: { origin: '*' } })
@@ -63,11 +64,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  // for the cases where user starts new chat
+  @SubscribeMessage('joinChat')
+  handleJoinChat(client: Socket, payload: { chatId: string }) {
+    client.join(payload.chatId);
+  }
+
   @SubscribeMessage('sendMessage')
-  async handleMessage(
-    client: Socket,
-    payload: { chatId: string; message: string; media?: any },
-  ) {
+  async handleMessage(client: Socket, payload: Message) {
     const userId = this.getUserIdFromSocketId(client.id);
 
     if (!userId) {
@@ -86,12 +90,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // Broadcast the message to the chat room
-    this.server.to(payload.chatId).emit('receiveMessage', {
-      chatId: payload.chatId,
-      from: userId,
-      message: payload.message,
-      media: payload.media,
-    });
+    this.server.to(payload.chatId).emit('receiveMessage', payload);
   }
 
   @SubscribeMessage('typing')

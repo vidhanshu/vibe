@@ -585,6 +585,35 @@ export class ChatsService {
         media: media ? { create: media } : undefined,
         ...(repliedMessageId ? { repliedToMessageId: repliedMessageId } : {}),
       },
+      include: {
+        media: true,
+        sender: {
+          select: {
+            username: true,
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+        repliedToMessage: {
+          select: {
+            id: true,
+            text: true,
+            senderId: true,
+            sender: {
+              select: { id: true, username: true, name: true },
+            },
+            media: {
+              select: {
+                id: true,
+                key: true,
+                url: true,
+                mediaType: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 

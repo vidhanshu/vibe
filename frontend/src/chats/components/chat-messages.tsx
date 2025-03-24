@@ -13,8 +13,12 @@ import MessageInput from "./chat-message-input";
 import MessageGroup from "./message-group";
 import useChatMessages from "../hooks/use-chat-messages";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ChatActionSidebar from "./chat-action-sidebar";
+import { NSChat } from "../types";
+import { useParams } from "next/navigation";
+import { getChat } from "../actions/chats-action";
+import { useQuery } from "@tanstack/react-query";
 
 const DateSeparator = ({ date }: { date: string }) => {
   const today = dayjs().format("YYYY-MM-DD");
@@ -39,27 +43,50 @@ const DateSeparator = ({ date }: { date: string }) => {
 };
 
 const ChatMessages = () => {
+  const params = useParams();
+  const chatId = params.chatId as string;
+
   const userId = useSessionStore((s) => s.user?.id);
+
   const [chatInfoOpen, setChatInfoOpen] = useState(false);
+
+  const [message, setMessage] = useState("");
+  const [editingMessageId, setEditingMessageId] = useState<null | string>(null);
+  const [replyMessage, setReplyMessage] = useState<NSChat.Message | null>(null);
   const {
-    chat,
     allMessages,
-    isChatLoading,
     scrollContainerRef,
     isFetchingNextPage,
     hasNextPage,
-    otherParticipant,
-    infiniteRef: ref,
     isMessagesLoading,
-    message,
-    setMessage,
-    editingMessageId,
-    setEditingMessageId,
-    replyMessage,
-    setReplyMessage,
+    fetchNextPage,
+    prevScrollHeight,
   } = useChatMessages();
 
+  const { data: chat, isLoading: isChatLoading } = useQuery({
+    queryKey: ["chat", chatId],
+    queryFn: async () => {
+      const res = await getChat({ chatId });
+      return res.data;
+    },
+    enabled: !!chatId,
+  });
+
   const myParticipant = chat?.participants?.find((p) => p.userId === userId);
+  const otherParticipant = useMemo(
+    () => chat?.participants?.find((p) => p.user.id !== userId),
+    [chat, userId]
+  );
+
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    if (el.scrollTop < 100 && hasNextPage && !isFetchingNextPage) {
+      prevScrollHeight.current = el.scrollHeight;
+      fetchNextPage();
+    }
+  };
 
   return (
     <div className="h-screen flex">
@@ -113,16 +140,27 @@ const ChatMessages = () => {
             />
 
             <div
+              onScroll={handleScroll}
               ref={scrollContainerRef}
               className={cn(
-                "flex-1 max-h-[calc(100vh-65px-70px)] overflow-y-auto w-full scroll-smooth"
+                "flex-1 max-h-[calc(100vh-65px-70px)] overflow-y-auto w-full"
               )}
             >
               {isFetchingNextPage && (
                 <Loader2 className="text-muted-foreground size-12 mx-auto animate-spin" />
               )}
-              <div ref={ref} />
-              <div className="min-h-[calc(100vh-65px-70px)] flex flex-col-reverse p-4 gap-2 w-full">
+              <div className="min-h-[calc(100vh-65px-70px)] flex flex-col p-4 gap-2 w-full">
+                {!hasNextPage && (
+                  <div
+                    className={cn(allMessages?.length === 0 ? "flex-1" : "")}
+                  >
+                    <ChatProfileInfo
+                      chat={chat || undefined}
+                      otherParticipant={otherParticipant}
+                    />
+                  </div>
+                )}
+
                 {isMessagesLoading
                   ? Array.from({ length: 10 }).map((_, idx) => {
                       return (
@@ -171,16 +209,6 @@ const ChatMessages = () => {
                       }
                       return null;
                     })}
-                {!hasNextPage && (
-                  <div
-                    className={cn(allMessages?.length === 0 ? "flex-1" : "")}
-                  >
-                    <ChatProfileInfo
-                      chat={chat || undefined}
-                      otherParticipant={otherParticipant}
-                    />
-                  </div>
-                )}
               </div>
             </div>
 
