@@ -61,6 +61,7 @@ const ChatMessages = () => {
     isMessagesLoading,
     fetchNextPage,
     prevScrollHeight,
+    audioContent,
   } = useChatMessages();
 
   const { data: chat, isLoading: isChatLoading } = useQuery({
@@ -90,6 +91,7 @@ const ChatMessages = () => {
 
   return (
     <div className="h-screen flex">
+      {audioContent}
       <div
         className={cn(
           "h-screen flex flex-col flex-1",

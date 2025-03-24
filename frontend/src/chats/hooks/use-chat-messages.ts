@@ -6,14 +6,19 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import { useSocketContext } from "@/src/common/contexts/socket-context";
 import useMessageContainerScroll from "./user-message-container-scroll";
+import useSessionStore from "@/src/common/stores/session-store";
+import useAudioUnlock from "@/src/common/hooks/use-audio-unlock";
 
 const useChatMessages = () => {
   const params = useParams();
   const chatId = params.chatId as string;
+  const userId = useSessionStore((s) => s.user?.id);
   const { joinChat, leaveChat, onNewMessage, offNewMessage } =
     useSocketContext();
 
   const [messages, setMessages] = useState<NSChat.Message[]>([]);
+
+  const { audioRef, unlocked, content: audioContent } = useAudioUnlock();
 
   const {
     data,
@@ -57,8 +62,15 @@ const useChatMessages = () => {
 
   // Real-time message handler (already inside your socket effect)
   useEffect(() => {
+    if (!userId) return;
+
     const handleNewMessage = (newMessage: NSChat.Message) => {
       if (newMessage.chatId === chatId) {
+        if (unlocked && newMessage.chatId === chatId) {
+          if (newMessage.senderId !== userId) {
+            audioRef.current?.play();
+          }
+        }
         setMessages((prev) => [...prev, newMessage]);
       }
     };
@@ -67,7 +79,7 @@ const useChatMessages = () => {
     return () => {
       offNewMessage(handleNewMessage);
     };
-  }, [chatId, onNewMessage, offNewMessage]);
+  }, [chatId, onNewMessage, offNewMessage, userId, unlocked]);
 
   const allMessages = useMemo(() => {
     if (!messages?.length) return [];
@@ -148,6 +160,8 @@ const useChatMessages = () => {
     fetchNextPage,
     scrollContainerRef,
     prevScrollHeight,
+    audioRef,
+    audioContent,
   };
 };
 
