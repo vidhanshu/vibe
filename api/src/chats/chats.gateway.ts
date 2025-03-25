@@ -11,6 +11,21 @@ import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { Message } from '@prisma/client';
+import { ChatsService } from './chats.service';
+
+const SOCKET_EVENTS = {
+  JOIN_CHAT: 'joinChat',
+  LEAVE_CHAT: 'leaveChat',
+  SEND_MESSAGE: 'sendMessage',
+  RECEIVE_MESSAGE: 'receiveMessage',
+  UPDATE_MESSAGE: 'updateMessage',
+  RECEIVE_UPDATED_MESSAGE: 'receiveUpdateMessage',
+  UNSEND_MESSAGE: 'unsendMessage',
+  REMOVE_MESSAGE: 'removeMessage',
+  TYPING: 'typing',
+  STOP_TYPING: 'stopTyping',
+  UPDATE_CHAT_LIST: 'updateChatList',
+};
 
 // TODO: add proper origins later
 @WebSocketGateway({ namespace: '/', cors: { origin: '*' } })
@@ -21,6 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private configService: ConfigService,
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private chatService: ChatsService,
   ) {}
 
   @WebSocketServer()
@@ -42,8 +58,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.connectedUserSockets.set(userId, client.id);
 
       // Join all active chat rooms for the user
-      const chats = await this.getUserChats(userId);
-      chats.forEach((chat) => client.join(chat.id));
+      // const chats = await this.getUserChats(userId);
+      // chats.forEach((chat) => client.join(chat.id));
 
       client.emit('connected', { message: 'Connected successfully' });
     } catch (error) {
@@ -65,12 +81,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // for the cases where user starts new chat
-  @SubscribeMessage('joinChat')
+  @SubscribeMessage(SOCKET_EVENTS.JOIN_CHAT)
   handleJoinChat(client: Socket, payload: { chatId: string }) {
     client.join(payload.chatId);
   }
 
-  @SubscribeMessage('sendMessage')
+  @SubscribeMessage(SOCKET_EVENTS.LEAVE_CHAT)
+  handleLeaveChat(client: Socket, payload: { chatId: string }) {
+    client.leave(payload.chatId);
+  }
+
+  @SubscribeMessage(SOCKET_EVENTS.SEND_MESSAGE)
   async handleMessage(client: Socket, payload: Message) {
     const userId = this.getUserIdFromSocketId(client.id);
 
@@ -80,20 +101,87 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // Validate user is part of the chat
-    const isMember = await this.isUserInChat({
+    const isMember = !!(await this.isUserInChat({
       userId,
       chatId: payload.chatId,
-    });
+    }));
     if (!isMember) {
       client.emit('error', { message: 'You are not part of this chat' });
       return;
     }
 
     // Broadcast the message to the chat room
-    this.server.to(payload.chatId).emit('receiveMessage', payload);
+    this.server.to(payload.chatId).emit(SOCKET_EVENTS.RECEIVE_MESSAGE, payload);
+    const chat = await this.chatService.getChat(payload.chatId);
+    if (chat) {
+      const toUserIds = chat.participants
+        .map((p) => p.userId)
+        .filter((u) => u !== userId);
+
+      // broad cast to individual participants
+      for (const userId of toUserIds) {
+        const socketId = this.connectedUserSockets.get(userId);
+        if (socketId) {
+          this.server.to(socketId).emit(SOCKET_EVENTS.UPDATE_CHAT_LIST, chat);
+        }
+      }
+    }
   }
 
-  @SubscribeMessage('typing')
+  @SubscribeMessage(SOCKET_EVENTS.UPDATE_MESSAGE)
+  async handleUpdate(
+    client: Socket,
+    payload: { chatId: string; message: Message },
+  ) {
+    console.log('[updateMessage]');
+    const userId = this.getUserIdFromSocketId(client.id);
+
+    if (!userId) {
+      client.emit('error', { message: 'Unauthorized' });
+      return;
+    }
+
+    // Validate user is part of the chat
+    const isMember = !!(await this.isUserInChat({
+      userId,
+      chatId: payload.chatId,
+    }));
+    if (!isMember) {
+      client.emit('error', { message: 'You are not part of this chat' });
+      return;
+    }
+
+    // Broadcast the message to the chat room
+    this.server
+      .to(payload.chatId)
+      .emit(SOCKET_EVENTS.RECEIVE_UPDATED_MESSAGE, payload);
+  }
+
+  @SubscribeMessage(SOCKET_EVENTS.UNSEND_MESSAGE)
+  async unsendMessage(
+    client: Socket,
+    payload: { chatId: string; messageId: string },
+  ) {
+    const userId = this.getUserIdFromSocketId(client.id);
+
+    if (!userId) {
+      client.emit('error', { message: 'Unauthorized' });
+      return;
+    }
+
+    // Validate user is part of the chat
+    const isMember = !!(await this.isUserInChat({
+      userId,
+      chatId: payload.chatId,
+    }));
+    if (!isMember) {
+      client.emit('error', { message: 'You are not part of this chat' });
+      return;
+    }
+    this.server.to(payload.chatId).emit(SOCKET_EVENTS.REMOVE_MESSAGE, payload);
+  }
+
+  @SubscribeMessage(SOCKET_EVENTS.TYPING)
   async handleTyping(client: Socket, payload: { chatId: string }) {
     const userId = this.getUserIdFromSocketId(client.id);
     if (!userId) {
@@ -108,13 +196,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return client.emit('error', { message: 'User is not part of this chat' });
     }
 
-    client.broadcast.to(payload.chatId).emit('typing', {
+    client.broadcast.to(payload.chatId).emit(SOCKET_EVENTS.TYPING, {
       userId: userId,
+      name: isUserInChat.user.name || isUserInChat.user.username,
       chatId: payload.chatId,
     });
   }
 
-  @SubscribeMessage('stopTyping')
+  @SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
   async handleStopTyping(client: Socket, payload: { chatId: string }) {
     const userId = this.getUserIdFromSocketId(client.id);
     if (!userId) {
@@ -129,8 +218,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return client.emit('error', { message: 'User is not part of this chat' });
     }
 
-    client.broadcast.to(payload.chatId).emit('stopTyping', {
+    client.broadcast.to(payload.chatId).emit(SOCKET_EVENTS.STOP_TYPING, {
       userId: userId,
+      name: isUserInChat.user.username || isUserInChat.user.name,
       chatId: payload.chatId,
     });
   }
@@ -190,10 +280,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }: {
     userId: string;
     chatId: string;
-  }): Promise<boolean> {
+  }) {
     const chatMember = await this.prisma.chatMember.findUnique({
       where: { chatId_userId: { chatId, userId } },
+      include: { user: true },
     });
-    return !!chatMember;
+    return chatMember;
   }
 }

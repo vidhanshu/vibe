@@ -59,9 +59,9 @@ const ChatMessages = () => {
     isFetchingNextPage,
     hasNextPage,
     isMessagesLoading,
-    fetchNextPage,
-    prevScrollHeight,
+    handleScroll,
     audioContent,
+    fetchNextPage,
   } = useChatMessages();
 
   const { data: chat, isLoading: isChatLoading } = useQuery({
@@ -78,16 +78,6 @@ const ChatMessages = () => {
     () => chat?.participants?.find((p) => p.user.id !== userId),
     [chat, userId]
   );
-
-  const handleScroll = () => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-
-    if (el.scrollTop < 100 && hasNextPage && !isFetchingNextPage) {
-      prevScrollHeight.current = el.scrollHeight;
-      fetchNextPage();
-    }
-  };
 
   return (
     <div className="h-screen flex">
@@ -116,7 +106,10 @@ const ChatMessages = () => {
               </ChatUsersModal>
             </div>
           </div>
-        ) : chat?.type === "GROUP" && !myParticipant && !isChatLoading ? (
+        ) : chat?.type === "GROUP" &&
+          !myParticipant &&
+          !isChatLoading &&
+          !isMessagesLoading ? (
           <div className="flex flex-col items-center gap-4">
             <NoContent
               icon={MessageCircleOff}
@@ -142,7 +135,9 @@ const ChatMessages = () => {
             />
 
             <div
-              onScroll={handleScroll}
+              onScroll={(e) => {
+                handleScroll(e, fetchNextPage, hasNextPage);
+              }}
               ref={scrollContainerRef}
               className={cn(
                 "flex-1 max-h-[calc(100vh-65px-70px)] overflow-y-auto w-full"

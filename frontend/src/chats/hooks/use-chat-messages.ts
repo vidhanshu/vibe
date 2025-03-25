@@ -1,20 +1,31 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getChatMessages } from "../actions/chats-action";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import { NSChat } from "../types";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import dayjs from "dayjs";
-import { useSocketContext } from "@/src/common/contexts/socket-context";
 import useMessageContainerScroll from "./user-message-container-scroll";
 import useSessionStore from "@/src/common/stores/session-store";
 import useAudioUnlock from "@/src/common/hooks/use-audio-unlock";
+import useChatSocket, {
+  SocketOnRemoveMessagePayload,
+  SocketOnUpdateMessagePayload,
+} from "./use-chat-socket";
 
 const useChatMessages = () => {
   const params = useParams();
   const chatId = params.chatId as string;
   const userId = useSessionStore((s) => s.user?.id);
-  const { joinChat, leaveChat, onNewMessage, offNewMessage } =
-    useSocketContext();
+  const {
+    joinChat,
+    leaveChat,
+    onNewMessage,
+    offNewMessage,
+    onRemoveMessage,
+    offRemoveMessage,
+    onUpdateMessage,
+    offUpdateMessage,
+  } = useChatSocket();
 
   const [messages, setMessages] = useState<NSChat.Message[]>([]);
 
@@ -34,10 +45,11 @@ const useChatMessages = () => {
     fetcher: async (props: any) => getChatMessages({ chatId, ...props }),
   });
 
-  const { prevScrollHeight, scrollContainerRef } = useMessageContainerScroll({
-    isFetchingNextPage,
-    messages,
-  });
+  const { prevScrollHeight, scrollContainerRef, handleScroll } =
+    useMessageContainerScroll({
+      isFetchingNextPage,
+      messages,
+    });
 
   useEffect(() => {
     if (data) {
@@ -75,11 +87,47 @@ const useChatMessages = () => {
       }
     };
 
+    const handleRemoveMessage = ({
+      chatId: mChatId,
+      messageId,
+    }: SocketOnRemoveMessagePayload) => {
+      if (mChatId === chatId) {
+        setMessages((prev) => prev.filter(({ id }) => id !== messageId));
+      }
+    };
+
+    const handleUpdateMessage = ({
+      chatId: mChatId,
+      message,
+    }: SocketOnUpdateMessagePayload) => {
+      if (mChatId === chatId && message) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === message.id ? { ...msg, ...message } : msg
+          )
+        );
+      }
+    };
+
     onNewMessage(handleNewMessage);
+    onRemoveMessage(handleRemoveMessage);
+    onUpdateMessage(handleUpdateMessage);
     return () => {
       offNewMessage(handleNewMessage);
+      offRemoveMessage(handleRemoveMessage);
+      offUpdateMessage(handleUpdateMessage);
     };
-  }, [chatId, onNewMessage, offNewMessage, userId, unlocked]);
+  }, [
+    chatId,
+    onNewMessage,
+    offNewMessage,
+    offRemoveMessage,
+    onRemoveMessage,
+    onUpdateMessage,
+    offUpdateMessage,
+    userId,
+    unlocked,
+  ]);
 
   const allMessages = useMemo(() => {
     if (!messages?.length) return [];
@@ -161,6 +209,7 @@ const useChatMessages = () => {
     scrollContainerRef,
     prevScrollHeight,
     audioRef,
+    handleScroll,
     audioContent,
   };
 };

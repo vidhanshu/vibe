@@ -108,7 +108,7 @@ export class ChatsService {
     return this.prisma.chat.delete({ where: { id: chatId } });
   }
 
-  async getChat(chatId: string): Promise<Chat | null> {
+  async getChat(chatId: string)  {
     const chat = this.prisma.chat.findUnique({
       where: { id: chatId },
       include: {

@@ -14,28 +14,20 @@ import { useQuery } from "@tanstack/react-query";
 import { getAuthTokenSA } from "../actions/get-token";
 import { NSChat } from "@/src/chats/types";
 
+type OnRemovePayload = {
+  chatId: string;
+  messageId: string;
+};
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-  isLoading: boolean;
-  // Chat specific methods
-  joinChat: (chatId: string) => void;
-  leaveChat: (chatId: string) => void;
-  // Event listeners
-  onNewMessage: (callback: (message: NSChat.Message) => void) => void;
-  offNewMessage: (callback: (message: NSChat.Message) => void) => void;
-  onSendMessage: (message: NSChat.Message) => void;
+  isLoading: boolean
 }
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
-  isLoading: false,
-  joinChat: () => {},
-  leaveChat: () => {},
-  onNewMessage: () => {},
-  offNewMessage: () => {},
-  onSendMessage: () => {},
+  isLoading: false
 });
 
 export const SocketContextProvider = ({ children }: PropsWithChildren) => {
@@ -77,57 +69,12 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
     };
   }, [socketInstance]);
 
-  const joinChat = useCallback(
-    (chatId: string) => {
-      if (!socketInstance) return;
-      socketInstance.emit("join_chat", { chatId });
-    },
-    [socketInstance]
-  );
-
-  const leaveChat = useCallback(
-    (chatId: string) => {
-      if (!socketInstance) return;
-      socketInstance.emit("leave_chat", { chatId });
-    },
-    [socketInstance]
-  );
-
-  const onNewMessage = useCallback(
-    (callback: (message: NSChat.Message) => void) => {
-      if (!socketInstance) return;
-      socketInstance.on("receiveMessage", callback);
-    },
-    [socketInstance]
-  );
-
-  const offNewMessage = useCallback(
-    (callback: (message: NSChat.Message) => void) => {
-      if (!socketInstance) return;
-      socketInstance.off("receiveMessage", callback);
-    },
-    [socketInstance]
-  );
-
-  const onSendMessage = useCallback(
-    (message: NSChat.Message) => {
-      if (!socketInstance) return;
-      socketInstance.emit("sendMessage", message);
-    },
-    [socketInstance]
-  );
-
   return (
     <SocketContext.Provider
       value={{
         socket: socketInstance,
         isConnected,
         isLoading,
-        joinChat,
-        leaveChat,
-        onNewMessage,
-        offNewMessage,
-        onSendMessage,
       }}
     >
       {children}

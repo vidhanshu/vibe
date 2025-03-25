@@ -1,8 +1,15 @@
 /**
  * Not re-usable, just to extract logic separate
+ * This still doesn't work properly
  */
 
-import { useEffect, useLayoutEffect, useRef } from "react";
+import {
+  DOMAttributes,
+  UIEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { NSChat } from "../types";
 
 const useMessageContainerScroll = ({
@@ -18,7 +25,6 @@ const useMessageContainerScroll = ({
   const initialScrollDone = useRef(false);
 
   // To scroll to the extreme bottom on first load
-  // TODO: On page refresh it doesn't scroll the extreme bottom
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -93,9 +99,24 @@ const useMessageContainerScroll = ({
     return () => observer.disconnect();
   }, []);
 
+  const handleScroll = (
+    e: any,
+    fetchNextPage: () => void,
+    hasNextPage: boolean
+  ) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    if (el.scrollTop < 100 && hasNextPage && !isFetchingNextPage) {
+      prevScrollHeight.current = el.scrollHeight;
+      fetchNextPage();
+    }
+  };
+
   return {
     scrollContainerRef,
     prevScrollHeight,
+    handleScroll,
   };
 };
 

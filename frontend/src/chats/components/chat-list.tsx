@@ -4,7 +4,7 @@ import UserChip from "@/src/common/components/user-chip";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import useSessionStore from "@/src/common/stores/session-store";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createChat, getChats } from "../actions/chats-action";
 import { NSChat } from "../types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,12 +18,16 @@ import ChatUsersModal from "./chat-users-modal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import useIsMobile from "@/src/common/hooks/use-is-mobile";
+import useChatSocket from "../hooks/use-chat-socket";
 
 const ChatList = () => {
   const qc = useQueryClient();
+  const chatId = useParams().chatId;
   const router = useRouter();
   const { user } = useSessionStore();
   const pathname = usePathname();
+  const [chats, setChats] = useState<(NSChat.Chat & { unread?: number })[]>([]);
+  const { onChatListUpdate, offChatListUpdate } = useChatSocket();
   const { isPending: isCreating, mutateAsync: mutateCreateChat } = useMutation({
     mutationKey: ["create-chat-group"],
     mutationFn: async ({
@@ -56,13 +60,45 @@ const ChatList = () => {
     fetcher: getChats,
   });
 
-  const [personal, group] = useMemo(() => {
-    const allChats = data?.map((data) => data.items as NSChat.Chat[]).flat();
-    return [
-      allChats.filter((chat) => chat.type === "DM"),
-      allChats.filter((chat) => chat.type === "GROUP"),
-    ];
+  useEffect(() => {
+    if (data) setChats(data.map((data) => data.items as NSChat.Chat[]).flat());
   }, [data]);
+
+  const [personal, group] = useMemo(() => {
+    return [
+      chats.filter((chat) => chat.type === "DM"),
+      chats.filter((chat) => chat.type === "GROUP"),
+    ];
+  }, [chats]);
+
+  useEffect(() => {
+    const handleChatListUpdate = (chat: NSChat.Chat) => {
+      setChats((ch) => {
+        const newChat = [...ch];
+        const chIdx = newChat.findIndex((cH) => cH.id === chat.id);
+        if (chIdx != -1) {
+          const oldUnReadCount = newChat[chIdx].unread ?? 0;
+          newChat.splice(chIdx, 1);
+          newChat.unshift({ ...chat, unread: oldUnReadCount + 1 });
+          return newChat;
+        }
+        return ch;
+      });
+    };
+
+    onChatListUpdate(handleChatListUpdate);
+    return () => {
+      offChatListUpdate(handleChatListUpdate);
+    };
+  }, [onChatListUpdate, offChatListUpdate]);
+
+  useEffect(() => {
+    if (chatId) {
+      setChats((ch) =>
+        ch.map((cH) => (cH.id === chatId ? { ...cH, unread: 0 } : cH))
+      );
+    }
+  }, [chatId]);
 
   const isMobile = useIsMobile();
 
@@ -179,7 +215,11 @@ const ChatList = () => {
   );
 };
 
-const ChatListItem = ({ chat }: { chat: NSChat.Chat }) => {
+const ChatListItem = ({
+  chat,
+}: {
+  chat: NSChat.Chat & { unread?: number };
+}) => {
   const param = useParams();
   const router = useRouter();
   const userId = useSessionStore((select) => select.user?.id);
@@ -196,7 +236,7 @@ const ChatListItem = ({ chat }: { chat: NSChat.Chat }) => {
     <button
       onClick={() => router.push(`/chats/${chat.id}`)}
       className={cn(
-        "px-4 py-3 hover:bg-secondary/40 transition-colors w-full",
+        "px-4 py-3 hover:bg-secondary/40 transition-colors w-full relative",
         { "bg-secondary/40": param.chatId === chat.id }
       )}
     >
@@ -218,6 +258,11 @@ const ChatListItem = ({ chat }: { chat: NSChat.Chat }) => {
           messageSentAt={lastMessage?.createdAt}
           messageSender={messageSender}
         />
+      )}
+      {!!chat.unread && (
+        <div className="text-[.5rem] rounded-full bg-rose-500 h-3 min-w-3 w-fit absolute inset-y-0 my-auto right-4">
+          {chat.unread}
+        </div>
       )}
     </button>
   );

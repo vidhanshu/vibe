@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "@/src/common/components/popovers/emoji-picker";
 import { useMutation } from "@tanstack/react-query";
-import { Smile, Image, X } from "lucide-react";
+import { Smile, Image, X, TypeIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { sendMessage, updateMessage } from "../actions/chats-action";
@@ -13,7 +13,10 @@ import { toast } from "sonner";
 import NImage from "next/image";
 import { NSChat } from "../types";
 import useSessionStore from "@/src/common/stores/session-store";
-import { useSocketContext } from "@/src/common/contexts/socket-context";
+import useChatSocket, {
+  SocketOnTypingResponse,
+} from "../hooks/use-chat-socket";
+import { useDebounceValue } from "usehooks-ts";
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024;
 const MessageInput = ({
@@ -37,7 +40,18 @@ const MessageInput = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { onSendMessage } = useSocketContext();
+  const [typing, setTyping] = useState<Set<string>>();
+  const userIdToNameMapRef = useRef<Map<string, string>>(new Map());
+  const {
+    sendMessage: sSendMessage,
+    startTyping,
+    stopTyping,
+    offStopTypingMessage,
+    offTypingMessage,
+    onStopTypingMessage,
+    onTypingMessage,
+    updateMessage: sUpdateMessage,
+  } = useChatSocket();
 
   const { isPending: isSendingMessage, mutate } = useMutation({
     mutationKey: ["send-message", chatId],
@@ -56,7 +70,8 @@ const MessageInput = ({
       setMessage("");
       setMediaFile(null);
       setReplyToMessage(null);
-      onSendMessage(res.data);
+      console.log("[sSendMessage got called]]");
+      sSendMessage(res.data);
       // scrollToBottom?.();
     },
   });
@@ -70,12 +85,13 @@ const MessageInput = ({
         message,
         messageId: editingMessageId,
       });
-      if (res.message) {
+      if (res.message || !res.data) {
         toast.error(res.message);
         return;
       }
       setMessage("");
       setEditingMessageId(null);
+      sUpdateMessage({ chatId: chatId, message: res.data });
       toast.success("Message updated successfully");
       // scrollToBottom?.();
     },
@@ -92,6 +108,62 @@ const MessageInput = ({
     isUpdatingMessage,
   ]);
 
+  useEffect(() => {
+    if (!chatId || !userId) return;
+
+    const handleTyping = (payload: SocketOnTypingResponse) => {
+      userIdToNameMapRef.current.set(payload.userId, payload.name);
+
+      if (payload.chatId === chatId) {
+        if (!typing?.has(payload.userId)) {
+          setTyping((p) => {
+            const newSet = new Set(p);
+            newSet.add(payload.userId);
+            return newSet;
+          });
+        }
+      }
+    };
+    const handleStopTyping = (payload: SocketOnTypingResponse) => {
+      if (payload.chatId === chatId) {
+        setTyping((p) => {
+          const newSet = new Set(p);
+          newSet.delete(payload.userId);
+          return newSet;
+        });
+      }
+    };
+
+    onTypingMessage(handleTyping);
+    onStopTypingMessage(handleStopTyping);
+    return () => {
+      offTypingMessage(handleTyping);
+      offStopTypingMessage(handleStopTyping);
+    };
+  }, [
+    offStopTypingMessage,
+    onStopTypingMessage,
+    onTypingMessage,
+    offTypingMessage,
+    chatId,
+    userId,
+  ]);
+
+  useEffect(() => {
+    if (!chatId || !message) return;
+
+    startTyping({ chatId });
+
+    const timer = setTimeout(() => {
+      stopTyping({ chatId });
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      stopTyping({ chatId });
+    };
+  }, [message, chatId, startTyping, stopTyping]);
+
   const isLoading = isUpdatingMessage || isSendingMessage;
   const showPreview = editingMessageId || !!replyMessage;
 
@@ -99,9 +171,17 @@ const MessageInput = ({
     <div
       className={cn(
         "px-4 py-2 w-full",
-        (editingMessageId || !!replyMessage) && "border-t"
+        (editingMessageId || !!replyMessage || typing?.size) && "border-t"
       )}
     >
+      {!!typing?.size && typing.size > 0 && (
+        <div className="flex items-center text-xs text-muted-foreground pb-2">
+          {Array.from(typing)
+            .map((e) => userIdToNameMapRef.current.get(e))
+            .join(", ")}{" "}
+          Typing...
+        </div>
+      )}
       {showPreview && (
         <div
           className={cn(
