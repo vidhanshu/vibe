@@ -79,7 +79,11 @@ const ChatList = () => {
         if (chIdx != -1) {
           const oldUnReadCount = newChat[chIdx].unread ?? 0;
           newChat.splice(chIdx, 1);
-          newChat.unshift({ ...chat, unread: oldUnReadCount + 1 });
+          if (!chatId || chatId !== chat.id) {
+            newChat.unshift({ ...chat, unread: oldUnReadCount + 1 });
+          } else {
+            newChat.unshift(chat);
+          }
           return newChat;
         }
         return ch;
@@ -90,7 +94,7 @@ const ChatList = () => {
     return () => {
       offChatListUpdate(handleChatListUpdate);
     };
-  }, [onChatListUpdate, offChatListUpdate]);
+  }, [onChatListUpdate, offChatListUpdate, chatId]);
 
   useEffect(() => {
     if (chatId) {

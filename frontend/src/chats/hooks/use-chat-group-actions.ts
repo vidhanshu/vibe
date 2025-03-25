@@ -8,9 +8,11 @@ import {
 } from "../actions/chats-action";
 import { toast } from "sonner";
 import { NSChat } from "../types";
+import useChatSocket from "./use-chat-socket";
 
 const useChatGroupActions = ({ chatId }: { chatId: string }) => {
   const qc = useQueryClient();
+  const { sendMessage } = useChatSocket();
 
   const { isPending, mutateAsync } = useMutation({
     mutationKey: ["add-participants", chatId],
@@ -27,6 +29,9 @@ const useChatGroupActions = ({ chatId }: { chatId: string }) => {
           userIds.length ? "s" : ""
         } added to chat`
       );
+      if (res?.data?.log) {
+        sendMessage(res.data.log);
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["chat", chatId] });
@@ -55,6 +60,9 @@ const useChatGroupActions = ({ chatId }: { chatId: string }) => {
           qc.invalidateQueries({ queryKey: ["chats"] });
         }
         qc.invalidateQueries({ queryKey: ["chat", chatId] });
+        if (res?.data?.log) {
+          sendMessage(res.data.log);
+        }
       },
       onSuccess: () => {},
     });
@@ -76,6 +84,9 @@ const useChatGroupActions = ({ chatId }: { chatId: string }) => {
         });
         if (res.message) {
           return toast.error(res.message);
+        }
+        if (res?.data?.log) {
+          sendMessage(res.data.log);
         }
         toast.success("Participant updated");
       },
@@ -100,6 +111,9 @@ const useChatGroupActions = ({ chatId }: { chatId: string }) => {
         });
         if (res.message) {
           return toast.error(res.message);
+        }
+        if (res?.data?.log) {
+          sendMessage(res.data.log);
         }
         toast.success("Chat updated");
       },

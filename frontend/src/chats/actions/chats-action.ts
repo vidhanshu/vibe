@@ -182,7 +182,10 @@ export const updateChat = async ({
   chatId: string;
   name?: string;
   description?: string;
-}): NSCommon.Response<NSChat.Chat & { existsAlready?: boolean }> => {
+}): NSCommon.Response<{
+  chat: NSChat.Chat & { existsAlready?: boolean };
+  log: NSChat.Message;
+}> => {
   try {
     const res = await api.patch(`/chats/${chatId}`, {
       name,
@@ -221,7 +224,7 @@ export const addParticipants = async ({
 }: {
   chatId: string;
   participantIds: string[];
-}) => {
+}): NSCommon.Response<{ chat: NSChat.Chat; log: NSChat.Message }> => {
   try {
     const res = await api.patch(`/chats/${chatId}/add-participants`, {
       participantIds,
@@ -242,7 +245,7 @@ export const removeParticipant = async ({
 }: {
   chatId: string;
   participantId: string;
-}) => {
+}): NSCommon.Response<{ chat: NSChat.Chat; log: NSChat.Message }> => {
   try {
     const res = await api.patch(`/chats/${chatId}/remove-participant`, {
       participantId,
@@ -265,7 +268,7 @@ export const updateParticipant = async ({
   chatId: string;
   participantId: string;
   role: NSChat.ChatGroupRole;
-}) => {
+}): NSCommon.Response<{ chat: NSChat.Chat; log: NSChat.Message }> => {
   try {
     const res = await api.patch(
       `/chats/${chatId}/participant/${participantId}`,

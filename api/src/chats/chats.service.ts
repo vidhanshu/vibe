@@ -108,7 +108,7 @@ export class ChatsService {
     return this.prisma.chat.delete({ where: { id: chatId } });
   }
 
-  async getChat(chatId: string)  {
+  async getChat(chatId: string) {
     const chat = this.prisma.chat.findUnique({
       where: { id: chatId },
       include: {
@@ -275,15 +275,44 @@ export class ChatsService {
       data: payload,
     });
     // group log
-    await this.prisma.message.create({
+    const message = await this.prisma.message.create({
       data: {
         isLog: true,
         chatId,
         text: `Group's ${name && description ? 'Name & Description' : name ? 'Name' : 'Description'} was updated by ${myParticipant.user.name || myParticipant.user.username}`,
         senderId: userId,
       },
+      include: {
+        media: true,
+        sender: {
+          select: {
+            username: true,
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+        repliedToMessage: {
+          select: {
+            id: true,
+            text: true,
+            senderId: true,
+            sender: {
+              select: { id: true, username: true, name: true },
+            },
+            media: {
+              select: {
+                id: true,
+                key: true,
+                url: true,
+                mediaType: true,
+              },
+            },
+          },
+        },
+      },
     });
-    return res;
+    return { chat: res, log: message };
   }
 
   // group chat
@@ -345,15 +374,44 @@ export class ChatsService {
     });
 
     // group
-    await this.prisma.message.create({
+    const message = await this.prisma.message.create({
       data: {
         chatId,
         isLog: true,
         text: `${you.user.name || you.user.username} Added ${participantToConsiderUsers.map((p) => p.name || p.username).join(', ')}${participantIds.length - 2 > 0 ? ` and ${participantIds.length - 2} More` : ''}`,
         senderId: userId,
       },
+      include: {
+        media: true,
+        sender: {
+          select: {
+            username: true,
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+        repliedToMessage: {
+          select: {
+            id: true,
+            text: true,
+            senderId: true,
+            sender: {
+              select: { id: true, username: true, name: true },
+            },
+            media: {
+              select: {
+                id: true,
+                key: true,
+                url: true,
+                mediaType: true,
+              },
+            },
+          },
+        },
+      },
     });
-    return res;
+    return { chat: res, log: message };
   }
 
   async removeParticipantFromChat(
@@ -405,7 +463,7 @@ export class ChatsService {
     const participantBeingRemoved = chat.participants.find(
       (p) => p.id === participantId,
     );
-    await this.prisma.message.create({
+    const message = await this.prisma.message.create({
       data: {
         chatId,
         isLog: true,
@@ -415,8 +473,37 @@ export class ChatsService {
             : `${you.user.name || you.user.username} Removed ${participantBeingRemoved?.user.name || participantBeingRemoved?.user.username}`,
         senderId: userId,
       },
+      include: {
+        media: true,
+        sender: {
+          select: {
+            username: true,
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+        repliedToMessage: {
+          select: {
+            id: true,
+            text: true,
+            senderId: true,
+            sender: {
+              select: { id: true, username: true, name: true },
+            },
+            media: {
+              select: {
+                id: true,
+                key: true,
+                url: true,
+                mediaType: true,
+              },
+            },
+          },
+        },
+      },
     });
-    return res;
+    return { chat: res, log: message };
   }
 
   async updateParticipant(
@@ -465,15 +552,44 @@ export class ChatsService {
     const participantBeingRemoved = chat.participants.find(
       (p) => p.id === participantId,
     );
-    await this.prisma.message.create({
+    const message = await this.prisma.message.create({
       data: {
         chatId,
         isLog: true,
         text: `${you.user.name || you.user.username} Made ${role.toLocaleLowerCase()} to ${participantBeingRemoved?.user.name || participantBeingRemoved?.user.username}`,
         senderId: userId,
       },
+      include: {
+        media: true,
+        sender: {
+          select: {
+            username: true,
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+        repliedToMessage: {
+          select: {
+            id: true,
+            text: true,
+            senderId: true,
+            sender: {
+              select: { id: true, username: true, name: true },
+            },
+            media: {
+              select: {
+                id: true,
+                key: true,
+                url: true,
+                mediaType: true,
+              },
+            },
+          },
+        },
+      },
     });
-    return res;
+    return { chat: res, log: message };
   }
 
   // messages
