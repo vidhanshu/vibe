@@ -25,4 +25,8 @@ export class SendMessageDto {
   @IsUUID()
   @IsOptional()
   repliedMessageId: string;
+
+  @IsUUID()
+  @IsOptional()
+  statusId: string;
 }

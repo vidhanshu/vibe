@@ -1,4 +1,5 @@
 import { NSCommon } from "../common/types";
+import { NSPost } from "../posts/types";
 import { NSUser } from "../users/types";
 
 export namespace NSChat {
@@ -41,11 +42,13 @@ export namespace NSChat {
     text?: string;
     media?: NSCommon.Media;
     chat: Chat;
+    status?: NSPost.Status;
     repliedToMessage?: Message;
     repliedToMessageId?: string;
     sender: NSUser.User;
     createdAt: Date;
     updatedAt: Date;
     isLog: boolean;
+    isStatus: boolean;
   }
 }

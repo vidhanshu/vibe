@@ -1,4 +1,5 @@
 import { NSCommon } from "../common/types";
+import { NSPost } from "../posts/types";
 
 export namespace NSUser {
   export interface User {
@@ -12,6 +13,7 @@ export namespace NSUser {
     createdAt: Date;
     updatedAt: Date;
     profilePhoto?: NSCommon.Media;
+    status?: NSPost.Status;
     _count: {
       followers: number;
       followings: number;

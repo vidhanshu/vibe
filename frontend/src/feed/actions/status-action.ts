@@ -18,7 +18,10 @@ export const getStatuses = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -59,7 +62,10 @@ export const createStatus = async ({
     // delete uploaded files, if error
     if (uploadedFiles.length)
       await deleteFiles(uploadedFiles.map(({ key }) => key));
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -73,7 +79,10 @@ export const addStatusView = async (
     return { data: null };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -85,6 +94,9 @@ export const deleteStatus = async (): NSCommon.Response<null> => {
     return { data: null };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };

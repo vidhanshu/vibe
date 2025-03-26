@@ -10,10 +10,16 @@ import { getUserByUsername } from "@/src/users/actions/user-actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bookmark, Grid3X3, Youtube } from "lucide-react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { toast } from "sonner";
 import { followUnfollow } from "../actions/follow-actions";
 import ProfileHeaderSkeleton from "./skeletons/profile-header-skeleton";
+import StatusViewDrawer from "@/src/feed/components/status/status-view-drawer";
 
 const PRONOUN_MAP = {
   he: "he/his",
@@ -24,6 +30,9 @@ const PRONOUN_MAP = {
 const ProfileHeader = () => {
   const params = useParams();
   const qc = useQueryClient();
+  const router = useRouter();
+  const sp = useSearchParams();
+  const isOpen = sp.get("status") === "open";
   const pathname = usePathname()?.split("?")[0];
   const { user, isLoading } = useSessionStore();
 
@@ -80,13 +89,36 @@ const ProfileHeader = () => {
 
   return (
     <>
-      <div className="px-4 md:px-0 flex flex-col gap-y-4 md:flex-row gap-x-4 md:gap-x-16 max-w-[700px] mx-auto">
-        <UserAvatar
-          username={currentUser?.username}
-          fallbackClassName="text-4xl md:text-6xl font-bold"
-          url={currentUser?.profilePhoto?.url}
-          className="size-28 md:size-40"
+      {currentUser?.status && (
+        <StatusViewDrawer
+          close={() => {
+            router.push(pathname.split("?")[0]);
+          }}
+          statuses={[currentUser.status]}
+          setViewStatusIdx={(idx) => {}}
+          viewStatusIdx={isOpen ? 0 : null}
         />
+      )}
+      <div className="px-4 md:px-0 flex flex-col gap-y-4 md:flex-row gap-x-4 md:gap-x-16 max-w-[700px] mx-auto">
+        <div
+          onClick={() => {
+            router.push(`${pathname}?status=open`);
+          }}
+          className={cn(
+            currentUser?.status
+              ? currentUser.status.viewed
+                ? "rounded-full p-1 cursor-pointer bg-secondary"
+                : "insta-bg rounded-full p-1 cursor-pointer"
+              : ""
+          )}
+        >
+          <UserAvatar
+            username={currentUser?.username}
+            fallbackClassName="text-4xl md:text-6xl font-bold"
+            url={currentUser?.profilePhoto?.url}
+            className="size-28 md:size-40 border-4 border-black"
+          />
+        </div>
         <div className="flex-1 flex flex-col justify-between py-2 gap-2">
           <div className="flex gap-x-4 items-center">
             <div className="">

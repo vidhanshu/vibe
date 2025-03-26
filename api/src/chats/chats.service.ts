@@ -627,6 +627,15 @@ export class ChatsService {
                 profilePhoto: true,
               },
             },
+            status: {
+              select: {
+                medias: true,
+                createdAt: true,
+                id: true,
+                userId: true,
+                user: true,
+              },
+            },
             repliedToMessage: {
               select: {
                 id: true,
@@ -671,7 +680,12 @@ export class ChatsService {
   async sendMessage(
     userId: string,
     chatId: string,
-    { media, message, repliedMessageId }: SendMessageDto = {} as SendMessageDto,
+    {
+      media,
+      message,
+      repliedMessageId,
+      statusId,
+    }: SendMessageDto = {} as SendMessageDto,
   ) {
     if (!media && !message) {
       throw new BadRequestException('message or media is required');
@@ -700,6 +714,7 @@ export class ChatsService {
         text: message,
         media: media ? { create: media } : undefined,
         ...(repliedMessageId ? { repliedToMessageId: repliedMessageId } : {}),
+        ...(statusId ? { statusId, isStatus: true } : {}),
       },
       include: {
         media: true,
@@ -709,6 +724,15 @@ export class ChatsService {
             id: true,
             name: true,
             profilePhoto: true,
+          },
+        },
+        status: {
+          select: {
+            medias: true,
+            createdAt: true,
+            id: true,
+            userId: true,
+            user: true,
           },
         },
         repliedToMessage: {

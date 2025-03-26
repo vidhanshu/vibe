@@ -174,7 +174,7 @@ const FeedPostCard = ({
             </DropdownMenu>
           </AlertDialog>
         </div>
-        <div className="md:h-[585px] flex items-center justify-center">
+        <div className="md:h-[585px] flex items-center justify-center md:border">
           <PostMediaCarousel
             containerClassName="flex-1"
             imageClassName="w-full max-h-[585px]"

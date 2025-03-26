@@ -30,11 +30,13 @@ export const sendMessage = async ({
   message,
   media,
   repliedMessageId,
+  statusId,
 }: {
   chatId: string;
   message?: string;
   media: File | null;
   repliedMessageId?: string;
+  statusId?: string;
 }) => {
   let uploadedFiles: Omit<NSAuth.Media, "id">[] = [];
   try {
@@ -52,6 +54,9 @@ export const sendMessage = async ({
     }
     if (repliedMessageId) {
       payload["repliedMessageId"] = repliedMessageId;
+    }
+    if (statusId) {
+      payload["statusId"] = statusId;
     }
     const res = await api.post(`/chats/${chatId}/messages`, payload);
     return { data: res.data };

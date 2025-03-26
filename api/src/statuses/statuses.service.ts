@@ -41,9 +41,10 @@ export class StatusesService {
   ): Promise<PaginatedResponse<Status>> {
     const where = {
       OR: [
-        //  get the statuses of the users to whom I follow, and my status
+        //  get the statuses of the users to whom I follow, those who follow me, and my status
         { userId },
         { user: { followers: { some: { followerId: userId } } } },
+        { user: { followings: { some: { followingId: userId } } } },
       ],
       // get statuses that are created in the last 24 hours
       createdAt: {

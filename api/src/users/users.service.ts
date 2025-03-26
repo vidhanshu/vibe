@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Status, User } from '@prisma/client';
 import { PaginatedResponse } from 'src/common/types/return-type';
 import { MediasService } from 'src/medias/medias.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -25,14 +25,25 @@ export class UsersService {
       take,
       include: {
         profilePhoto: true,
+        status: {
+          include: {
+            medias: true,
+            user: { select: { name: true, username: true } },
+            _count: {
+              select: {
+                views: true,
+              },
+            },
+          },
+        },
         _count: { select: { followers: true, followings: true } },
       },
     };
     if (search)
       filter.where = {
         OR: [
-          { username: { contains: search } },
-          { email: { contains: search } },
+          { username: { contains: search, mode: 'insensitive' } },
+          { name: { contains: search, mode: 'insensitive' } },
         ],
       };
 
@@ -62,7 +73,7 @@ export class UsersService {
   }
 
   async getSuggestedToFollow(
-    { limit: take = 10, page = 1, search, sort }: FilterUsersDto,
+    { limit: take = 5, page = 1, search, sort }: FilterUsersDto,
     userId: string,
   ): Promise<PaginatedResponse<User>> {
     const skip = (page - 1) * take;
@@ -82,7 +93,7 @@ export class UsersService {
     const followingIds = followings.map(({ id }) => id);
 
     // Find potential suggestions (friends of friends)
-    const suggestedUsers = await this.prisma.user.findMany({
+    let suggestedUsers = await this.prisma.user.findMany({
       where: {
         followers: {
           none: { followerId: userId }, // Exclude users to whom I already follow
@@ -99,6 +110,11 @@ export class UsersService {
       include: {
         profilePhoto: true,
         followers: {
+          where: {
+            NOT: {
+              followerId: userId,
+            },
+          },
           select: { follower: { select: { username: true } } },
           take: 2,
         },
@@ -106,13 +122,55 @@ export class UsersService {
     });
 
     // Count total suggested users
-    const count = await this.prisma.user.count({
+    let count = await this.prisma.user.count({
       where: {
         followers: { some: { followerId: { in: followingIds } } },
         followings: { none: { followingId: userId } },
         id: { not: userId },
       },
     });
+
+    if (suggestedUsers.length == 0) {
+      suggestedUsers = await this.prisma.user.findMany({
+        where: {
+          NOT: {
+            id: userId,
+          },
+          followers: {
+            none: {
+              followerId: userId, // all such users to which I don't follow
+            },
+          },
+        },
+        take,
+        skip,
+        orderBy: sort ? { [sort]: 'desc' } : undefined, // Example: sort by followers count
+        include: {
+          profilePhoto: true,
+          followers: {
+            where: {
+              NOT: {
+                followerId: userId,
+              },
+            },
+            select: { follower: { select: { username: true } } },
+            take: 2,
+          },
+        },
+      });
+      count = await this.prisma.user.count({
+        where: {
+          NOT: {
+            id: userId,
+          },
+          followers: {
+            none: {
+              followerId: userId, // all such users to which I don't follow
+            },
+          },
+        },
+      });
+    }
 
     return {
       items: suggestedUsers,
@@ -126,8 +184,21 @@ export class UsersService {
     };
   }
 
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id: string) {
     //TODO: Also check if the user who is requesting follows or not, for O(1) checking
+    // Also check if the user who is requesting follows or not, for O(1) checking
+    const follows = await this.prisma.user.findFirst({
+      where: {
+        id,
+        followers: {
+          some: {
+            followerId: id,
+          },
+        },
+      },
+      select: { id: true },
+    });
+
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -138,17 +209,37 @@ export class UsersService {
             posts: true,
           },
         },
+        status: {
+          include: {
+            medias: true,
+            user: { select: { name: true, username: true } },
+            views: { select: { viewerId: true } },
+            _count: {
+              select: {
+                views: true,
+              },
+            },
+          },
+        },
         profilePhoto: true,
       },
     });
     if (!user) throw new NotFoundException(`User not found`);
-    return user;
+    return {
+      ...user,
+      follows: !!follows,
+      status: user.status
+        ? {
+            ...user.status,
+            viewed: !!user.status.views.find(
+              ({ viewerId }) => viewerId === user.id,
+            ),
+          }
+        : null,
+    };
   }
 
-  async getUserByUsername(
-    username: string,
-    currentUserId: string,
-  ): Promise<User & { follows: boolean }> {
+  async getUserByUsername(username: string, currentUserId: string) {
     // Also check if the user who is requesting follows or not, for O(1) checking
     const follows = await this.prisma.user.findFirst({
       where: {
@@ -169,6 +260,20 @@ export class UsersService {
             followers: true,
             followings: true,
             posts: true,
+          },
+        },
+        status: {
+          include: {
+            medias: true,
+            views: {
+              select: { viewerId: true },
+            },
+            user: { select: { name: true, username: true } },
+            _count: {
+              select: {
+                views: true,
+              },
+            },
           },
         },
         followers: {
@@ -194,7 +299,18 @@ export class UsersService {
       },
     });
     if (!user) throw new NotFoundException(`User not found`);
-    return { ...user, follows: !!follows };
+    return {
+      ...user,
+      follows: !!follows,
+      status: user.status
+        ? {
+            ...user.status,
+            viewed: !!user.status.views.find(
+              ({ viewerId }) => viewerId === user.id,
+            ),
+          }
+        : null,
+    };
   }
 
   async updateUser(

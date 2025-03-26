@@ -11,6 +11,7 @@ import useChatSocket, {
   SocketOnRemoveMessagePayload,
   SocketOnUpdateMessagePayload,
 } from "./use-chat-socket";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useChatMessages = () => {
   const params = useParams();
@@ -26,6 +27,7 @@ const useChatMessages = () => {
     onUpdateMessage,
     offUpdateMessage,
   } = useChatSocket();
+  const qc = useQueryClient();
 
   const [messages, setMessages] = useState<NSChat.Message[]>([]);
 
@@ -82,6 +84,9 @@ const useChatMessages = () => {
           if (newMessage.senderId !== userId) {
             audioRef.current?.play();
           }
+        }
+        if (newMessage.isLog) {
+          qc.invalidateQueries({ queryKey: ["chat", chatId] });
         }
         setMessages((prev) => [...prev, newMessage]);
       }

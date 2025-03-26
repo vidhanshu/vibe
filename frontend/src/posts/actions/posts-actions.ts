@@ -43,7 +43,10 @@ export const createPost = async ({
     // delete uploaded files, if error
     if (uploadedFiles.length)
       await deleteFiles(uploadedFiles.map(({ key }) => key));
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -55,7 +58,10 @@ export const deletePost = async (postId: string): NSCommon.Response<null> => {
     return { data: null };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -77,7 +83,10 @@ export const updatePost = async (
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -96,7 +105,10 @@ export const getPosts = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -112,7 +124,10 @@ export const getSavedPosts = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -129,7 +144,10 @@ export const getPostById = async (
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -147,7 +165,10 @@ export const likeUnLike = async (
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -164,7 +185,10 @@ export const saveUnsave = async (
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -180,7 +204,10 @@ export const getComments = async (
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -198,7 +225,10 @@ export const addComment = async (
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -213,7 +243,10 @@ export const deleteComment = async (
     return { data: null };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -234,6 +267,9 @@ export const updateComment = async (
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };

@@ -47,6 +47,9 @@ import { toast } from "sonner";
 import { deleteStatus } from "../../actions/status-action";
 import UserChip from "@/src/common/components/user-chip";
 import { NSUser } from "@/src/users/types";
+import { createChat, sendMessage } from "@/src/chats/actions/chats-action";
+import useChatSocket from "@/src/chats/hooks/use-chat-socket";
+import { useCopyToClipboard } from "usehooks-ts";
 
 const StatusViewer = ({
   status,
@@ -61,9 +64,17 @@ const StatusViewer = ({
 }) => {
   const qc = useQueryClient();
   const { user } = useSessionStore();
+  const userId = user?.id;
   const [mute, setMute] = useState(false);
   const [active, setActive] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const { sendMessage: sSendMessage } = useChatSocket();
+  const [isInputFocused, setInputFocused] = useState(false);
+
+  // eslint-disable-next-line
+  const [_, cpyText] = useCopyToClipboard();
   const { mutate } = useMutation({
     mutationKey: ["delete-status"],
     mutationFn: async () => {
@@ -75,6 +86,53 @@ const StatusViewer = ({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["statuses"] });
       setViewStatusIdx(null);
+    },
+  });
+
+  useEffect(() => {
+    if (!status?.userId || !userId) return;
+
+    const handleChatCreate = async () => {
+      const res = await createChat({
+        chatType: "DM",
+        participantId: status.userId,
+      });
+      if (res.data?.id) {
+        setChatId(res.data.id);
+      } else if (res.message) {
+        toast.error(res.message);
+      }
+    };
+    if (status?.userId !== userId) {
+      handleChatCreate();
+    }
+  }, [status?.userId, userId]);
+
+  const { isPending: isSendingMessage, mutate: sendReply } = useMutation({
+    mutationKey: ["send-message", chatId],
+    mutationFn: async (reaction: string = "") => {
+      console.log("[came -here 1]]");
+      if (!chatId) return toast.error("Something went wrong!");
+      console.log("[came -here 2]]");
+      const message = (reaction || inputRef.current?.value) ?? "";
+      if (!reaction) {
+        console.log("[came -here 3]]");
+        if (!message.trim().length) return toast.error("Please enter message");
+      }
+
+      const res = await sendMessage({
+        chatId,
+        message,
+        media: null,
+        statusId: status.id,
+      });
+      if (res.message) {
+        toast.error(res.message);
+        return;
+      }
+      toast.success(`${reaction ? "Reaction" : "Reply"} sent!`);
+      if (inputRef.current) inputRef.current.value = "";
+      sSendMessage(res.data);
     },
   });
 
@@ -161,7 +219,14 @@ const StatusViewer = ({
     setMute((e) => !e);
   };
 
-  const isMyStatus = status.user.id === user?.id;
+  const isMyStatus = status.userId === user?.id;
+
+  useEffect(() => {
+    if (isInputFocused) {
+      videoRef.current?.pause();
+    }
+  }, [isInputFocused]);
+
   return (
     <div
       className={cn(
@@ -173,13 +238,17 @@ const StatusViewer = ({
         status?.medias[active].url && (
           <div className="absolute inset-0 blur-lg z-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="status" src={status.medias[active].url} className="h-full w-full" />
+            <img
+              alt="status"
+              src={status.medias[active].url}
+              className="h-full w-full"
+            />
           </div>
         )}
 
       {status?.medias[active]?.mediaType === "VIDEO" &&
         status?.medias[active].url && (
-          <div className="absolute inset-0 blur-lg z-0 bg-rose-500" />
+          <div className="absolute inset-0 blur-lg z-0 bg-rose-950" />
         )}
 
       {mediaElements[active]}
@@ -266,7 +335,12 @@ const StatusViewer = ({
                       </AlertDialogTrigger>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      cpyText(`/users/${status.user.username}?status=open`);
+                      toast.success("Link copied");
+                    }}
+                  >
                     <Share className="size-2" /> Share
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -298,15 +372,54 @@ const StatusViewer = ({
         </div>
       </div>
 
-      {/* footer */}
-      <div className="absolute z-10 bottom-0 flex items-center gap-x-2 p-4 inset-x-0">
-        <Input
-          className="bg-transparent border-white text-white rounded-full placeholder:text-white focus-visible:ring-0"
-          placeholder={`Reply to ${status.user.username}...`}
-        />
-        <Heart className="size-7" />
-        <Send className="size-7" />
+      <div
+        className={cn(
+          isInputFocused ? "" : "hidden",
+          "text-white z-10 absolute bottom-24 px-4 inset-x-0"
+        )}
+      >
+        <h1 className="text-center text-2xl font-bold">Quick Reactions</h1>
+        <div className="flex justify-between items-center gap-x-2 max-w-[90%] mx-auto mt-4">
+          {["😂", "😮", "😍", "👏", "🔥", "💯"].map((e) => (
+            <button
+              onClick={() => sendReply(e)}
+              key={e}
+              className="text-4xl md:hover:scale-110 md:transition-transform"
+            >
+              {e}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* footer */}
+      {status.userId !== user?.id && (
+        <form className="absolute z-10 bottom-0 flex items-center gap-x-2 p-4 inset-x-0">
+          <Input
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+            disabled={isSendingMessage}
+            ref={inputRef}
+            className="bg-transparent border-white text-white rounded-full placeholder:text-white focus-visible:ring-0"
+            placeholder={
+              isSendingMessage
+                ? "Sending reply..."
+                : `Reply to ${status.user.username}...`
+            }
+          />
+          <Heart className="size-7" />
+          <button
+            type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              sendReply(undefined);
+            }}
+            className="disabled:text-muted-foreground"
+          >
+            <Send className="size-7 cursor-pointer" />
+          </button>
+        </form>
+      )}
     </div>
   );
 };

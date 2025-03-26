@@ -197,7 +197,10 @@ const PostFooter = ({
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Add a comment..."
-          className="focus-visible:outline-none focus-visible:ring-0 border-none text-base bg-black"
+          className={cn(
+            "focus-visible:outline-none focus-visible:ring-0 border-none text-base bg-black",
+            isFeedVariant ? "bg-transparent" : ""
+          )}
         />
         <button
           disabled={!comment.trim().length}

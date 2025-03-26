@@ -38,7 +38,7 @@ const PostMediaCarousel = ({
           width={500}
           height={500}
           className={cn(
-            "w-[calc(100%-20px)] max-h-[calc(100vh-100px)] object-contain object-center",
+            "w-full max-h-[calc(100vh-100px)] object-cover object-center",
             imageClassName
           )}
         />

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUsers } from "@/src/users/actions/user-actions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, User } from "lucide-react";
+import { ArrowRight, User, X } from "lucide-react";
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
@@ -56,36 +56,23 @@ const ChatUsersModal = ({
   const userId = useSessionStore((s) => s.user?.id);
   const [open, setOpen] = useState(false);
   const [debouncedValue, setDebouncedValue] = useDebounceValue("", 1000);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
   const [value, setValue] = useState({
     name: "",
     description: "",
   });
 
-  const { data, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["chat-users-search", debouncedValue],
     queryFn: async () => {
-      setIsLoading(true);
       const { data, message } = await getUsers({
         search: debouncedValue,
       });
-      setIsLoading(false);
       if (message) toast.error(message);
       return data;
     },
   });
-
-  useEffect(() => {
-    if (!debouncedValue.trim().length) {
-      qc?.setQueryData(["chat-users-search"], null);
-      return;
-    }
-    setIsLoading(true);
-    refetch().finally(() => {
-      setIsLoading(false);
-    });
-  }, [debouncedValue, qc, refetch]);
 
   const handleUserSelect = async (userId: string) => {
     setOpen(false);
@@ -166,10 +153,21 @@ const ChatUsersModal = ({
             <Input
               placeholder="Search..."
               className="border-0 outline-none focus-visible:ring-0"
+              value={search}
               onChange={(e) => {
+                setSearch(e.target.value);
                 setDebouncedValue(e.target.value);
               }}
             />
+            {search.length > 0 && (
+              <X
+                className="size-4"
+                onClick={() => {
+                  setSearch("");
+                  setDebouncedValue("");
+                }}
+              />
+            )}
           </div>
           <div className="max-h-[300px] overflow-y-auto">
             {isLoading ? (

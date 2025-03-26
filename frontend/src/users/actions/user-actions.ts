@@ -17,7 +17,10 @@ export const userById = async (id: string): NSCommon.Response<NSUser.User> => {
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -34,7 +37,10 @@ export const getUserByUsername = async (
     return { data: resJson };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -57,7 +63,7 @@ export const getProfile = async (): NSCommon.Response<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
-      message: error.message,
+      message: error?.response?.data?.message || error.message,
       statusCode: error.response.status,
       data: null,
     };
@@ -80,12 +86,14 @@ export const getUsers = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
 export const getFollowSuggestions = async ({
-  limit = 10,
   page = 1,
   search,
 }: NSCommon.PaginationDto): NSCommon.Response<
@@ -97,14 +105,16 @@ export const getFollowSuggestions = async ({
 > => {
   try {
     const query = new URLSearchParams();
-    query.append("limit", limit.toString());
     query.append("page", page.toString());
     if (search) query.append("search", search);
     const res = await api.get(`/users/suggested-to-follow?${query.toString()}`);
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -130,6 +140,9 @@ export const updateProfile = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };

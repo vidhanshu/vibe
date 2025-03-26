@@ -21,7 +21,10 @@ export const getFollowers = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -42,7 +45,10 @@ export const getFollowings = async ({
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };
 
@@ -52,6 +58,9 @@ export const followUnfollow = async (userId: string) => {
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    return { message: error.message, data: null };
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
   }
 };

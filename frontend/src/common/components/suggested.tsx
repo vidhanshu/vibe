@@ -87,7 +87,7 @@ const SuggestedForYou = ({
                 key={item.id}
                 className={cn(
                   "flex justify-between items-center",
-                  isFeedVariant ? "flex-col border p-2 rounded-md gap-4" : ""
+                  isFeedVariant ? "flex-col border px-4 py-2 rounded-md gap-4" : ""
                 )}
               >
                 <Link
@@ -113,11 +113,16 @@ const SuggestedForYou = ({
                     )}
                   >
                     <span className="font-semibold">{item?.username}</span>
-                    <span className="text-muted-foreground text-xs">
+                    {isFeedVariant && (
+                      <div className="text-xs text-muted-foreground truncate font-semibold">
+                        {item?.name}
+                      </div>
+                    )}
+                    <p className="text-muted-foreground text-xs truncate">
                       {item.followers?.[0]?.follower?.username
                         ? `Followed by ${item.followers[0].follower.username}`
                         : "Suggested for you"}
-                    </span>
+                    </p>
                   </div>
                 </Link>
                 <button

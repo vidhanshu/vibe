@@ -10,6 +10,7 @@ import {
   Pencil,
   Play,
   Reply,
+  Image as IImage,
 } from "lucide-react";
 import ActionTooltip from "@/src/common/components/action-tooltip";
 import {
@@ -30,6 +31,8 @@ import MediaViewerModal from "./media-viewer-modal";
 import { useState } from "react";
 import { getShortRelativeTime } from "@/src/common/utils/dayjs";
 import useChatSocket from "../hooks/use-chat-socket";
+import { isOnlyEmojis } from "../utils/emote";
+import Link from "next/link";
 
 const Message = ({
   message,
@@ -46,7 +49,6 @@ const Message = ({
   setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>;
   setReplyToMessage: (val: NSChat.Message | null) => void;
 }) => {
-  const qc = useQueryClient();
   const chatId = useParams().chatId as string;
   const userId = useSessionStore((s) => s.user?.id);
   const isMyMessage = message.senderId === userId;
@@ -65,8 +67,6 @@ const Message = ({
         return toast.error(res.message);
       }
       toast.success("Message unsent");
-      // qc.invalidateQueries({ queryKey: ["chat", chatId] });
-      // qc.invalidateQueries({ queryKey: ["chat-messages", chatId] });
       sUnSendMessage({ chatId, messageId: message.id });
     },
   });
@@ -155,44 +155,103 @@ const Message = ({
             </a>
           )}
 
+          {/* if status reply */}
+          {message.isStatus && (
+            <>
+              {message.status ? (
+                <div>
+                  <Link
+                    href={`/users/${message.status.user.username}?status=open`}
+                  >
+                    {message.status.medias[0].mediaType === "IMAGE" ? (
+                      <Image
+                        src={message.status.medias[0].url}
+                        alt="media-file"
+                        width={200}
+                        height={200}
+                        className="rounded-md cursor-pointer"
+                      />
+                    ) : (
+                      <div className="relative group/video cursor-pointer">
+                        <video
+                          className="rounded-md max-w-[200px]"
+                          src={message.status.medias[0].url}
+                        />
+                        <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
+                      </div>
+                    )}
+                  </Link>
+                </div>
+              ) : (
+                <div className="h-28 bg-secondary/30 rounded-md flex items-center flex-col justify-center text-muted-foreground">
+                  <IImage />
+                  <p>
+                    Story not <br />
+                    available
+                  </p>
+                </div>
+              )}
+              <div
+                className={cn(
+                  "text-xs text-muted-foreground",
+                  isMyMessage ? "border-r-4 pr-2 text-right" : "border-l-4 pl-2"
+                )}
+              >
+                {isMyMessage ? "You " : ""}Replied to{" "}
+                {!isMyMessage ? "Your " : `${message.status?.user.username}'s `}
+                Story
+              </div>
+            </>
+          )}
+
           {/* text */}
-          <div
-            id={message.id}
-            className={cn(
-              "px-3 py-1 bg-secondary w-fit rounded-sm",
-              {
-                "bg-[#3697ef] text-white ml-auto rounded-l-3xl": isMyMessage,
-                "rounded-r-3xl": !isMyMessage,
-              },
-              total === 1
-                ? "rounded-3xl"
-                : total === 2
-                ? isMyMessage
-                  ? index == 1
-                    ? "rounded-t-3xl"
-                    : "rounded-b-3xl"
-                  : index == 1
-                  ? "rounded-t-3xl rounded-r-3xl"
-                  : "rounded-b-3xl rounded-r-3xl"
-                : isMyMessage
-                ? index == total - 1
-                  ? "rounded-t-3xl"
-                  : index === 0
-                  ? "rounded-b-3xl"
-                  : ""
-                : index == total - 1
-                ? "rounded-t-3xl rounded-r-3xl"
-                : index === 0
-                ? "rounded-b-3xl rounded-r-3xl"
-                : ""
-            )}
-          >
+          {isOnlyEmojis(message.text || "") ? (
             <div
-              dangerouslySetInnerHTML={{
-                __html: message.text?.replaceAll("\n", "<br/>") || "",
-              }}
-            />
-          </div>
+              className={cn("text-5xl bg-transparent", {
+                "ml-auto text-right": isMyMessage,
+              })}
+            >
+              {message.text}
+            </div>
+          ) : (
+            <div
+              id={message.id}
+              className={cn(
+                "px-3 py-1 bg-secondary w-fit rounded-sm",
+                {
+                  "bg-[#3697ef] text-white ml-auto rounded-l-3xl": isMyMessage,
+                  "rounded-r-3xl": !isMyMessage,
+                },
+                total === 1
+                  ? "rounded-3xl"
+                  : total === 2
+                  ? isMyMessage
+                    ? index == 1
+                      ? "rounded-t-3xl"
+                      : "rounded-b-3xl"
+                    : index == 1
+                    ? "rounded-t-3xl rounded-r-3xl"
+                    : "rounded-b-3xl rounded-r-3xl"
+                  : isMyMessage
+                  ? index == total - 1
+                    ? "rounded-t-3xl"
+                    : index === 0
+                    ? "rounded-b-3xl"
+                    : ""
+                  : index == total - 1
+                  ? "rounded-t-3xl rounded-r-3xl"
+                  : index === 0
+                  ? "rounded-b-3xl rounded-r-3xl"
+                  : ""
+              )}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: message.text?.replaceAll("\n", "<br/>") || "",
+                }}
+              />
+            </div>
+          )}
 
           {/* medias */}
           {message.media && (
