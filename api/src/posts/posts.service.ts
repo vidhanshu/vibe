@@ -22,35 +22,41 @@ export class PostsService {
     id: string,
     { content, title, medias, hashTags = [] }: CreatePostDto,
   ): Promise<Post> {
-    return this.prisma.$transaction(async (prisma) => {
-      // 1. Upsert hashtags
-      const hashtagRecords = await Promise.all(
-        hashTags.map(async (tag) => {
-          const cleanTag = tag.replace(/^#/, '');
-          return prisma.hashTag.upsert({
-            where: { name: cleanTag },
-            update: {}, // No update needed, just ensure existence
-            create: { name: tag },
-          });
-        }),
-      );
+    return this.prisma.$transaction(
+      async (prisma) => {
+        // 1. Upsert hashtags
+        const hashtagRecords = await Promise.all(
+          hashTags.map(async (tag) => {
+            const cleanTag = tag.replace(/^#/, '');
+            return prisma.hashTag.upsert({
+              where: { name: cleanTag },
+              update: {}, // No update needed, just ensure existence
+              create: { name: tag },
+            });
+          }),
+        );
 
-      // 2. Create post and link hashtags
-      const data: Prisma.PostCreateInput = {
-        title,
-        content,
-        user: { connect: { id } },
-        medias: medias.length ? { create: medias } : undefined,
-        hashTags: {
-          connect: hashtagRecords.map((tag) => ({ id: tag.id })),
-        },
-      };
+        // 2. Create post and link hashtags
+        const data: Prisma.PostCreateInput = {
+          title,
+          content,
+          user: { connect: { id } },
+          medias: medias.length ? { create: medias } : undefined,
+          hashTags: {
+            connect: hashtagRecords.map((tag) => ({ id: tag.id })),
+          },
+        };
 
-      return prisma.post.create({
-        data,
-        include: { medias: true, hashTags: true },
-      });
-    });
+        return prisma.post.create({
+          data,
+          include: { medias: true, hashTags: true },
+        });
+      },
+      {
+        maxWait: 60000 * 1,
+        timeout: 60000 * 1,
+      },
+    );
   }
 
   async getAllPosts(
@@ -107,8 +113,9 @@ export class PostsService {
       items: posts.map((post) => {
         return {
           ...post,
-          liked: post.likes.findIndex(({ userId }) => userId === currentUserId)
-          !=-1,
+          liked:
+            post.likes.findIndex(({ userId }) => userId === currentUserId) !=
+            -1,
         };
       }),
       metadata: {
@@ -189,8 +196,9 @@ export class PostsService {
       items: posts.map((post) => {
         return {
           ...post,
-          liked: post.likes.findIndex(({ userId }) => userId === currentUserId) 
-          !=-1,
+          liked:
+            post.likes.findIndex(({ userId }) => userId === currentUserId) !=
+            -1,
         };
       }),
       metadata: {
@@ -250,8 +258,8 @@ export class PostsService {
         return {
           ...post,
           liked:
-            post.likes.findIndex(({ userId: lUserId }) => lUserId === userId) 
-            !=-1,
+            post.likes.findIndex(({ userId: lUserId }) => lUserId === userId) !=
+            -1,
         };
       }),
       metadata: {
