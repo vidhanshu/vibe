@@ -32,6 +32,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
+  Loader,
   MoreVertical,
   Pause,
   Play,
@@ -75,7 +76,7 @@ const StatusViewer = ({
 
   // eslint-disable-next-line
   const [_, cpyText] = useCopyToClipboard();
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ["delete-status"],
     mutationFn: async () => {
       const res = await deleteStatus();
@@ -413,6 +414,12 @@ const StatusViewer = ({
             <Send className="size-7 cursor-pointer" />
           </button>
         </form>
+      )}
+
+      {isPending && (
+        <div className="bg-black/60 w-full h-full absolute inset-0 flex items-center justify-center z-10">
+          <Loader className="size-6 animate-spin" />
+        </div>
       )}
     </div>
   );

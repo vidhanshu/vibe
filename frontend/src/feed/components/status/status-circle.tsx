@@ -41,7 +41,7 @@ const StatusCircle = ({
           url={status?.user.profilePhoto?.url}
         />
       </div>
-      <div className="text-muted-foreground text-sm text-center">
+      <div className="text-xs text-center truncate max-w-16 font-semibold">
         {status?.user?.username}
       </div>
     </div>
@@ -63,7 +63,7 @@ const StatusCircle = ({
           endContent={<PlusIcon className="size-4" />}
           className="absolute bottom-4 right-0 size-6"
         />
-        <div className="text-muted-foreground text-sm text-center">
+        <div className="text-xs text-center truncate max-w-16 font-semibold">
           {user?.username}
         </div>
       </div>

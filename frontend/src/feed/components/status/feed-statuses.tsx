@@ -50,7 +50,7 @@ const FeedStatuses = () => {
       <div
         ref={statusContainerRef}
         onScroll={handleScroll}
-        className="flex max-w-2xl overflow-x-auto gap-x-4 hide-scrollbar"
+        className="flex max-w-[38rem] overflow-x-auto gap-x-4 hide-scrollbar mx-auto"
       >
         {isLoading ? (
           Array.from({ length: 5 }).map((_, idx) => (
