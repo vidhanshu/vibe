@@ -16,6 +16,7 @@ import PostComments from "./post-comments";
 import PostFooter from "./post-footer";
 import PostMediaCarousel from "./post-media-carousel";
 import PostSkeleton from "./post-skeleton";
+import useSessionStore from "@/src/common/stores/session-store";
 
 interface ViewPostModalProps {
   postId: string;
@@ -25,6 +26,7 @@ interface ViewPostModalProps {
 }
 const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
   const router = useRouter();
+  const currentUserId = useSessionStore((s) => s.user?.id);
   const [comment, setComment] = useState("");
   const p = usePathname();
   const sp = useSearchParams();
@@ -68,6 +70,8 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
             <PostMediaCarousel
               title={post?.title ?? ""}
               medias={post?.medias ?? []}
+              postId={post.id}
+              isLiked={!!post?.liked}
             />
             <div className="col-span-5 flex flex-col max-h-[calc(100vh-50px)]">
               <PostComments

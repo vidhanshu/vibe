@@ -9,6 +9,7 @@ export namespace NSPost {
     userId: string;
     createdAt: Date;
     updatedAt: Date;
+    liked?: boolean;
     medias: NSCommon.FullMedia[];
     hashTags: HashTag[];
     _count: {

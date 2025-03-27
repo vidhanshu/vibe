@@ -5,7 +5,7 @@ import ViewPostModal from "@/src/common/components/modals/view-post-modal";
 import useSessionStore from "@/src/common/stores/session-store";
 import { getPosts, getSavedPosts } from "@/src/posts/actions/posts-actions";
 import { NSPost } from "@/src/posts/types";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, Loader2, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
@@ -22,7 +22,7 @@ const ProfilePosts = () => {
   const saved = pathname.includes("/saved");
 
   const { user } = useSessionStore();
-  const { data, isLoading, ref } = useInfinite({
+  const { data, isLoading, ref, isFetchingNextPage } = useInfinite({
     fetcher: saved
       ? getSavedPosts
       : // eslint-disable-next-line
@@ -73,6 +73,9 @@ const ProfilePosts = () => {
         </NoContent>
       )}
       {postId ? <ViewPostModal open postId={postId} /> : null}
+      {isFetchingNextPage && (
+        <Loader2 className="size-6 mx-auto animate-spin" />
+      )}
       <div ref={ref} />
     </div>
   );
@@ -90,7 +93,7 @@ const ProfilePostCard = ({ post }: { post: NSPost.Post }) => {
       href={`/users/${param.username}${saved ? "/saved" : ""}?postId=${
         post.id
       }`}
-      className="h-[300px] relative z-0 bg-white/10 rounded-md overflow-hidden group"
+      className="h-[300px] relative z-0 bg-white/10 group"
     >
       {post.medias?.[0]?.url && post.medias?.[0]?.mediaType === "IMAGE" ? (
         <Image
@@ -98,7 +101,13 @@ const ProfilePostCard = ({ post }: { post: NSPost.Post }) => {
           alt={post.title}
           src={post.medias?.[0]?.url}
           fill
-          className="object-contain object-center"
+          draggable={false}
+          className="object-cover object-center"
+        />
+      ) : post.medias?.[0]?.url && post.medias[0]?.mediaType === "VIDEO" ? (
+        <video
+          className="w-full h-full object-cover"
+          src={post.medias?.[0]?.url}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">

@@ -111,6 +111,7 @@ const Sidebar = () => {
             >
               {!collapsed ? (
                 <Image
+                  draggable={false}
                   src="/full-logo.svg"
                   className=""
                   alt="logo"
@@ -119,6 +120,7 @@ const Sidebar = () => {
                 />
               ) : (
                 <Image
+                  draggable={false}
                   src="/logo.svg"
                   className=""
                   alt="logo"
@@ -160,9 +162,13 @@ const Sidebar = () => {
           >
             Search
           </SidebarItem>
-          <SidebarItem collapsed={collapsed} icon={Compass}>
-            Explore
-          </SidebarItem>
+          <div>
+            <Link href="/explore">
+              <SidebarItem collapsed={collapsed} icon={Compass}>
+                Explore
+              </SidebarItem>
+            </Link>
+          </div>
           <div>
             <Link href="/chats">
               <SidebarItem collapsed={collapsed} icon={MessageCircle}>
@@ -260,7 +266,7 @@ const Sidebar = () => {
                     sideOffset={20}
                     content={`${isStatus ? "Status" : "Post"} uploading...`}
                   >
-                    <div className="size-5">
+                    <div className="size-5 flex items-center justify-center">
                       <Loader2 className="size-4 animate-spin" />
                     </div>
                   </ActionTooltip>
@@ -277,7 +283,7 @@ const Sidebar = () => {
                     <span className="text-6">❌</span>
                   </ActionTooltip>
                 )}
-                {status === "uploading" && collapsed && (
+                {status === "completed" && collapsed && (
                   <ActionTooltip
                     content={`Added ${isStatus ? "status" : "post"} ✅`}
                     className="z-[1001]"
@@ -385,7 +391,14 @@ export const NavbarMobile = () => {
   return (
     <div className="flex gap-x-2 items-center py-2 px-2 border-b">
       <Link href="/">
-        <Image src="/logo.svg" className="" alt="logo" width={40} height={40} />
+        <Image
+          draggable={false}
+          src="/logo.svg"
+          className=""
+          alt="logo"
+          width={40}
+          height={40}
+        />
       </Link>
       <div ref={popoverRef} className="flex-1 relative">
         <Input

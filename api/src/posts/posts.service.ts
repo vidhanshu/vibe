@@ -53,12 +53,10 @@ export class PostsService {
     });
   }
 
-  async getAllPosts({
-    limit: take = 10,
-    page = 1,
-    search,
-    username,
-  }: FilterPostDto): Promise<PaginatedResponse<Post>> {
+  async getAllPosts(
+    { limit: take = 10, page = 1, search, username, tag }: FilterPostDto,
+    currentUserId,
+  ): Promise<PaginatedResponse<Post>> {
     const skip = (page - 1) * take;
     const filter: Prisma.PostFindManyArgs = {
       take,
@@ -92,16 +90,109 @@ export class PostsService {
     if (username) {
       filter.where = { user: { username } };
     }
+    if (tag) {
+      filter.where = { hashTags: { some: { name: { equals: tag } } } };
+    }
 
     const [posts, count] = await Promise.all([
-      this.prisma.post.findMany(filter) as Promise<Post[]>,
+      this.prisma.post.findMany(filter) as Promise<
+        (Post & { likes: { userId: string }[] })[]
+      >,
       this.prisma.post.count({
         where: filter.where,
       }),
     ]);
 
     return {
-      items: posts,
+      items: posts.map((post) => {
+        return {
+          ...post,
+          liked: post.likes.findIndex(({ userId }) => userId === currentUserId)
+          !=-1,
+        };
+      }),
+      metadata: {
+        totalItems: count,
+        itemsCount: posts.length,
+        totalPages: Math.ceil(count / take),
+        currentPage: page,
+        limit: take,
+      },
+    };
+  }
+
+  async getExplorePosts(
+    { limit: take = 10, page = 1 }: FilterPostDto,
+    currentUserId: string,
+  ): Promise<PaginatedResponse<Post>> {
+    const skip = (page - 1) * take;
+
+    // Fetch user-interested hashtags
+    const userInterests = await this.prisma.hashTag.findMany({
+      where: { posts: { some: { userId: currentUserId } } },
+      select: { name: true },
+    });
+
+    // Define filters for explore posts
+    const filter: Prisma.PostFindManyArgs = {
+      take,
+      skip,
+      where: {
+        NOT: {
+          userId: currentUserId, // Exclude user's own posts
+          likes: { some: { userId: currentUserId } }, // Exclude liked posts
+          comments: { some: { userId: currentUserId } }, // Exclude commented posts
+          savedBy: { some: { id: currentUserId } }, // Exclude saved posts
+        },
+        OR: [
+          { likes: { some: {} } }, // Trending posts (high likes)
+          { comments: { some: {} } }, // Trending posts (high comments)
+          { user: { followers: { some: { id: currentUserId } } } }, // Posts from followed users
+          {
+            hashTags: {
+              some: { name: { in: userInterests.map((tag) => tag.name) } },
+            },
+          }, // Posts with user's interested hashtags
+        ],
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            profilePhoto: true,
+            username: true,
+            name: true,
+            status: true,
+          },
+        },
+        hashTags: true,
+        medias: true,
+        likes: { select: { userId: true } },
+        savedBy: { select: { id: true } },
+        _count: { select: { likes: true, comments: true } },
+      },
+      orderBy: [
+        { likes: { _count: 'desc' } },
+        { comments: { _count: 'desc' } },
+        { createdAt: 'desc' },
+      ],
+    };
+
+    const [posts, count] = await Promise.all([
+      this.prisma.post.findMany(filter) as Promise<
+        (Post & { likes: { userId: string }[] })[]
+      >,
+      this.prisma.post.count({ where: filter.where }),
+    ]);
+
+    return {
+      items: posts.map((post) => {
+        return {
+          ...post,
+          liked: post.likes.findIndex(({ userId }) => userId === currentUserId) 
+          !=-1,
+        };
+      }),
       metadata: {
         totalItems: count,
         itemsCount: posts.length,
@@ -148,12 +239,21 @@ export class PostsService {
     };
 
     const [posts, count] = await Promise.all([
-      this.prisma.post.findMany(filter),
+      this.prisma.post.findMany(filter) as Promise<
+        (Post & { likes: { userId: string }[] })[]
+      >,
       this.prisma.post.count({ where: baseWhere }),
     ]);
 
     return {
-      items: posts,
+      items: posts.map((post) => {
+        return {
+          ...post,
+          liked:
+            post.likes.findIndex(({ userId: lUserId }) => lUserId === userId) 
+            !=-1,
+        };
+      }),
       metadata: {
         totalItems: count,
         itemsCount: posts.length,
@@ -164,7 +264,10 @@ export class PostsService {
     };
   }
 
-  async getPostById(id: string): Promise<Post> {
+  async getPostById(
+    id: string,
+    currentUserId: string,
+  ): Promise<Post & { liked: boolean }> {
     const post = await this.prisma.post.findUnique({
       where: { id },
       include: {
@@ -183,7 +286,11 @@ export class PostsService {
       },
     });
     if (!post) throw new NotFoundException(`Post #${id} not found`);
-    return post;
+    return {
+      ...post,
+      liked:
+        post.likes.findIndex(({ userId }) => userId === currentUserId) != -1,
+    };
   }
 
   async updatePost(

@@ -42,10 +42,11 @@ const UserChip = ({
   const xl_2 = size === "2xl";
   const isChatVariant = variant === "chat";
 
+  const statusExists = !!user?.status && !noLink;
   const avatar = (
     <div
       className={cn({
-        "insta-bg rounded-full p-[1px] cursor-pointer": user?.status,
+        "insta-bg rounded-full p-[1px] cursor-pointer": statusExists,
       })}
     >
       <UserAvatar
@@ -59,7 +60,7 @@ const UserChip = ({
             "size-16": xl_2,
           },
           avatarClassName,
-          { "border-2 border-black": user?.status }
+          { "border-2 border-black": statusExists }
         )}
         fallbackClassName={cn(
           {
@@ -137,7 +138,7 @@ const UserChip = ({
       </div>
     );
   }
-  if (user?.status) {
+  if (user?.status && !noLink) {
     return (
       <div className="flex justify-between items-center gap-x-2">
         <Link href={`/users/${user.username}?status=open`}>{avatar}</Link>

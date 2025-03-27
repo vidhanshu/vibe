@@ -51,6 +51,7 @@ const ViewCropStep = ({
           alt="image"
           width={468}
           height={585}
+          draggable={false}
           className="object-contain aspect-auto h-[585px] w-auto md:w-[468px]"
         />
       );
@@ -138,6 +139,7 @@ const ViewCropStep = ({
                       alt="image"
                       width={100}
                       height={100}
+                      draggable={false}
                       className="rounded-md object-cover aspect-square"
                     />
                     {closeButton}

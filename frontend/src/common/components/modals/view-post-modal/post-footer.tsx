@@ -68,12 +68,13 @@ const PostFooter = ({
   useEffect(() => {
     if (!currentUserId) return;
 
-    if (post?.likes?.some(({ userId }) => userId === currentUserId)) {
+    if (post?.liked) {
       setLiked(true);
     } else {
       setLiked(false);
     }
 
+    // TODO: also move to backed similar to like/follow
     if (post?.savedBy?.some(({ id }) => id === currentUserId)) {
       setSaved(true);
     } else {
@@ -151,7 +152,7 @@ const PostFooter = ({
                         <Link
                           key={name}
                           className="mr-1 text-sm text-[#e0f1ff]"
-                          href={`/tags/${name}`}
+                          href={`/explore//tags/${name}`}
                         >
                           <button>#{name}</button>
                         </Link>

@@ -1,9 +1,12 @@
 import Button from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NSCommon } from "@/src/common/types";
+import useLike from "@/src/posts/hooks/use-like";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
+  Heart,
   Pause,
   Play,
   Volume2,
@@ -18,20 +21,35 @@ const PostMediaCarousel = ({
   imageClassName,
   videoClassName,
   containerClassName,
+  postId,
+  isLiked,
 }: {
   title: string;
   medias: NSCommon.FullMedia[];
   imageClassName?: string;
   videoClassName?: string;
   containerClassName?: string;
+  postId: string;
+  isLiked: boolean;
 }) => {
   const [active, setActive] = useState(0);
+  const [showHeart, setShowHeart] = useState(false);
   const LENGTH = medias.length;
+  const { handleLike } = useLike({
+    postId: postId,
+  });
 
   const mediaElements = medias.map((media, key) => {
     if (media.mediaType === "IMAGE")
       return (
         <Image
+          onDoubleClick={() => {
+            setShowHeart(true);
+            setTimeout(() => {
+              setShowHeart(false);
+            }, 1000);
+            if (!isLiked) handleLike();
+          }}
           key={key}
           src={media.url}
           alt={title}
@@ -41,6 +59,7 @@ const PostMediaCarousel = ({
             "w-full max-h-[calc(100vh-52px)] object-center aspect-auto",
             imageClassName
           )}
+          draggable={false}
         />
       );
     return (
@@ -51,11 +70,23 @@ const PostMediaCarousel = ({
   return (
     <div
       className={cn(
-        "col-span-7 flex items-center justify-center relative bg-secondary",
+        "col-span-7 flex items-center justify-center relative bg-secondary overflow-hidden",
         containerClassName
       )}
     >
       {mediaElements[active]}
+      <AnimatePresence>
+        {showHeart && (
+          <motion.div
+            initial={{ scale: 0.5 }}
+            animate={{ scale: 1, rotate: "45deg" }}
+            exit={{ y: "-450px" }}
+            className="size-20 inset-0 m-auto absolute"
+          >
+            <Heart className="fill-rose-500 size-20 stroke-rose-500" />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {LENGTH > 1 && (
         <>
           <ChevronLeft

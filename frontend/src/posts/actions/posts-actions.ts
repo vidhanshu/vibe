@@ -88,9 +88,11 @@ export const updatePost = async (
 };
 
 export const getPosts = async ({
+  tag,
   username,
   page,
 }: {
+  tag?: string;
   username?: string;
   page?: number;
 }): NSCommon.Response<NSCommon.PaginatedResponse<NSPost.Post>> => {
@@ -98,7 +100,26 @@ export const getPosts = async ({
     const sp = new URLSearchParams();
     if (page) sp.append("page", page.toString());
     if (username) sp.append("username", username);
+    if (tag) sp.append("tag", tag);
     const res = await api.get(`/posts?${sp.toString()}`);
+    return { data: res.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+export const getExplorePosts = async ({
+  page,
+}: {
+  page?: number;
+}): NSCommon.Response<NSCommon.PaginatedResponse<NSPost.Post>> => {
+  try {
+    const sp = new URLSearchParams();
+    if (page) sp.append("page", page.toString());
+    const res = await api.get(`/posts/explore?${sp.toString()}`);
     return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

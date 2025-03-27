@@ -116,7 +116,7 @@ const ChatList = () => {
             <UserChip user={user!} size="md" />
             <div className="space-x-2">
               <ChatUsersModal>
-                <Button variant="secondary" size="icon-xs">
+                <Button variant="secondary" size="icon-xs" title="New Chat">
                   <Edit className="size-4" />
                 </Button>
               </ChatUsersModal>
@@ -139,6 +139,7 @@ const ChatList = () => {
                 }}
               >
                 <Button
+                  title="New Group"
                   loading={isCreating}
                   loaderClassName="size-4"
                   variant="secondary"
@@ -197,10 +198,10 @@ const ChatList = () => {
             ) : !group.length ? (
               <div className="py-8 flex items-center justify-center">
                 <NoContent
-                  title="No Chats"
+                  title="No Groups"
                   icon={MessageCircle}
                   iconClassName="size-4"
-                  subtitle="There are no chats, select a user and chat"
+                  subtitle="There are no groups, create one"
                 />
               </div>
             ) : (

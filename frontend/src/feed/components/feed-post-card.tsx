@@ -51,7 +51,7 @@ const FeedPostCard = ({
   setEditPostId: (id: string) => void;
   setViewPostId: (id: string) => void;
 }) => {
-  const { id, createdAt, medias, title, user } = detailedPost;
+  const { id, createdAt, medias, title, user, liked } = detailedPost;
 
   const qc = useQueryClient();
   const [comment, setComment] = useState("");
@@ -109,19 +109,7 @@ const FeedPostCard = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>Post options</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {user?.id !== currentUserId ? (
-                  <DropdownMenuGroup>
-                    {/* <DropdownMenuItem className="text-rose-500">
-                      <SquareX />
-                      <span>Report</span>
-                    </DropdownMenuItem> */}
-                    <DropdownMenuItem className="text-rose-500">
-                      <UserMinus />
-                      <span>Unfollow</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                ) : (
+                {user?.id === currentUserId ? (
                   <DropdownMenuGroup>
                     <DropdownMenuItem
                       onClick={() => setEditPostId(id)}
@@ -140,16 +128,10 @@ const FeedPostCard = ({
                       </AlertDialogTrigger>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
-                )}
+                ) : null}
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  {user?.id !== currentUserId && (
-                    <DropdownMenuItem>
-                      <Star />
-                      <span>Add to favorites</span>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem>
+                  <DropdownMenuItem disabled>
                     <Share />
                     <span>Share to...</span>
                   </DropdownMenuItem>
@@ -174,9 +156,11 @@ const FeedPostCard = ({
           <PostMediaCarousel
             containerClassName="flex-1"
             imageClassName="w-full max-h-[578px]"
-            videoClassName="max-h-[578px] w-auto max-w-sm"
+            videoClassName="max-h-[578px] w-full"
             title={title}
+            postId={id}
             medias={medias}
+            isLiked={!!liked}
           />
         </div>
         {detailedPost && (

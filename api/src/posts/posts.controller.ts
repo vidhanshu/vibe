@@ -28,8 +28,13 @@ export class PostsController {
   }
 
   @Get()
-  getAllPosts(@Query() filterPostDto: FilterPostDto) {
-    return this.postsService.getAllPosts(filterPostDto);
+  getAllPosts(@Query() filterPostDto: FilterPostDto, @User('sub') userId) {
+    return this.postsService.getAllPosts(filterPostDto, userId);
+  }
+
+  @Get('/explore')
+  getExplorePosts(@Query() filterPostDto: FilterPostDto, @User('sub') userId) {
+    return this.postsService.getExplorePosts(filterPostDto, userId);
   }
 
   @Get('/saved')
@@ -38,8 +43,8 @@ export class PostsController {
   }
 
   @Get(':id')
-  getPostById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.postsService.getPostById(id);
+  getPostById(@Param('id', ParseUUIDPipe) id: string, @User('sub') userId) {
+    return this.postsService.getPostById(id, userId);
   }
 
   @Patch(':id')

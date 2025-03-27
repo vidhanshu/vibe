@@ -13,7 +13,7 @@ const ProfileReels = () => {
 
   return (
     <div>
-      <h1 className="text-center text-lg border p-2">Feature Yet To Be Implemented</h1>
+      <h1 className="text-center text-lg border p-2 mb-4 rounded-sm w-fit mx-auto text-rose-400 border-rose-400">Feature Yet To Be Implemented</h1>
       <NoContent
         icon={Youtube}
         {...(!isSelf

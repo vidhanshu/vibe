@@ -77,6 +77,7 @@ const NotificationContextProvider = ({ children }: PropsWithChildren) => {
             <div className="size-[40px] min-w-[40px] relative">
               {mediaToShow.mediaType === "IMAGE" ? (
                 <Image
+                  draggable={false}
                   src={mediaToShow.url}
                   alt="media-file"
                   width={40}

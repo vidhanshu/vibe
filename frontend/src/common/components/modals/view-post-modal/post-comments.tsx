@@ -85,7 +85,7 @@ const PostComments = ({
                       <Link
                         key={name}
                         className="mr-1 text-sm text-[#e0f1ff]"
-                        href={`/tags/${name}`}
+                        href={`/explore/tags/${name}`}
                       >
                         <button>#{name}</button>
                       </Link>

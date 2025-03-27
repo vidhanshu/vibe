@@ -5,4 +5,8 @@ export class FilterPostDto extends PaginationDto {
   @IsString()
   @IsOptional()
   username: string;
+
+  @IsString()
+  @IsOptional()
+  tag: string;
 }

@@ -129,6 +129,7 @@ const Message = ({
                           width={150}
                           height={150}
                           quality={30}
+                          draggable={false}
                           className={cn(
                             "rounded-md cursor-pointer",
                             isMyMessage && "ml-auto"
@@ -171,6 +172,7 @@ const Message = ({
                   >
                     {message.status.medias[0].mediaType === "IMAGE" ? (
                       <Image
+                        draggable={false}
                         src={message.status.medias[0].url}
                         alt="media-file"
                         width={200}
@@ -265,6 +267,7 @@ const Message = ({
             <div onClick={() => setIsMediaViewerOpen(true)}>
               {message.media.mediaType === "IMAGE" ? (
                 <Image
+                  draggable={false}
                   src={message.media.url}
                   alt="media-file"
                   width={200}

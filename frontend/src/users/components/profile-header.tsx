@@ -164,21 +164,22 @@ const ProfileHeader = () => {
                 {data?.data?.follows ? "Unfollow" : "Follow"}
               </Button>
             )}
-            {isUserSelf && (
+            {isUserSelf ? (
               <Link href="/users/accounts/edit">
                 <Button className="font-semibold" variant="secondary" size="sm">
                   Edit profile
                 </Button>
               </Link>
+            ) : (
+              <Button
+                onClick={handleUserSelect}
+                className="font-semibold"
+                variant="secondary"
+                size="sm"
+              >
+                Message
+              </Button>
             )}
-            <Button
-              onClick={handleUserSelect}
-              className="font-semibold"
-              variant="secondary"
-              size="sm"
-            >
-              Message
-            </Button>
             {/* {!isUserSelf && (
               <Button size="icon-sm" variant="secondary" className="rounded-md">
                 <UserPlus2 className="size-5" />

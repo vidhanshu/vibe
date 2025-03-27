@@ -41,6 +41,7 @@ const MediaViewerModal = ({
               className="object-contain rounded-md"
               quality={50}
               priority
+              draggable={false}
             />
           </div>
         ) : (
