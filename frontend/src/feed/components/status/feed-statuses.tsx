@@ -2,16 +2,13 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import useInfinite from "@/src/common/hooks/use-infinite";
-import useSessionStore from "@/src/common/stores/session-store";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { getStatuses } from "../../actions/status-action";
 import StatusCircle from "./status-circle";
 import StatusViewDrawer from "./status-view-drawer";
-import Button from "@/components/ui/button";
 
 const FeedStatuses = () => {
-  const { user } = useSessionStore();
   const statusContainerRef = useRef<HTMLDivElement>(null);
   const [viewStatusIdx, setViewStatusIdx] = useState<null | number>(null); // null -> close , number -> open
   const [showLeft, setShowLeft] = useState(false);
@@ -23,7 +20,7 @@ const FeedStatuses = () => {
 
   const allData = useMemo(
     () => data?.map(({ items }) => items).flat(),
-    [data, user?.id]
+    [data]
   );
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {

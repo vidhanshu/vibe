@@ -1,7 +1,6 @@
 "use server";
 
-import { NSAuth } from "@/src/auth/types";
-import { deleteFiles, uploadFiles } from "@/src/common/actions/file-actions";
+import { deleteFiles } from "@/src/common/actions/file-actions";
 import { NSCommon } from "@/src/common/types";
 import api from "@/src/common/utils/axios";
 import { NSPost } from "../types";

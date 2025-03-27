@@ -12,10 +12,8 @@ import {
   getFollowings,
 } from "@/src/users/actions/follow-actions";
 import NoContent from "@/src/users/components/no-content";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, User, X } from "lucide-react";
-import React, { PropsWithChildren, useEffect, useMemo } from "react";
-import { toast } from "sonner";
+import React, { PropsWithChildren, useMemo } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import UserChip from "../user-chip";
 import useInfinite from "../../hooks/use-infinite";
@@ -25,13 +23,12 @@ const FollowersFollowingsModal = ({
   children,
   forFollowers = true,
 }: { id: string; forFollowers?: boolean } & PropsWithChildren) => {
-  const qc = useQueryClient();
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = useDebounceValue("", 1000);
 
   const { data, isLoading, ref, isFetchingNextPage } = useInfinite({
     queryKey: [forFollowers ? "followers" : "followings", search],
-    fetcher: (props: any) =>
+    fetcher: (props: { page: number }) =>
       forFollowers
         ? getFollowers({ id, search, ...props })
         : getFollowings({ id, search, ...props }),

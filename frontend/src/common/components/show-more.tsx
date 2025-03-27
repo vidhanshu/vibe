@@ -20,7 +20,7 @@ const ShowMore = ({
   const isExceeding = text.length > limit;
   const txString = useMemo(
     () => (isReadMore ? text.slice(0, limit) : text).replaceAll("\n", "<br/>"),
-    [text, isReadMore]
+    [text, isReadMore, limit]
   );
 
   return (

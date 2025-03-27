@@ -62,19 +62,18 @@ const FeedList = () => {
               iconContainerClassName="size-16"
               title="No posts"
               subtitle="Be the first one to post on vibe 😉!"
-              children={
-                <CreatePostModal asChild>
-                  <Button
-                    size="sm"
-                    className="mt-2 w-fit"
-                    containerProps={{ className: "gap-x-1" }}
-                    endContent={<Plus className="size-5" />}
-                  >
-                    Create post
-                  </Button>
-                </CreatePostModal>
-              }
-            />
+            >
+              <CreatePostModal asChild>
+                <Button
+                  size="sm"
+                  className="mt-2 w-fit"
+                  containerProps={{ className: "gap-x-1" }}
+                  endContent={<Plus className="size-5" />}
+                >
+                  Create post
+                </Button>
+              </CreatePostModal>
+            </NoContent>
           </div>
         ) : (
           <div className="space-y-6 max-w-[29rem] mx-auto">

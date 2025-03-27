@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getUsers } from "@/src/users/actions/user-actions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, User, X } from "lucide-react";
-import { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { PropsWithChildren, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
 import UserChip from "@/src/common/components/user-chip";

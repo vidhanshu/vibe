@@ -80,7 +80,8 @@ const CreatePostModal = ({
         updateUpload(uploadId, "completed");
         toast.success("Post created successfully");
         return data;
-      } catch (error) {
+        // eslint-disable-next-line
+      } catch (e) {
         updateUpload(uploadId, "failed");
         return toast.error("Failed to upload status.");
       }

@@ -54,7 +54,7 @@ export function Multiselect({
         setSelected(selected.filter((s) => s.value !== option.value));
       }
     },
-    [disabled, selected]
+    [disabled, selected, setSelected]
   );
 
   const handleKeyDown = React.useCallback(
@@ -82,7 +82,7 @@ export function Multiselect({
         setSelected(selected.slice(0, -1)); // Remove last selected item
       }
     },
-    [inputValue, selected, onCreate, disabled]
+    [inputValue, selected, onCreate, disabled, setSelected, setInputValue]
   );
 
   const selectables = options.filter(
@@ -217,7 +217,7 @@ export function Multiselect({
                         })}
                       >
                         <p>
-                          Create "#<strong>{inputValue}</strong>"
+                          Create &ldquo;#<strong>{inputValue}</strong>&rdquo;
                         </p>
                       </CommandItem>
                     ) : isLoading ? (

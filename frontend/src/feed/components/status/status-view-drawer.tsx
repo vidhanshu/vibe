@@ -15,7 +15,7 @@ import { NSPost } from "@/src/posts/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { addStatusView } from "../../actions/status-action";
 import StatusViewer from "./status-viewer";

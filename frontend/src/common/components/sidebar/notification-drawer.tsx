@@ -28,7 +28,7 @@ const NotificationDrawer = ({ closeDrawer }: { closeDrawer: () => void }) => {
     setNotifications(
       data?.map((data) => data.items).flat() as NSCommon.Notification[]
     );
-  }, [data]);
+  }, [data, setNotifications]);
 
   return (
     <>

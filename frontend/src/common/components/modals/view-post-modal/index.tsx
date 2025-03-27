@@ -16,7 +16,6 @@ import PostComments from "./post-comments";
 import PostFooter from "./post-footer";
 import PostMediaCarousel from "./post-media-carousel";
 import PostSkeleton from "./post-skeleton";
-import useSessionStore from "@/src/common/stores/session-store";
 
 interface ViewPostModalProps {
   postId: string;
@@ -26,7 +25,6 @@ interface ViewPostModalProps {
 }
 const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
   const router = useRouter();
-  const currentUserId = useSessionStore((s) => s.user?.id);
   const [comment, setComment] = useState("");
   const p = usePathname();
   const sp = useSearchParams();

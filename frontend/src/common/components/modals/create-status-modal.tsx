@@ -81,7 +81,8 @@ const CreateStatusModal = ({
         qc.invalidateQueries({ queryKey: ["session"] });
         onReset();
         return data;
-      } catch (error) {
+        // eslint-disable-next-line
+      } catch (error: any) {
         updateUpload(uploadId, "failed");
         return toast.error("Failed to upload status.");
       }
@@ -140,7 +141,7 @@ const CreateStatusModal = ({
         hideCloseBtn
         aria-describedby="modal-description"
         onEscapeKeyDown={(e) => {
-          step !== "media_select" && e.preventDefault();
+          if (step !== "media_select") e.preventDefault();
         }}
         onInteractOutside={(e) => e.preventDefault()}
         className="p-0 border-none gap-0 rounded-md overflow-hidden w-full md:max-w-max"

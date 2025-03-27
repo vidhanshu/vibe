@@ -7,7 +7,7 @@ import FollowersFollowingsModal from "@/src/common/components/modals/followers-f
 import useSessionStore from "@/src/common/stores/session-store";
 import { getShortNumber } from "@/src/common/utils/number";
 import { getUserByUsername } from "@/src/users/actions/user-actions";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Bookmark, Grid3X3, Youtube } from "lucide-react";
 import Link from "next/link";
 import {
@@ -17,7 +17,6 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { toast } from "sonner";
-import { followUnfollow } from "../actions/follow-actions";
 import ProfileHeaderSkeleton from "./skeletons/profile-header-skeleton";
 import StatusViewDrawer from "@/src/feed/components/status/status-view-drawer";
 import useFollow from "../hooks/use-follow";
@@ -31,7 +30,6 @@ const PRONOUN_MAP = {
 
 const ProfileHeader = () => {
   const params = useParams();
-  const qc = useQueryClient();
   const router = useRouter();
   const sp = useSearchParams();
   const isOpen = sp.get("status") === "open";
@@ -102,7 +100,7 @@ const ProfileHeader = () => {
             router.push(pathname.split("?")[0]);
           }}
           statuses={[currentUser.status]}
-          setViewStatusIdx={(idx) => {}}
+          setViewStatusIdx={() => {}}
           viewStatusIdx={isOpen ? 0 : null}
         />
       )}

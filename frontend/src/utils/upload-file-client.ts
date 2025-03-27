@@ -11,7 +11,7 @@ const uploadFileClient = async (
   onProgress?: (progress: number) => void
 ) => {
   let uploadedFiles: NSCommon.Media[] = [];
-  let uploadedKeys = [];
+  const uploadedKeys = [];
   const token = await getAuthTokenSA();
   if (!token) {
     toast.error("Something went wrong, please try again!");

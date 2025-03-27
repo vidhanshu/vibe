@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCopyToClipboard } from "usehooks-ts";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { unSendMessage } from "../actions/chats-action";
 import { useParams } from "next/navigation";
 import Image from "next/image";

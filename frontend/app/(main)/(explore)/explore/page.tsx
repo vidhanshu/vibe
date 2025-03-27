@@ -19,7 +19,7 @@ const ExplorePage = () => {
   const [viewPostId, setViewPostId] = useState<string | null>(null);
   const { data, isFetchingNextPage, isLoading, ref } = useInfinite({
     queryKey: ["explore"],
-    fetcher: (val: any) => getExplorePosts({ ...val }),
+    fetcher: (val: { page: number }) => getExplorePosts({ ...val }),
   });
 
   const allData = useMemo(() => {
@@ -45,19 +45,18 @@ const ExplorePage = () => {
             iconContainerClassName="size-16"
             title="No posts to explore"
             subtitle="Be the first one to post on vibe 😉!"
-            children={
-              <CreatePostModal asChild>
-                <Button
-                  size="sm"
-                  className="mt-2 w-fit"
-                  containerProps={{ className: "gap-x-1" }}
-                  endContent={<Plus className="size-5" />}
-                >
-                  Create post
-                </Button>
-              </CreatePostModal>
-            }
-          />
+          >
+            <CreatePostModal asChild>
+              <Button
+                size="sm"
+                className="mt-2 w-fit"
+                containerProps={{ className: "gap-x-1" }}
+                endContent={<Plus className="size-5" />}
+              >
+                Create post
+              </Button>
+            </CreatePostModal>
+          </NoContent>
         ) : (
           allData.map((post) => {
             const image = post.medias.find(

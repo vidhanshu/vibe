@@ -132,6 +132,8 @@ const useChatMessages = () => {
     offUpdateMessage,
     userId,
     unlocked,
+    qc,
+    audioRef,
   ]);
 
   const allMessages = useMemo(() => {

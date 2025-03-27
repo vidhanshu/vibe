@@ -5,19 +5,13 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState,
-  useCallback,
+  useState
 } from "react";
 import io, { type Socket } from "socket.io-client";
 import { SOCKET_URL } from "../utils/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getAuthTokenSA } from "../actions/get-token";
-import { NSChat } from "@/src/chats/types";
 
-type OnRemovePayload = {
-  chatId: string;
-  messageId: string;
-};
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;

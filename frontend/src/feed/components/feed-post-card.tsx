@@ -8,10 +8,7 @@ import {
   Ellipsis,
   Paperclip,
   Pencil,
-  Share,
-  Star,
-  Trash,
-  UserMinus,
+  Share, Trash
 } from "lucide-react";
 import { useState } from "react";
 

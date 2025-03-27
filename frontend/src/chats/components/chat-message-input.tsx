@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "@/src/common/components/popovers/emoji-picker";
 import { useMutation } from "@tanstack/react-query";
-import { Smile, Image, X, TypeIcon } from "lucide-react";
+import { Smile, Image, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { sendMessage, updateMessage } from "../actions/chats-action";
@@ -16,7 +16,6 @@ import useSessionStore from "@/src/common/stores/session-store";
 import useChatSocket, {
   SocketOnTypingResponse,
 } from "../hooks/use-chat-socket";
-import { useDebounceValue } from "usehooks-ts";
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024;
 const MessageInput = ({
@@ -146,6 +145,7 @@ const MessageInput = ({
     offTypingMessage,
     chatId,
     userId,
+    typing,
   ]);
 
   useEffect(() => {

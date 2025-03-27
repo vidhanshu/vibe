@@ -3,13 +3,7 @@
  * This still doesn't work properly
  */
 
-import {
-  DOMAttributes,
-  UIEvent,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { NSChat } from "../types";
 
 const useMessageContainerScroll = ({
@@ -100,6 +94,7 @@ const useMessageContainerScroll = ({
   }, []);
 
   const handleScroll = (
+    // eslint-disable-next-line
     e: any,
     fetchNextPage: () => void,
     hasNextPage: boolean

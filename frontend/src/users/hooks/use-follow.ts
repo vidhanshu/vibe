@@ -1,7 +1,6 @@
 import {
-  unsetMarker,
   useMutation,
-  useQueryClient,
+  useQueryClient
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { followUnfollow } from "../actions/follow-actions";
