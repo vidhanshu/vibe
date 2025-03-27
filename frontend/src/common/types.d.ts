@@ -1,3 +1,6 @@
+import { NSPost } from "../posts/types";
+import { NSUser } from "../users/types";
+
 export namespace NSCommon {
   export interface FullMedia {
     id: string;
@@ -17,6 +20,25 @@ export namespace NSCommon {
     key: string;
     mediaType: MediaType;
   }
+
+  export interface Notification {
+    id: string;
+    byUserId: string;
+    byUser: NSUser.User & {follows?:boolean};
+    forUserId: string;
+    forUser: NSUser.User;
+    type: NotificationType;
+    postId?: string;
+    post?: NSPost.Post;
+    statusId?: string;
+    status: NSPost.Status;
+    commentId?: string;
+    comment: NSPost.Comment;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  export type NotificationType = "FOLLOW" | "LIKE" | "COMMENT" | "MENTION";
 
   export type MediaType = "IMAGE" | "VIDEO";
 

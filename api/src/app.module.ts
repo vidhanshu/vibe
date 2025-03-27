@@ -14,6 +14,8 @@ import { StatusesModule } from './statuses/statuses.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronTasksModule } from './cron-tasks/cron-tasks.module';
 import { ChatsModule } from './chats/chats.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { WebsocketModule } from './websockets/websockets.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { ChatsModule } from './chats/chats.module';
     ScheduleModule.forRoot(),
     CronTasksModule,
     ChatsModule,
+    NotificationsModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [

@@ -10,10 +10,19 @@ export namespace NSPost {
     createdAt: Date;
     updatedAt: Date;
     medias: NSCommon.FullMedia[];
+    hashTags: HashTag[];
     _count: {
       likes: 0;
       comments: 0;
     };
+  }
+
+  export interface HashTag {
+    id: string;
+    name: string;
+    posts: Post[];
+    createdAt: Date;
+    updatedAt: Date;
   }
 
   export interface DetailedPost extends Post {

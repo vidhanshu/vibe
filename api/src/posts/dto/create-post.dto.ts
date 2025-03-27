@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsString, MaxLength, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 import { MediaDto } from 'src/medias/dto/media.dto';
 
 export class CreatePostDto {
@@ -15,4 +21,9 @@ export class CreatePostDto {
   @ValidateNested({ each: true })
   @Type(() => MediaDto)
   medias: MediaDto[];
+
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true })
+  hashTags: string[];
 }

@@ -24,7 +24,7 @@ const FeedPostCardSkeleton = () => {
         </div>
         <Skeleton className="size-6 rounded-full" />
       </div>
-      <Skeleton className="h-[500px]" />
+      <Skeleton className="h-[578px]" />
       {/* footer*/}
       <div className="space-y-2">
         <div className="flex items-center gap-x-4">

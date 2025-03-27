@@ -28,31 +28,25 @@ export const getStatuses = async ({
 export const createStatus = async ({
   backgroundColor,
   message,
-  medias,
+  uploadedFiles,
 }: {
   backgroundColor: string;
   message: string;
-  medias?: File[];
+  uploadedFiles?: NSCommon.Media[];
 }): NSCommon.Response<{ post: NSPost.Post }> => {
-  let uploadedFiles: Omit<NSAuth.Media, "id">[] = [];
   try {
-    if (medias?.length) {
-      const res = await uploadFiles(medias);
-      if (res.message) {
-        return { message: res.message, data: null };
-      }
-      uploadedFiles = res.data ?? [];
-    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newPayload: any = { message, backgroundColor };
-    if (uploadedFiles.length) {
+    if (uploadedFiles?.length) {
       newPayload.medias = uploadedFiles;
     }
     const res = await api.post("/statuses", newPayload);
     if (res.status !== 201) {
       // delete uploaded files, if error
-      if (uploadedFiles.length)
+      if (uploadedFiles?.length) {
+        console.log("[createStatus:try:deletingFiles]");
         await deleteFiles(uploadedFiles.map(({ key }) => key));
+      }
       return { message: res.data.message, data: null };
     }
 
@@ -60,8 +54,10 @@ export const createStatus = async ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // delete uploaded files, if error
-    if (uploadedFiles.length)
+    if (uploadedFiles?.length) {
+      console.log("[createStatus:catch:deletingFiles]");
       await deleteFiles(uploadedFiles.map(({ key }) => key));
+    }
     return {
       message: error?.response?.data?.message || error.message,
       data: null,

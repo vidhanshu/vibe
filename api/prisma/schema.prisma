@@ -35,11 +35,12 @@ model User {
   savedPosts Post[]    @relation("saved_posts")
 
   // Fields which are mostly there for relation, and won't much of a use
-  statusesViewed    StatusView[]   @relation("viewed_by_user")
-  participatedChats ChatMember[]   @relation("user_chats")
-  messagesSent      Message[]      @relation("sent_messages")
-  createdChats      Chat[]         @relation("chat_created_by")
-  notifications     Notification[] @relation("notification_user")
+  statusesViewed      StatusView[]   @relation("viewed_by_user")
+  participatedChats   ChatMember[]   @relation("user_chats")
+  messagesSent        Message[]      @relation("sent_messages")
+  createdChats        Chat[]         @relation("chat_created_by")
+  notificationsFromMe Notification[] @relation("notification_by_user")
+  notifications       Notification[] @relation("notification_for_user") // my notifications
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -79,10 +80,22 @@ model Post {
   comments      Comment[]      @relation("comments_of_post")
   savedBy       User[]         @relation("saved_posts")
   notifications Notification[] @relation("notification_post")
+  hashTags      HashTag[]
 
   @@index([userId])
   @@index([userId, id])
   @@map("posts")
+}
+
+model HashTag {
+  id        String   @id @default(uuid())
+  name      String
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
+  @@map("hash_tags")
 }
 
 model Like {
@@ -106,10 +119,11 @@ model Comment {
   id      String @id @default(uuid())
   content String
 
-  postId String
-  userId String
-  post   Post   @relation("comments_of_post", fields: [postId], references: [id], onDelete: Cascade)
-  user   User   @relation("commented_by_user", fields: [userId], references: [id], onDelete: Cascade)
+  postId        String
+  userId        String
+  post          Post           @relation("comments_of_post", fields: [postId], references: [id], onDelete: Cascade)
+  user          User           @relation("commented_by_user", fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[] @relation("notification_comment")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -244,18 +258,26 @@ model Message {
 }
 
 model Notification {
-  id       String           @id @default(uuid())
-  userId   String
-  user     User             @relation("notification_user", references: [id], fields: [userId])
-  type     NotificationType
-  postId   String?
-  post     Post?            @relation("notification_post", references: [id], fields: [postId])
-  statusId String?
-  status   Status?          @relation("notification_status", references: [id], fields: [statusId])
+  id        String           @id @default(uuid())
+  byUserId  String
+  byUser    User             @relation("notification_by_user", references: [id], fields: [byUserId])
+  forUserId String
+  forUser   User             @relation("notification_for_user", references: [id], fields: [forUserId])
+  type      NotificationType
+  postId    String?
+  post      Post?            @relation("notification_post", references: [id], fields: [postId])
+  commentId String?
+  comment   Comment?         @relation("notification_comment", references: [id], fields: [commentId])
+  statusId  String?
+  status    Status?          @relation("notification_status", references: [id], fields: [statusId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([byUserId, statusId]) // one user can react to status only once
+  @@index([byUserId, forUserId, type])
+  @@index([byUserId, postId, type])
+  @@index([type])
   @@map("notifications")
 }
 
@@ -264,6 +286,7 @@ enum NotificationType {
   LIKE
   COMMENT
   MENTION
+  STATUS
 }
 
 enum ChatGroupRole {

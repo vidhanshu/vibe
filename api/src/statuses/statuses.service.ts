@@ -40,17 +40,48 @@ export class StatusesService {
     { limit = 30, page = 1 }: FilterStatusesDto,
   ): Promise<PaginatedResponse<Status>> {
     const where = {
-      OR: [
-        //  get the statuses of the users to whom I follow, those who follow me, and my status
-        { userId },
-        { user: { followers: { some: { followerId: userId } } } },
-        { user: { followings: { some: { followingId: userId } } } },
+      AND: [
+        { NOT: { userId } },
+        {
+          OR: [
+            //  get the statuses of the users to whom I follow, those who follow me
+            { user: { followers: { some: { followerId: userId } } } },
+            { user: { followings: { some: { followingId: userId } } } },
+          ],
+        },
       ],
       // get statuses that are created in the last 24 hours
       createdAt: {
         gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
       },
     };
+
+    const myStatus = await this.prisma.status.findFirst({
+      where: { userId },
+      include: {
+        user: {
+          select: {
+            username: true,
+            id: true,
+            profilePhoto: { select: { url: true } },
+          },
+        },
+        medias: {
+          select: {
+            id: true,
+            key: true,
+            url: true,
+            mediaType: true,
+          },
+        },
+        views: { select: { viewerId: true } },
+        _count: {
+          select: {
+            views: true,
+          },
+        },
+      },
+    });
 
     const [items, count] = await Promise.all([
       this.prisma.status.findMany({
@@ -79,16 +110,31 @@ export class StatusesService {
             },
           },
         },
+        orderBy: {
+          views: {
+            _count: 'asc',
+          },
+        },
         where,
       }),
       this.prisma.status.count({ where }),
     ]);
 
-    return {
-      items: items.map(({ views, ...rest }) => {
-        const viewed = views.map(({ viewerId }) => viewerId).includes(userId);
+    const statuses: (Status & { viewed?: boolean })[] = items.map(
+      ({ views, ...rest }) => {
+        const viewed = !!views.find(({ viewerId }) => viewerId === userId);
         return { ...rest, viewed };
-      }),
+      },
+    );
+    if (myStatus) {
+      statuses.unshift({
+        ...myStatus,
+        viewed: !!myStatus.views.find(({ viewerId }) => viewerId === userId),
+      });
+    }
+
+    return {
+      items: statuses,
       metadata: {
         currentPage: page,
         itemsCount: items.length,

@@ -13,24 +13,25 @@ import { JwtService } from '@nestjs/jwt';
 import { Message } from '@prisma/client';
 import { ChatsService } from './chats.service';
 import { SOCKET_EVENTS } from 'src/common/utils/constants';
+import { WebsocketsService } from 'src/websockets/websockets.service';
 
 // TODO: add proper origins later
 @WebSocketGateway({ namespace: '/', cors: { origin: '*' } })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  private connectedUserSockets: Map<string, string> = new Map(); // Map<userId, socketId>
-
   constructor(
     private configService: ConfigService,
     private prisma: PrismaService,
     private jwtService: JwtService,
     private chatService: ChatsService,
+    private websocketService: WebsocketsService,
   ) {}
 
   @WebSocketServer()
   server: Server;
 
   afterInit(server: Server) {
-    console.log('WebSocket server initialized');
+    console.log('initialized');
+    this.websocketService.setServer(server);
   }
 
   // Handle connection
@@ -42,7 +43,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      this.connectedUserSockets.set(userId, client.id);
+      // this.websocketService.getAllConnectedUsers().set(userId, client.id);
+      this.websocketService.addUserSocket(userId, client.id);
 
       // Join all active chat rooms for the user
       // const chats = await this.getUserChats(userId);
@@ -58,12 +60,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // Handle disconnection
   handleDisconnect(client: Socket) {
-    const userId = [...this.connectedUserSockets.entries()].find(
-      ([, socketId]) => socketId === client.id,
-    )?.[0];
+    const userId = [
+      ...this.websocketService.getAllConnectedUsers().entries(),
+    ].find(([, socketId]) => socketId === client.id)?.[0];
 
     if (userId) {
-      this.connectedUserSockets.delete(userId);
+      this.websocketService.getAllConnectedUsers().delete(userId);
     }
   }
 
@@ -101,13 +103,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(payload.chatId).emit(SOCKET_EVENTS.RECEIVE_MESSAGE, payload);
     const chat = await this.chatService.getChat(payload.chatId);
     if (chat) {
-      const toUserIds = chat.participants
-        .map((p) => p.userId)
-        .filter((u) => u !== userId);
+      const toUserIds = chat.participants.map((p) => p.userId);
 
       // broad cast to individual participants
       for (const userId of toUserIds) {
-        const socketId = this.connectedUserSockets.get(userId);
+        const socketId = this.websocketService
+          .getAllConnectedUsers()
+          .get(userId);
         if (socketId) {
           this.server.to(socketId).emit(SOCKET_EVENTS.UPDATE_CHAT_LIST, chat);
         }
@@ -256,7 +258,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   private getUserIdFromSocketId(socketId: string): string | undefined {
-    return [...this.connectedUserSockets.entries()].find(
+    return [...this.websocketService.getAllConnectedUsers().entries()].find(
       ([, id]) => id === socketId,
     )?.[0];
   }

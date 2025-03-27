@@ -13,11 +13,12 @@ import {
 } from "@/src/users/actions/follow-actions";
 import NoContent from "@/src/users/components/no-content";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { User, X } from "lucide-react";
-import React, { PropsWithChildren, useEffect } from "react";
+import { Loader2, User, X } from "lucide-react";
+import React, { PropsWithChildren, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
 import UserChip from "../user-chip";
+import useInfinite from "../../hooks/use-infinite";
 
 const FollowersFollowingsModal = ({
   id,
@@ -28,34 +29,17 @@ const FollowersFollowingsModal = ({
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = useDebounceValue("", 1000);
 
-  const [isLoading, setIsLoading] = React.useState(false);
-  const { refetch, data } = useQuery({
-    queryKey: [forFollowers ? "followers" : "followings"],
-    queryFn: async () => {
-      setIsLoading(true);
-      const res = forFollowers
-        ? await getFollowers({ id, search })
-        : await getFollowings({ id, search });
-      if (res.message) {
-        toast.error(res.message);
-        setIsLoading(false);
-        return null;
-      }
-      setIsLoading(false);
-      return res.data;
-    },
+  const { data, isLoading, ref, isFetchingNextPage } = useInfinite({
+    queryKey: [forFollowers ? "followers" : "followings", search],
+    fetcher: (props: any) =>
+      forFollowers
+        ? getFollowers({ id, search, ...props })
+        : getFollowings({ id, search, ...props }),
   });
 
-  useEffect(() => {
-    if (!search.trim().length) {
-      qc?.setQueryData(["search"], null); // Set data to null
-      return;
-    }
-    setIsLoading(true);
-    refetch().finally(() => {
-      setIsLoading(false);
-    });
-  }, [search, qc, refetch]);
+  const allData = useMemo(() => {
+    return data.map((data) => data.items).flat();
+  }, [data]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -80,7 +64,7 @@ const FollowersFollowingsModal = ({
             placeholder="Search"
             onChange={(e) => setSearch(e.target.value)}
           />
-          <div className="px-4 py-2 space-y-2">
+          <div className="px-4 py-2 space-y-2 max-h-[70vh] overflow-y-auto">
             {isLoading ? (
               <div className="space-y-4 mt-4">
                 <Skeleton className="h-10" />
@@ -89,7 +73,7 @@ const FollowersFollowingsModal = ({
                 <Skeleton className="h-10" />
                 <Skeleton className="h-10" />
               </div>
-            ) : !data?.items?.length && search.trim().length ? (
+            ) : !allData?.length && search.trim().length ? (
               <div className="py-16">
                 <NoContent
                   titleClassName="text-xl"
@@ -99,7 +83,7 @@ const FollowersFollowingsModal = ({
                   subtitle=""
                 />
               </div>
-            ) : !data?.items?.length ? (
+            ) : !allData?.length ? (
               <NoContent
                 titleClassName="text-xl"
                 iconContainerClassName="size-10"
@@ -108,7 +92,13 @@ const FollowersFollowingsModal = ({
                 subtitle=""
               />
             ) : (
-              data?.items?.map((user) => <UserChip key={user.id} user={user} size="sm" />)
+              allData?.map((user) => (
+                <UserChip key={user.id} user={user} size="sm" />
+              ))
+            )}
+            <div ref={ref} />
+            {isFetchingNextPage && (
+              <Loader2 className="mx-auto size-6 animate-spin" />
             )}
           </div>
         </div>

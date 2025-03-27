@@ -70,7 +70,6 @@ const MessageInput = ({
       setMessage("");
       setMediaFile(null);
       setReplyToMessage(null);
-      console.log("[sSendMessage got called]]");
       sSendMessage(res.data);
       // scrollToBottom?.();
     },

@@ -12,7 +12,7 @@ import UserAvatar from "@/src/auth/components/user-avatar";
 import useIsMobile from "@/src/common/hooks/use-is-mobile";
 import { getShortRelativeTime } from "@/src/common/utils/dayjs";
 import { NSPost } from "@/src/posts/types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -31,6 +31,7 @@ const StatusViewDrawer = ({
   setViewStatusIdx: React.Dispatch<React.SetStateAction<null | number>>;
   close: () => void;
 }) => {
+  const qc = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: async () => {
       // if already viewed skip
@@ -56,7 +57,13 @@ const StatusViewDrawer = ({
   }, [viewStatusIdx, mutate]);
 
   return (
-    <Drawer open={viewStatusIdx !== null} onClose={close}>
+    <Drawer
+      open={viewStatusIdx !== null}
+      onClose={() => {
+        close();
+        qc.invalidateQueries({ queryKey: ["statuses"] });
+      }}
+    >
       <DrawerContent
         className="h-[99%] md:h-full bg-black md:bg-neutral-800 mt-0 flex flex-col"
         handleClassName="hidden"
@@ -68,7 +75,10 @@ const StatusViewDrawer = ({
 
         <Button
           className="hidden md:flex absolute right-4 top-4 bg-white/20"
-          onClick={close}
+          onClick={() => {
+            close();
+            qc.invalidateQueries({ queryKey: ["statuses"] });
+          }}
           size="icon-sm"
           endContent={<X className="size-4" />}
         />

@@ -36,8 +36,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import ViewPostModal from "@/src/common/components/modals/view-post-modal";
-import useIsMobile from "@/src/common/hooks/use-is-mobile";
 import { deletePost } from "@/src/posts/actions/posts-actions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -56,7 +54,6 @@ const FeedPostCard = ({
   const { id, createdAt, medias, title, user } = detailedPost;
 
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
   const [comment, setComment] = useState("");
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -75,7 +72,6 @@ const FeedPostCard = ({
   });
 
   const currentUserId = useSessionStore((select) => select.user?.id);
-  const isMobile = useIsMobile();
 
   return (
     <>
@@ -111,7 +107,7 @@ const FeedPostCard = ({
                   <Ellipsis className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
+              <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>Post options</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {user?.id !== currentUserId ? (
@@ -174,11 +170,11 @@ const FeedPostCard = ({
             </DropdownMenu>
           </AlertDialog>
         </div>
-        <div className="md:h-[585px] flex items-center justify-center md:border">
+        <div className="h-[489px] md:h-[578px] flex items-center justify-center border-y md:border">
           <PostMediaCarousel
             containerClassName="flex-1"
-            imageClassName="w-full max-h-[585px]"
-            videoClassName="max-h-[585px] w-auto max-w-sm"
+            imageClassName="w-full max-h-[578px]"
+            videoClassName="max-h-[578px] w-auto max-w-sm"
             title={title}
             medias={medias}
           />
@@ -197,24 +193,11 @@ const FeedPostCard = ({
               window.location.href + `/users/${user.username}?postId=${id}`
             }
             onCommentClick={() => {
-              if (isMobile) {
-                setViewPostId(id);
-              } else {
-                setOpen(true);
-              }
+              setViewPostId(id);
             }}
           />
         )}
       </div>
-
-      {open && !isMobile && (
-        <ViewPostModal
-          skipPostFetch
-          open={open}
-          setOpen={setOpen}
-          postId={id}
-        />
-      )}
     </>
   );
 };

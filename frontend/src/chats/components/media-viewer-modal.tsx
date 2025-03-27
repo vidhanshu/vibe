@@ -39,6 +39,7 @@ const MediaViewerModal = ({
               src={media.url}
               alt="media-file"
               className="object-contain rounded-md"
+              quality={50}
               priority
             />
           </div>

@@ -42,8 +42,12 @@ const UserChip = ({
   const xl_2 = size === "2xl";
   const isChatVariant = variant === "chat";
 
-  const content = (
-    <>
+  const avatar = (
+    <div
+      className={cn({
+        "insta-bg rounded-full p-[1px] cursor-pointer": user?.status,
+      })}
+    >
       <UserAvatar
         className={cn(
           {
@@ -54,7 +58,8 @@ const UserChip = ({
             "size-14": xl,
             "size-16": xl_2,
           },
-          avatarClassName
+          avatarClassName,
+          { "border-2 border-black": user?.status }
         )}
         fallbackClassName={cn(
           {
@@ -70,6 +75,10 @@ const UserChip = ({
         username={user?.username}
         url={user?.profilePhoto?.url}
       />
+    </div>
+  );
+  const content = (
+    <>
       {!avatarOnly && (
         <div>
           <p
@@ -121,8 +130,24 @@ const UserChip = ({
         <div
           className={cn("flex gap-x-2 items-center w-fit flex-1", className)}
         >
+          {avatar}
           {content}
         </div>
+        {endContent}
+      </div>
+    );
+  }
+  if (user?.status) {
+    return (
+      <div className="flex justify-between items-center gap-x-2">
+        <Link href={`/users/${user.username}?status=open`}>{avatar}</Link>
+        <Link
+          className={cn("flex gap-x-2 items-center w-fit flex-1", className)}
+          href={`/users/${user?.username}`}
+          {...linkProps}
+        >
+          {content}
+        </Link>
         {endContent}
       </div>
     );
@@ -134,6 +159,7 @@ const UserChip = ({
         href={`/users/${user?.username}`}
         {...linkProps}
       >
+        {avatar}
         {content}
       </Link>
       {endContent}

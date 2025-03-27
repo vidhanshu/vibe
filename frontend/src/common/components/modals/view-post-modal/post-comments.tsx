@@ -9,6 +9,7 @@ import React from "react";
 import ShowMore from "../../show-more";
 import Comment from "./comment";
 import UserChip from "../../user-chip";
+import Link from "next/link";
 
 const PostComments = ({
   post,
@@ -75,7 +76,23 @@ const PostComments = ({
             />
             <div>
               <h1 className="font-bold">{post?.title}</h1>
-              <ShowMore text={post?.content ?? ""} />
+              <ShowMore
+                text={post.content}
+                endContent={
+                  <>
+                    <br />
+                    {post?.hashTags?.map(({ name }) => (
+                      <Link
+                        key={name}
+                        className="mr-1 text-sm text-[#e0f1ff]"
+                        href={`/tags/${name}`}
+                      >
+                        <button>#{name}</button>
+                      </Link>
+                    ))}
+                  </>
+                }
+              />
             </div>
           </div>
           <h1 className="font-bold text-muted-foreground mt-6 mb-2">

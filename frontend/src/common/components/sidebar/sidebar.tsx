@@ -12,6 +12,7 @@ import {
   Compass,
   Heart,
   Home,
+  Loader2,
   LucideIcon,
   MessageCircle,
   PlusSquare,
@@ -23,14 +24,18 @@ import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue, useOnClickOutside } from "usehooks-ts";
 import useSessionStore from "../../stores/session-store";
-import CreatePostModal from "../modals/create-post-modal";
+import CreatePostModal from "../modals/create-post-modal/create-post-modal";
 import SearchDrawer, { SearchDrawerContent } from "./search-drawer";
 import { usePathname } from "next/navigation";
 import { useSocketContext } from "../../contexts/socket-context";
+import NotificationDrawer from "./notification-drawer";
+import { useUploadStore } from "../../stores/upload-store";
+import ActionTooltip from "../action-tooltip";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const { user } = useSessionStore();
+  const { uploads } = useUploadStore();
   const isChatPage = pathname.startsWith("/chats");
 
   const [collapsed, setCollapsed] = useState(isChatPage ? true : false);
@@ -57,17 +62,25 @@ const Sidebar = () => {
           />
         );
       case "notification":
-        return <NotificationDrawer />;
+        return (
+          <NotificationDrawer
+            closeDrawer={() => {
+              setMode(null);
+              setCollapsed(false);
+            }}
+          />
+        );
       default:
         return null;
     }
   };
 
   useEffect(() => {
-    if (isChatPage) setCollapsed(true);
-    else setCollapsed(false);
+    if (isChatPage) {
+      setCollapsed(true);
+    } else setCollapsed(false);
   }, [isChatPage]);
-
+  console.log("uploads", uploads);
   return (
     <div
       ref={ref}
@@ -77,36 +90,56 @@ const Sidebar = () => {
         className={cn(
           "pr-6 pl-4 py-8 space-y-8 h-full relative",
           collapsed
-            ? "w-[82px] p-0 pt-8 flex flex-col items-center"
+            ? "w-[82px] p-0 pt-8 flex flex-col items-center overflow-visible"
             : "border-r w-full"
         )}
       >
         <div
-          className={cn("size-2 absolute rounded-full", isConnected ? "bg-green-500" : "bg-red-500")}
+          className={cn(
+            "size-2 absolute rounded-full",
+            isConnected ? "bg-green-500" : "bg-red-500"
+          )}
         />
-        {!collapsed ? (
-          <Image
-            src="/full-logo.svg"
-            className=""
-            alt="logo"
-            width={100}
-            height={42}
-          />
-        ) : (
-          <Image
-            src="/logo.svg"
-            className=""
-            alt="logo"
-            width={40}
-            height={40}
-          />
-        )}
+        <div>
+          <Link href="/" className="cursor-pointer w-fit rounded-sm">
+            <div
+              className={cn(
+                "w-fit",
+                collapsed &&
+                  "hover:bg-accent rounded-sm size-12 flex items-center justify-center"
+              )}
+            >
+              {!collapsed ? (
+                <Image
+                  src="/full-logo.svg"
+                  className=""
+                  alt="logo"
+                  width={100}
+                  height={42}
+                />
+              ) : (
+                <Image
+                  src="/logo.svg"
+                  className=""
+                  alt="logo"
+                  width={34}
+                  height={34}
+                />
+              )}
+            </div>
+          </Link>
+        </div>
         <div
           className={cn("space-y-4", collapsed && "flex flex-col items-center")}
         >
           <Link href="/">
             <SidebarItem
-              buttonProps={{ onClick: () => setCollapsed(false) }}
+              buttonProps={{
+                onClick: () => {
+                  setCollapsed(false);
+                  setMode(null);
+                },
+              }}
               collapsed={collapsed}
               icon={Home}
             >
@@ -142,7 +175,9 @@ const Sidebar = () => {
             icon={Heart}
             buttonProps={{
               onClick: () => {
-                setMode((p) => (p === "notification" ? null : "notification"));
+                setMode((p) =>
+                  p === "notification" && collapsed ? null : "notification"
+                );
                 if (mode === "search" && collapsed) return;
                 if (isChatPage) setCollapsed(true);
                 else setCollapsed((p) => !p);
@@ -189,6 +224,76 @@ const Sidebar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* status/post upload statuses */}
+      {uploads.length > 0 && (
+        <div className="absolute bottom-4 left-4 space-y-2">
+          {uploads.map(({ id, status }) => {
+            const isStatus = id.startsWith("status-");
+            return (
+              <div
+                key={id}
+                className={cn(
+                  "flex items-center gap-2 text-sm px-2 py-1 rounded-sm",
+                  {
+                    "bg-yellow-950": status === "uploading",
+                    "bg-green-950": status === "completed",
+                    "bg-rose-950": status === "failed",
+                  }
+                )}
+              >
+                {!collapsed && (
+                  <span>
+                    {status === "uploading"
+                      ? `${isStatus ? "Status" : "Post"} uploading...`
+                      : status === "failed"
+                      ? `Failed adding ${isStatus ? "status" : "post"} ❌`
+                      : `Added ${isStatus ? "status" : "post"} ✅`}
+                  </span>
+                )}
+                {status === "uploading" && (
+                  <ActionTooltip
+                    className="z-[1001]"
+                    align="center"
+                    side="right"
+                    alignOffset={20}
+                    sideOffset={20}
+                    content={`${isStatus ? "Status" : "Post"} uploading...`}
+                  >
+                    <div className="size-5">
+                      <Loader2 className="size-4 animate-spin" />
+                    </div>
+                  </ActionTooltip>
+                )}
+                {status === "failed" && collapsed && (
+                  <ActionTooltip
+                    className="z-[1001]"
+                    align="center"
+                    side="right"
+                    alignOffset={20}
+                    sideOffset={20}
+                    content={`Failed adding ${isStatus ? "status" : "post"} ❌`}
+                  >
+                    <span className="text-6">❌</span>
+                  </ActionTooltip>
+                )}
+                {status === "uploading" && collapsed && (
+                  <ActionTooltip
+                    content={`Added ${isStatus ? "status" : "post"} ✅`}
+                    className="z-[1001]"
+                    align="center"
+                    side="right"
+                    alignOffset={20}
+                    sideOffset={20}
+                  >
+                    <span className="text-6 border">✅</span>
+                  </ActionTooltip>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
@@ -339,16 +444,5 @@ const SidebarItem = ({
     >
       {collapsed ? null : children}
     </Button>
-  );
-};
-
-const NotificationDrawer = () => {
-  return (
-    <>
-      <div className="px-6">
-        <h1 className="font-bold text-2xl">Notifications</h1>
-      </div>
-      <Separator className="my-6" />
-    </>
   );
 };

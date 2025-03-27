@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { FollowsService } from './follows.service';
 import { FilterFollowsDto } from './dto/filter-follows.dto';
@@ -16,7 +17,7 @@ export class FollowsController {
 
   @Get('/followers')
   getFollowers(
-    @Body() filterFollowsDto: FilterFollowsDto,
+    @Query() filterFollowsDto: FilterFollowsDto,
     @Param('id', ParseUUIDPipe) userId: string,
   ) {
     return this.followsService.getFollowers(userId, filterFollowsDto ?? {});
@@ -24,7 +25,7 @@ export class FollowsController {
 
   @Get('/followings')
   getFollowing(
-    @Body() filterFollowsDto: FilterFollowsDto,
+    @Query() filterFollowsDto: FilterFollowsDto,
     @Param('id', ParseUUIDPipe) userId: string,
   ) {
     return this.followsService.getFollowing(userId, filterFollowsDto ?? {});

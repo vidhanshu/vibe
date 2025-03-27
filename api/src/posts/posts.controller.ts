@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -63,5 +62,10 @@ export class PostsController {
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string, @User('sub') userId: string) {
     return this.postsService.removePost(id, userId);
+  }
+
+  @Get('hashtags/suggest')
+  async suggestHashtags(@Query('q') query: string) {
+    return this.postsService.suggestHashtags(query);
   }
 }

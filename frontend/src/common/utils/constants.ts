@@ -1,4 +1,5 @@
 export const SOCKET_URL = "ws://localhost:4000";
+export const API_BASE_URL = "http://localhost:4000/api";
 
 export const SOCKET_EVENTS = {
   JOIN_CHAT: "joinChat",
@@ -11,5 +12,7 @@ export const SOCKET_EVENTS = {
   REMOVE_MESSAGE: "removeMessage",
   TYPING: "typing",
   STOP_TYPING: "stopTyping",
-  UPDATE_CHAT_LIST: 'updateChatList',
+  UPDATE_CHAT_LIST: "updateChatList",
+  RECEIVE_NOTIFICATION: "receiveNotification",
+  NOTIFY: "notify",
 };

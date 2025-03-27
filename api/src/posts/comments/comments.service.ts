@@ -3,15 +3,20 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Comment, Prisma } from '@prisma/client';
+import { Comment, NotificationType, Prisma } from '@prisma/client';
 import { PaginatedResponse } from 'src/common/types/return-type';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment-dto';
 import { FilterCommentsDto } from './dto/filter-comments.dto';
+import { WebsocketsService } from 'src/websockets/websockets.service';
+import { SOCKET_EVENTS } from 'src/common/utils/constants';
 
 @Injectable()
 export class CommentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private websocketService: WebsocketsService,
+  ) {}
 
   async getComments(
     postId: string,
@@ -26,7 +31,7 @@ export class CommentsService {
             id: true,
             username: true,
             profilePhoto: true,
-            name:true,
+            name: true,
           },
         },
       },
@@ -53,14 +58,60 @@ export class CommentsService {
     };
   }
 
-  createComment(
+  async createComment(
     userId: string,
     postId: string,
     createdCommentDto: CreateCommentDto,
   ) {
-    return this.prisma.comment.create({
+    const comment = await this.prisma.comment.create({
       data: { ...createdCommentDto, postId, userId },
     });
+
+    const postUser = await this.prisma.post.findUnique({
+      where: { id: postId },
+      select: { userId: true },
+    });
+    if (postUser?.userId !== userId && postUser && comment) {
+      const notification = await this.prisma.notification.create({
+        data: {
+          postId,
+          byUserId: userId,
+          type: NotificationType.COMMENT,
+          forUserId: postUser.userId,
+          commentId: comment.id,
+        },
+        include: {
+          byUser: {
+            include: {
+              profilePhoto: true,
+            },
+          },
+          post: {
+            include: {
+              medias: true,
+            },
+          },
+          comment: true,
+          status: {
+            include: {
+              medias: true,
+            },
+          },
+          forUser: {
+            include: {
+              profilePhoto: true,
+            },
+          },
+        },
+      });
+      this.websocketService.emitToUser(
+        postUser.userId,
+        SOCKET_EVENTS.RECEIVE_NOTIFICATION,
+        notification,
+      );
+    }
+
+    return comment;
   }
 
   async updateComment(

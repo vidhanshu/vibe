@@ -38,7 +38,6 @@ const useChatSocket = () => {
   const onNewMessage = useCallback(
     (callback: (message: NSChat.Message) => void) => {
       if (!socketInstance) return;
-      console.log("[receiveMessage]");
       socketInstance.on(SOCKET_EVENTS.RECEIVE_MESSAGE, callback);
     },
     [socketInstance]
@@ -55,7 +54,6 @@ const useChatSocket = () => {
   const onUpdateMessage = useCallback(
     (callback: (payload: SocketOnUpdateMessagePayload) => void) => {
       if (!socketInstance) return;
-      console.log("[updateMessage]");
       socketInstance.on(SOCKET_EVENTS.RECEIVE_UPDATED_MESSAGE, callback);
     },
     [socketInstance]

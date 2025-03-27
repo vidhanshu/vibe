@@ -28,12 +28,15 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
   const [comment, setComment] = useState("");
   const p = usePathname();
   const sp = useSearchParams();
-  const pathname = window.location.href + p + sp.toString();
+  const pathname =
+    (typeof window === "undefined" ? "" : window.location.href) +
+    p +
+    sp.toString();
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
 
   const { isPostLoading, post } = usePost({
     postId,
-    skipPostFetch: false,
+    skipPostFetch: !postId,
   });
 
   const isMobile = useIsMobile();
@@ -51,7 +54,7 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
             }
           },
         }}
-        className="md:w-full h-full md:max-w-screen-xl max-h-[calc(100vh-32px)] p-0 py-2 md:p-0 bg-black overflow-y-auto md:overflow-hidden"
+        className="md:w-full h-full md:max-w-[1050px] max-h-[calc(100vh-50px)] p-0 py-2 md:p-0 bg-background overflow-y-auto border-none sm:rounded-none rounded-none"
       >
         <DialogHeader className="hidden">
           <DialogTitle> </DialogTitle>
@@ -62,12 +65,11 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
           <PostSkeleton />
         ) : post ? (
           <div className="flex flex-col md:grid md:grid-cols-12">
-            {/* <div>Hello world</div> */}
             <PostMediaCarousel
               title={post?.title ?? ""}
               medias={post?.medias ?? []}
             />
-            <div className="col-span-5 flex flex-col max-h-[calc(100vh-32px)]">
+            <div className="col-span-5 flex flex-col max-h-[calc(100vh-50px)]">
               <PostComments
                 post={post}
                 comment={comment}

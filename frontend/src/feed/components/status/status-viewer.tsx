@@ -85,6 +85,7 @@ const StatusViewer = ({
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["statuses"] });
+      qc.invalidateQueries({ queryKey: ["session"] });
       setViewStatusIdx(null);
     },
   });
@@ -111,12 +112,9 @@ const StatusViewer = ({
   const { isPending: isSendingMessage, mutate: sendReply } = useMutation({
     mutationKey: ["send-message", chatId],
     mutationFn: async (reaction: string = "") => {
-      console.log("[came -here 1]]");
       if (!chatId) return toast.error("Something went wrong!");
-      console.log("[came -here 2]]");
       const message = (reaction || inputRef.current?.value) ?? "";
       if (!reaction) {
-        console.log("[came -here 3]]");
         if (!message.trim().length) return toast.error("Please enter message");
       }
 
@@ -147,6 +145,8 @@ const StatusViewer = ({
           alt="status"
           width={500}
           height={500}
+          quality={50}
+          draggable={false}
           className={cn("z-10 relative h-full object-contain object-center")}
         />
       );
@@ -230,7 +230,7 @@ const StatusViewer = ({
   return (
     <div
       className={cn(
-        "relative rounded-md overflow-hidden h-[calc(100vh-90px)] md:h-[calc(100vh-20px)]"
+        "relative rounded-md overflow-hidden h-[calc(100vh-90px)] md:h-[calc(100vh-20px)] bg-black"
       )}
       {...swipeProps}
     >
@@ -255,22 +255,14 @@ const StatusViewer = ({
 
       {LENGTH > 1 && (
         <>
-          <Button
-            size="icon-sm"
-            variant="secondary"
-            className="absolute z-10 inset-y-0 my-auto left-4"
+          <ChevronLeft
+            className="text-black cursor-pointer bg-white rounded-full absolute z-10 inset-y-0 my-auto left-4 p-1 shadow-md"
             onClick={handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <Button
-            size="icon-sm"
-            variant="secondary"
-            className="absolute z-10 inset-y-0 my-auto right-4"
+          />
+          <ChevronRight
+            className="text-black cursor-pointer bg-white rounded-full absolute z-10 inset-y-0 my-auto right-4 p-1 shadow-md"
             onClick={handleNext}
-          >
-            <ChevronRight />
-          </Button>
+          />
         </>
       )}
 
@@ -337,7 +329,9 @@ const StatusViewer = ({
                   )}
                   <DropdownMenuItem
                     onClick={() => {
-                      cpyText(`/users/${status.user.username}?status=open`);
+                      cpyText(
+                        `${window.location.href}/users/${status.user.username}?status=open`
+                      );
                       toast.success("Link copied");
                     }}
                   >

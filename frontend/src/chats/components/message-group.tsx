@@ -20,13 +20,13 @@ const MessageGroup = ({
 }) => {
   const userId = useSessionStore((s) => s.user?.id);
   const sender = messages[0].sender;
-  const isMyMessage = sender.id === userId;
+  const isMyMessage = messages[0].senderId === userId;
   const total = messages.length;
 
   return (
     <div
       className={cn("flex gap-x-4", {
-        "self-end flex-row-reverse  w-full": sender.id === userId,
+        "self-end flex-row-reverse  w-full": messages[0].senderId === userId,
       })}
     >
       {!messages[0].isLog && (

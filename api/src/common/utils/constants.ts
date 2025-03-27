@@ -10,4 +10,5 @@ export const SOCKET_EVENTS = {
   TYPING: 'typing',
   STOP_TYPING: 'stopTyping',
   UPDATE_CHAT_LIST: 'updateChatList',
+  RECEIVE_NOTIFICATION: 'receiveNotification',
 };

@@ -9,25 +9,22 @@ import { NSPost } from "../types";
 export const createPost = async ({
   title,
   content,
-  medias,
+  uploadedFiles = [],
+  hashTags = [],
 }: {
   title: string;
   content: string;
-  medias?: File[];
+  uploadedFiles?: NSCommon.Media[];
+  hashTags?: string[];
 }): NSCommon.Response<{ post: NSPost.Post }> => {
-  let uploadedFiles: Omit<NSAuth.Media, "id">[] = [];
   try {
-    if (medias?.length) {
-      const res = await uploadFiles(medias);
-      if (res.message) {
-        return { message: res.message, data: null };
-      }
-      uploadedFiles = res.data ?? [];
-    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newPayload: any = { title, content };
     if (uploadedFiles.length) {
       newPayload.medias = uploadedFiles;
+    }
+    if (hashTags.length) {
+      newPayload.hashTags = hashTags;
     }
     const res = await api.post("/posts", newPayload);
     if (res.status !== 201) {
@@ -178,7 +175,6 @@ export const saveUnsave = async (
   try {
     const response = await api.patch(`/posts/${postId}/save-unsave`);
     const resJson = response.data;
-    console.log(response.status);
     if (response.status !== 200)
       return { message: resJson.message, data: null };
 
@@ -265,6 +261,25 @@ export const updateComment = async (
       return { message: resJson.message, data: null };
 
     return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+
+export const getHashTags = async ({
+  name,
+}: {
+  name: string;
+}): NSCommon.Response<NSPost.HashTag[]> => {
+  try {
+    const sp = new URLSearchParams();
+    if (name) sp.append("q", name);
+    const res = await api.get(`/posts/hashtags/suggest?${sp.toString()}`);
+    return { data: res.data };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {

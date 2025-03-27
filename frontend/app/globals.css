@@ -72,6 +72,18 @@ body {
   }
 }
 
+.highlight-comment {
+  @apply bg-yellow-300/20 transition-all duration-1000;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
 .insta-bg {
   background: #f09433;
   background: -moz-linear-gradient(

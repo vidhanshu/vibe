@@ -1,6 +1,6 @@
 "use client";
 
-import CreatePostModal from "@/src/common/components/modals/create-post-modal";
+import CreatePostModal from "@/src/common/components/modals/create-post-modal/create-post-modal";
 import ViewPostModal from "@/src/common/components/modals/view-post-modal";
 import useSessionStore from "@/src/common/stores/session-store";
 import { getPosts, getSavedPosts } from "@/src/posts/actions/posts-actions";

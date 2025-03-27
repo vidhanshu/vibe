@@ -142,7 +142,23 @@ const PostFooter = ({
                   </Link>
                   <span>{post.title}</span>
                 </div>
-                <ShowMore text={post.content} />
+                <ShowMore
+                  text={post.content}
+                  endContent={
+                    <>
+                      <br />
+                      {post.hashTags.map(({ name }) => (
+                        <Link
+                          key={name}
+                          className="mr-1 text-sm text-[#e0f1ff]"
+                          href={`/tags/${name}`}
+                        >
+                          <button>#{name}</button>
+                        </Link>
+                      ))}
+                    </>
+                  }
+                />
                 <div
                   onClick={() => onCommentClick?.()}
                   className="text-sm text-muted-foreground cursor-pointer font-semibold"

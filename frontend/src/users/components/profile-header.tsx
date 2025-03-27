@@ -20,6 +20,8 @@ import { toast } from "sonner";
 import { followUnfollow } from "../actions/follow-actions";
 import ProfileHeaderSkeleton from "./skeletons/profile-header-skeleton";
 import StatusViewDrawer from "@/src/feed/components/status/status-view-drawer";
+import useFollow from "../hooks/use-follow";
+import { createChat } from "@/src/chats/actions/chats-action";
 
 const PRONOUN_MAP = {
   he: "he/his",
@@ -40,22 +42,12 @@ const ProfileHeader = () => {
     queryKey: ["profile", params.username],
     queryFn: () => getUserByUsername(params.username as string),
   });
-
-  const { mutate: handleFollowUnfollow } = useMutation({
-    mutationKey: ["follows"],
-    mutationFn: async (userId: string) => {
-      const res = await followUnfollow(userId);
-      if (res.message) {
-        toast.error(res.message);
-      } else {
-        toast.success(
-          `${data?.data?.follows ? "Unfollowed" : "Followed"} successfully`
-        );
-        qc.invalidateQueries({ queryKey: ["profile", params.username] });
-        qc.invalidateQueries({ queryKey: ["followers"] });
-      }
-      return res.data;
-    },
+  const { handleFollowUnfollow } = useFollow({
+    follows: data?.data?.follows,
+    queryKesToInvalidate: [
+      ["profile", params.username as string],
+      ["followers"],
+    ],
   });
 
   if (isLoading || isUserLoading) {
@@ -86,6 +78,21 @@ const ProfileHeader = () => {
       name: "Reels",
     },
   ];
+
+  const handleUserSelect = async () => {
+    if (!currentUser?.id) return;
+
+    const res = await createChat({
+      chatType: "DM",
+      participantId: currentUser.id,
+    });
+
+    if (res.data?.id) {
+      router.push(`/chats/${res.data.id}`);
+    } else if (res.message) {
+      toast.error(res.message);
+    }
+  };
 
   return (
     <>
@@ -137,12 +144,15 @@ const ProfileHeader = () => {
                   </>
                 )}
               </p>
-              <p className="font-bold text-muted-foreground">{user?.name}</p>
+              <p className="font-bold text-muted-foreground">
+                {currentUser?.name}
+              </p>
             </div>
             {!isUserSelf && (
               <Button
                 onClick={() =>
-                  data?.data?.id && handleFollowUnfollow(data.data.id)
+                  data?.data?.id &&
+                  handleFollowUnfollow({ userId: data.data.id })
                 }
                 className={cn(
                   "font-semibold",
@@ -161,6 +171,14 @@ const ProfileHeader = () => {
                 </Button>
               </Link>
             )}
+            <Button
+              onClick={handleUserSelect}
+              className="font-semibold"
+              variant="secondary"
+              size="sm"
+            >
+              Message
+            </Button>
             {/* {!isUserSelf && (
               <Button size="icon-sm" variant="secondary" className="rounded-md">
                 <UserPlus2 className="size-5" />

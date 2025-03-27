@@ -3,42 +3,24 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import UserAvatar from "@/src/auth/components/user-avatar";
-import { followUnfollow } from "@/src/users/actions/follow-actions";
 import { getFollowSuggestions } from "@/src/users/actions/user-actions";
 import NoContent from "@/src/users/components/no-content";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 import useSessionStore from "../stores/session-store";
 import UserChip from "./user-chip";
+import useFollow from "@/src/users/hooks/use-follow";
 
 const SuggestedForYou = ({
   variant = "default",
 }: {
   variant?: "feed" | "default";
 }) => {
-  const qc = useQueryClient();
   const { user } = useSessionStore();
 
-  const { mutate: handleFollowUnfollow, isPending } = useMutation({
-    mutationKey: ["follows"],
-    mutationFn: async ({
-      userId,
-      username,
-    }: {
-      userId: string;
-      username: string;
-    }) => {
-      const res = await followUnfollow(userId);
-      if (res.message) {
-        toast.error(res.message);
-      } else {
-        toast.success(`Followed ${username}`);
-        qc.invalidateQueries({ queryKey: ["follow-suggestions"] });
-      }
-      return res.data;
-    },
+  const { handleFollowUnfollow, isPending } = useFollow({
+    queryKesToInvalidate: [["follow-suggestions"], ["statuses"]],
   });
 
   const { data, isLoading } = useQuery({
@@ -87,7 +69,9 @@ const SuggestedForYou = ({
                 key={item.id}
                 className={cn(
                   "flex justify-between items-center",
-                  isFeedVariant ? "flex-col border px-4 py-2 rounded-md gap-4" : ""
+                  isFeedVariant
+                    ? "flex-col border px-4 py-2 rounded-md gap-4"
+                    : ""
                 )}
               >
                 <Link

@@ -3,6 +3,7 @@ import Sidebar, {
   NavbarMobile,
   SidebarMobile,
 } from "@/src/common/components/sidebar/sidebar";
+import NotificationContextProvider from "@/src/common/contexts/notification-context";
 import { SocketContextProvider } from "@/src/common/contexts/socket-context";
 import { PropsWithChildren } from "react";
 
@@ -12,9 +13,12 @@ const MainLayout = ({ children }: PropsWithChildren) => {
       <SocketContextProvider>
         <main className="relative min-h-screen md:flex pb-[40px] md:pb-0">
           {/* Sidebar */}
-          <aside className="hidden md:block sticky top-0 h-screen z-[20]">
-            <Sidebar />
-          </aside>
+          <NotificationContextProvider>
+            <aside className="hidden md:block sticky top-0 h-screen z-[20]">
+              <Sidebar />
+            </aside>
+          </NotificationContextProvider>
+
           <nav className="md:hidden sticky top-0 bg-black z-[20]">
             <NavbarMobile />
           </nav>

@@ -780,6 +780,44 @@ export class ChatsService {
       data: {
         text: message,
       },
+      include: {
+        media: true,
+        sender: {
+          select: {
+            username: true,
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+        status: {
+          select: {
+            medias: true,
+            createdAt: true,
+            id: true,
+            userId: true,
+            user: true,
+          },
+        },
+        repliedToMessage: {
+          select: {
+            id: true,
+            text: true,
+            senderId: true,
+            sender: {
+              select: { id: true, username: true, name: true },
+            },
+            media: {
+              select: {
+                id: true,
+                key: true,
+                url: true,
+                mediaType: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -799,6 +837,44 @@ export class ChatsService {
     }
     return this.prisma.message.delete({
       where: { id: messageId },
+      include: {
+        media: true,
+        sender: {
+          select: {
+            username: true,
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+        status: {
+          select: {
+            medias: true,
+            createdAt: true,
+            id: true,
+            userId: true,
+            user: true,
+          },
+        },
+        repliedToMessage: {
+          select: {
+            id: true,
+            text: true,
+            senderId: true,
+            sender: {
+              select: { id: true, username: true, name: true },
+            },
+            media: {
+              select: {
+                id: true,
+                key: true,
+                url: true,
+                mediaType: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 }

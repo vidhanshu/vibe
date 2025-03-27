@@ -128,6 +128,7 @@ const Message = ({
                           alt="media-file"
                           width={150}
                           height={150}
+                          quality={30}
                           className={cn(
                             "rounded-md cursor-pointer",
                             isMyMessage && "ml-auto"
@@ -147,7 +148,12 @@ const Message = ({
                       )}
                     </>
                   )}
-                  <blockquote className="bg-secondary mr-auto px-4 py-1 rounded-3xl text-white/70">
+                  <blockquote
+                    className={cn(
+                      "bg-secondary px-4 py-1 rounded-3xl text-white/70 w-fit block",
+                      isMyMessage ? "ml-auto" : "mr-auto"
+                    )}
+                  >
                     {replyMessage.text?.slice(0, 60)}...
                   </blockquote>
                 </div>
@@ -169,6 +175,7 @@ const Message = ({
                         alt="media-file"
                         width={200}
                         height={200}
+                        quality={1}
                         className="rounded-md cursor-pointer"
                       />
                     ) : (
@@ -262,6 +269,7 @@ const Message = ({
                   alt="media-file"
                   width={200}
                   height={200}
+                  quality={30}
                   className="rounded-md cursor-pointer"
                 />
               ) : (

@@ -38,7 +38,7 @@ const PostMediaCarousel = ({
           width={500}
           height={500}
           className={cn(
-            "w-full max-h-[calc(100vh-100px)] object-cover object-center",
+            "w-full max-h-[calc(100vh-52px)] object-center aspect-auto",
             imageClassName
           )}
         />
@@ -51,29 +51,21 @@ const PostMediaCarousel = ({
   return (
     <div
       className={cn(
-        "col-span-7 flex items-center justify-center border-r relative",
+        "col-span-7 flex items-center justify-center relative bg-secondary",
         containerClassName
       )}
     >
       {mediaElements[active]}
       {LENGTH > 1 && (
         <>
-          <Button
-            size="icon-sm"
-            variant="secondary"
-            className="absolute inset-y-0 my-auto left-4"
+          <ChevronLeft
+            className="text-black cursor-pointer bg-white rounded-full absolute inset-y-0 my-auto left-4 p-1 shadow-md"
             onClick={() => setActive((prev) => (prev - 1 + LENGTH) % LENGTH)}
-          >
-            <ChevronLeft />
-          </Button>
-          <Button
-            size="icon-sm"
-            variant="secondary"
-            className="absolute inset-y-0 my-auto right-4"
+          />
+          <ChevronRight
+            className="text-black cursor-pointer bg-white rounded-full absolute inset-y-0 my-auto right-4 p-1 shadow-md"
             onClick={() => setActive((prev) => (prev + 1) % LENGTH)}
-          >
-            <ChevronRight />
-          </Button>
+          />
         </>
       )}
     </div>
@@ -137,7 +129,6 @@ const VideoPreview = React.memo(
               videoClassName
             )}
             onTimeUpdate={(e) => {
-              console.log(e.currentTarget.currentTime);
               const pr = (e.currentTarget.currentTime / TOTAL_DURATION!) * 100;
               setProgress(pr.toFixed(0));
             }}

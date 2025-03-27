@@ -1,19 +1,31 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import EditPostDrawer from "@/src/common/components/drawers/edit-post-drawer";
 import SuggestedForYou from "@/src/common/components/suggested";
 import useInfinite from "@/src/common/hooks/use-infinite";
 import useIsMobile from "@/src/common/hooks/use-is-mobile";
 import { getPosts } from "@/src/posts/actions/posts-actions";
 import { NSPost } from "@/src/posts/types";
 import NoContent from "@/src/users/components/no-content";
-import { CircleCheckBig, Loader } from "lucide-react";
+import { CircleCheckBig, Loader, Plus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import FeedListSkeleton from "./feed-list-skeleton";
 import FeedPostCard from "./feed-post-card";
-import FeedPostViewDrawer from "./feed-post-view-drawer";
 import FeedStatuses from "./status/feed-statuses";
+import Button from "@/components/ui/button";
+import dynamic from "next/dynamic";
+
+const EditPostDrawer = dynamic(
+  () => import("@/src/common/components/drawers/edit-post-drawer")
+);
+const FeedPostViewDrawer = dynamic(() => import("./feed-post-view-drawer"));
+const CreatePostModal = dynamic(
+  () =>
+    import("@/src/common/components/modals/create-post-modal/create-post-modal")
+);
+const ViewPostModal = dynamic(
+  () => import("@/src/common/components/modals/view-post-modal")
+);
 
 const FeedList = () => {
   const [editPostId, setEditPostId] = useState<string | null>(null);
@@ -43,6 +55,27 @@ const FeedList = () => {
         <FeedStatuses />
         {isLoading ? (
           <FeedListSkeleton />
+        ) : paginatedResponse.length === 0 ? (
+          <div className="h-[50vh] flex items-center justify-center">
+            <NoContent
+              iconClassName="size-8"
+              iconContainerClassName="size-16"
+              title="No posts"
+              subtitle="Be the first one to post on vibe 😉!"
+              children={
+                <CreatePostModal asChild>
+                  <Button
+                    size="sm"
+                    className="mt-2 w-fit"
+                    containerProps={{ className: "gap-x-1" }}
+                    endContent={<Plus className="size-5" />}
+                  >
+                    Create post
+                  </Button>
+                </CreatePostModal>
+              }
+            />
+          </div>
         ) : (
           <div className="space-y-6 max-w-[29rem] mx-auto">
             {paginatedResponse?.map(
@@ -95,10 +128,16 @@ const FeedList = () => {
         )}
       </div>
 
-      {isMobile && (
+      {isMobile ? (
         <FeedPostViewDrawer
           postId={viewPostId}
           cancelView={() => setViewPostId(null)}
+        />
+      ) : (
+        <ViewPostModal
+          open={!!viewPostId}
+          postId={viewPostId ?? ""}
+          setOpen={() => setViewPostId(null)}
         />
       )}
 

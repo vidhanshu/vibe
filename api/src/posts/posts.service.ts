@@ -18,18 +18,39 @@ export class PostsService {
     private mediasService: MediasService,
   ) {}
 
-  createPost(
+  async createPost(
     id: string,
-    { content, title, medias }: CreatePostDto,
+    { content, title, medias, hashTags = [] }: CreatePostDto,
   ): Promise<Post> {
-    const data: Prisma.PostCreateInput = {
-      title,
-      content,
-      user: { connect: { id } },
-    };
-    if (medias.length) data.medias = { create: medias };
+    return this.prisma.$transaction(async (prisma) => {
+      // 1. Upsert hashtags
+      const hashtagRecords = await Promise.all(
+        hashTags.map(async (tag) => {
+          const cleanTag = tag.replace(/^#/, '');
+          return prisma.hashTag.upsert({
+            where: { name: cleanTag },
+            update: {}, // No update needed, just ensure existence
+            create: { name: tag },
+          });
+        }),
+      );
 
-    return this.prisma.post.create({ data, include: { medias: true } });
+      // 2. Create post and link hashtags
+      const data: Prisma.PostCreateInput = {
+        title,
+        content,
+        user: { connect: { id } },
+        medias: medias.length ? { create: medias } : undefined,
+        hashTags: {
+          connect: hashtagRecords.map((tag) => ({ id: tag.id })),
+        },
+      };
+
+      return prisma.post.create({
+        data,
+        include: { medias: true, hashTags: true },
+      });
+    });
   }
 
   async getAllPosts({
@@ -49,8 +70,10 @@ export class PostsService {
             profilePhoto: true,
             username: true,
             name: true,
+            status: true,
           },
         },
+        hashTags: true,
         medias: true,
         likes: { select: { userId: true } },
         savedBy: { select: { id: true } },
@@ -108,7 +131,13 @@ export class PostsService {
       where: baseWhere,
       include: {
         user: {
-          select: { id: true, profilePhoto: true, username: true, name: true },
+          select: {
+            id: true,
+            profilePhoto: true,
+            username: true,
+            name: true,
+            status: true,
+          },
         },
         medias: true,
         likes: { select: { userId: true } },
@@ -140,7 +169,10 @@ export class PostsService {
       where: { id },
       include: {
         medias: true,
-        user: true,
+        user: {
+          include: { status: true },
+        },
+        hashTags: true,
         _count: true,
         savedBy: { select: { id: true } },
         likes: {
@@ -163,7 +195,7 @@ export class PostsService {
       return await this.prisma.post.update({
         where: { id, userId },
         data: { title, content },
-        include: { medias: true },
+        include: { medias: true, hashTags: true },
       });
     } catch (error) {
       if (error.code === 'P2025') {
@@ -231,5 +263,20 @@ export class PostsService {
       statusCode: 200,
       message: `Post ${operation === 'connect' ? 'saved' : 'un saved'} successfully`,
     };
+  }
+
+  async suggestHashtags(query: string): Promise<{ name: string }[]> {
+    if (!query || query.length < 2) return [];
+    const cleanQuery = query.replace(/^#/, '');
+    return this.prisma.hashTag.findMany({
+      where: {
+        name: {
+          startsWith: cleanQuery,
+          mode: 'insensitive',
+        },
+      },
+      select: { name: true },
+      take: 10,
+    });
   }
 }
