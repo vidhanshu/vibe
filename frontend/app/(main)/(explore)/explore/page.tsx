@@ -13,7 +13,7 @@ import { NSPost } from "@/src/posts/types";
 import NoContent from "@/src/users/components/no-content";
 import { FileVideo, Images, Loader2, Play, Plus } from "lucide-react";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 const ExplorePage = () => {
   const [viewPostId, setViewPostId] = useState<string | null>(null);
@@ -111,11 +111,13 @@ const ExplorePage = () => {
           cancelView={() => setViewPostId(null)}
         />
       ) : (
-        <ViewPostModal
-          open={!!viewPostId}
-          postId={viewPostId ?? ""}
-          setOpen={() => setViewPostId(null)}
-        />
+        <Suspense>
+          <ViewPostModal
+            open={!!viewPostId}
+            postId={viewPostId ?? ""}
+            setOpen={() => setViewPostId(null)}
+          />
+        </Suspense>
       )}
     </div>
   );

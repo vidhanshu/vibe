@@ -8,7 +8,7 @@ import { getPosts } from "@/src/posts/actions/posts-actions";
 import { NSPost } from "@/src/posts/types";
 import NoContent from "@/src/users/components/no-content";
 import { CircleCheckBig, Loader, Plus } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import FeedListSkeleton from "./feed-list-skeleton";
 import FeedPostCard from "./feed-post-card";
 import FeedStatuses from "./status/feed-statuses";
@@ -133,11 +133,13 @@ const FeedList = () => {
           cancelView={() => setViewPostId(null)}
         />
       ) : (
-        <ViewPostModal
-          open={!!viewPostId}
-          postId={viewPostId ?? ""}
-          setOpen={() => setViewPostId(null)}
-        />
+        <Suspense>
+          <ViewPostModal
+            open={!!viewPostId}
+            postId={viewPostId ?? ""}
+            setOpen={() => setViewPostId(null)}
+          />
+        </Suspense>
       )}
 
       <EditPostDrawer

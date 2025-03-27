@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import NoContent from "./no-content";
 import useInfinite from "@/src/common/hooks/use-infinite";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const ProfilePosts = () => {
@@ -72,7 +72,11 @@ const ProfilePosts = () => {
           )}
         </NoContent>
       )}
-      {postId ? <ViewPostModal open postId={postId} /> : null}
+      {postId ? (
+        <Suspense>
+          <ViewPostModal open postId={postId} />
+        </Suspense>
+      ) : null}
       {isFetchingNextPage && (
         <Loader2 className="size-6 mx-auto animate-spin" />
       )}

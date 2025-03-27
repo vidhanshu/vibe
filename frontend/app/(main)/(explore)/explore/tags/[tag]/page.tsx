@@ -14,7 +14,7 @@ import NoContent from "@/src/users/components/no-content";
 import { FileVideo, Images, Loader2, Play, Plus } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 const ExploreTagPage = () => {
   const tag = useParams().tag as string;
@@ -116,11 +116,13 @@ const ExploreTagPage = () => {
           cancelView={() => setViewPostId(null)}
         />
       ) : (
-        <ViewPostModal
-          open={!!viewPostId}
-          postId={viewPostId ?? ""}
-          setOpen={() => setViewPostId(null)}
-        />
+        <Suspense>
+          <ViewPostModal
+            open={!!viewPostId}
+            postId={viewPostId ?? ""}
+            setOpen={() => setViewPostId(null)}
+          />
+        </Suspense>
       )}
     </div>
   );
