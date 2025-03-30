@@ -3,7 +3,7 @@
 // export const SOCKET_URL = "https://vibe-api-tuam.onrender.com";
 // export const API_BASE_URL = "https://vibe-api-tuam.onrender.com/api";
 export const SOCKET_URL =
-  "wss://ec2-43-204-102-4.ap-south-1.compute.amazonaws.com:4000";
+  "ws://ec2-43-204-102-4.ap-south-1.compute.amazonaws.com:4000";
 export const API_BASE_URL =
   "http://ec2-43-204-102-4.ap-south-1.compute.amazonaws.com:4000/api";
 
