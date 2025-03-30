@@ -21,6 +21,7 @@ const useInfinite = ({
   const {
     data: d,
     isFetching,
+    isLoading,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
@@ -57,7 +58,8 @@ const useInfinite = ({
   return {
     ref,
     data,
-    isLoading: isFetching,
+    isLoading,
+    isFetching,
     status,
     hasNextPage,
     isFetchingNextPage,

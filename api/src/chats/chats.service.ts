@@ -763,6 +763,18 @@ export class ChatsService {
       SOCKET_EVENTS.RECEIVE_MESSAGE,
       createdMessage,
     );
+    const otherParticipants = chat.participants.filter(
+      ({ userId: lUserId }) => lUserId !== userId,
+    );
+    otherParticipants.forEach(({ userId: luId }) => {
+      this.wsService.emitToUser(luId, SOCKET_EVENTS.RECEIVE_NOTIFICATION, {
+        type: 'MESSAGE',
+        byUser: createdMessage.sender,
+        byUserId: createdMessage.senderId,
+        createdAt: new Date(),
+        chatId,
+      });
+    });
     return createdMessage;
   }
 

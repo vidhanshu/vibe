@@ -31,6 +31,7 @@ export namespace NSCommon {
     postId?: string;
     post?: NSPost.Post;
     statusId?: string;
+    chatId?: string; // only show notifications, that means doesn't get stored in db
     status: NSPost.Status;
     commentId?: string;
     comment: NSPost.Comment;
@@ -38,7 +39,7 @@ export namespace NSCommon {
     updatedAt: Date;
   }
 
-  export type NotificationType = "FOLLOW" | "LIKE" | "COMMENT" | "MENTION";
+  export type NotificationType = "FOLLOW" | "LIKE" | "COMMENT" | "MENTION" | "MESSAGE";
 
   export type MediaType = "IMAGE" | "VIDEO";
 

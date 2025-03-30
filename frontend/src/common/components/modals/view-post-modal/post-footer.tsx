@@ -7,7 +7,14 @@ import useComments from "@/src/posts/hooks/use-comments";
 import useLike from "@/src/posts/hooks/use-like";
 import { NSPost } from "@/src/posts/types";
 import dayjs from "dayjs";
-import { Bookmark, Forward, Heart, MessageCircle, Smile } from "lucide-react";
+import {
+  Bookmark,
+  Forward,
+  Heart,
+  Loader2,
+  MessageCircle,
+  Smile,
+} from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -50,7 +57,12 @@ const PostFooter = ({
 
   const isFeedVariant = variant === "feed";
 
-  const { handleUpdateComment, handleComment } = useComments({
+  const {
+    handleUpdateComment,
+    handleComment,
+    isCommentAdding,
+    isUpdatingComment,
+  } = useComments({
     comment,
     editCommentId,
     postId: post.id,
@@ -220,12 +232,18 @@ const PostFooter = ({
           )}
         />
         <button
-          disabled={!comment.trim().length}
+          disabled={
+            !comment.trim().length || isUpdatingComment || isCommentAdding
+          }
           className={cn(
-            "text-blue-400 font-bold",
+            "text-blue-400 font-bold relative",
             !comment.trim().length && "text-blue-500/50"
           )}
         >
+          {isUpdatingComment ||
+            (isCommentAdding && (
+              <Loader2 className="text-white size-4 animate-spin absolute inset-0 m-auto" />
+            ))}
           {editCommentId ? "Update" : "Post"}
         </button>
       </form>

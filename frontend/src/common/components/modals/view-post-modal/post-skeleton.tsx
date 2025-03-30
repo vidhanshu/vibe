@@ -6,6 +6,14 @@ const PostSkeleton = () => (
     <div className="md:col-span-7 p-4">
       <Skeleton className="h-[200px] md:h-full w-full" />
     </div>
+    <PostCommentSkeleton />
+  </div>
+);
+
+export default PostSkeleton;
+
+export const PostCommentSkeleton = () => {
+  return (
     <div className="md:col-span-5 p-4 space-y-4">
       <div className="flex gap-x-4">
         <Skeleton className="size-8 rounded-full" />
@@ -28,7 +36,5 @@ const PostSkeleton = () => (
         ))}
       </div>
     </div>
-  </div>
-);
-
-export default PostSkeleton;
+  );
+};

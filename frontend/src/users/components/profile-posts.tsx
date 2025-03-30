@@ -22,7 +22,7 @@ const ProfilePosts = () => {
   const saved = pathname.includes("/saved");
 
   const { user } = useSessionStore();
-  const { data, isLoading, ref, isFetchingNextPage } = useInfinite({
+  const { data, isFetching, ref, isFetchingNextPage } = useInfinite({
     fetcher: saved
       ? getSavedPosts
       : // eslint-disable-next-line
@@ -38,7 +38,7 @@ const ProfilePosts = () => {
 
   return (
     <div>
-      {isLoading ? (
+      {isFetching ? (
         <div className="grid px-4 md:px-0 md:grid-cols-3 gap-4">
           <Skeleton className="h-52" />
           <Skeleton className="h-52" />

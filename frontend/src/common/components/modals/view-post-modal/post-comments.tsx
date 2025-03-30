@@ -10,6 +10,7 @@ import ShowMore from "../../show-more";
 import Comment from "./comment";
 import UserChip from "../../user-chip";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PostComments = ({
   post,
@@ -37,6 +38,7 @@ const PostComments = ({
     hasMoreComments,
     isCommentDeleting,
     isFetchingMoreComments,
+    isCommentsLoading,
     ref,
   } = useComments({
     comment,
@@ -99,7 +101,17 @@ const PostComments = ({
             Comments
           </h1>
           <div className="space-y-4">
-            {comments.length === 0 ? (
+            {isCommentsLoading ? (
+              Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} className="flex gap-x-4 max-w-[300px]">
+                  <Skeleton className="size-8 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="w-full h-[20px]" />
+                    <Skeleton className="w-full h-[5px]" />
+                  </div>
+                </div>
+              ))
+            ) : comments.length === 0 ? (
               <NoContent
                 icon={MessageCircle}
                 title="No comments found"
