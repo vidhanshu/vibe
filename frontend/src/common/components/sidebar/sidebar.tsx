@@ -12,7 +12,6 @@ import {
   Heart,
   Home,
   Loader2,
-  LogOut,
   LucideIcon,
   MessageCircle,
   PlusSquare,
@@ -26,7 +25,7 @@ import { useDebounceValue, useOnClickOutside } from "usehooks-ts";
 import useSessionStore from "../../stores/session-store";
 import CreatePostModal from "../modals/create-post-modal/create-post-modal";
 import SearchDrawer, { SearchDrawerContent } from "./search-drawer";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSocketContext } from "../../contexts/socket-context";
 import NotificationDrawer from "./notification-drawer";
 import { useUploadStore } from "../../stores/upload-store";
@@ -34,7 +33,6 @@ import ActionTooltip from "../action-tooltip";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const { user } = useSessionStore();
   const { uploads } = useUploadStore();
   const isChatPage = pathname.startsWith("/chats");

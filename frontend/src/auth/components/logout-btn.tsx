@@ -6,7 +6,7 @@ import { ConfirmationModal } from "@/src/common/components/modals/confirmation-m
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const LogoutButton = ({ isIcon = false }: { isIcon?: boolean }) => {
+const LogoutButton = () => {
   const router = useRouter();
 
   const logoutHandler = async () => {
