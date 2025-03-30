@@ -56,7 +56,7 @@ const PostMediaCarousel = ({
           width={500}
           height={500}
           className={cn(
-            "w-full max-h-[calc(100vh-52px)] object-center aspect-auto",
+            "w-full max-h-[calc(100vh-52px)] object-contain object-center aspect-auto",
             imageClassName
           )}
           draggable={false}
