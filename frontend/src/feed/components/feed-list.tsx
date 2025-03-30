@@ -30,7 +30,7 @@ const ViewPostModal = dynamic(
 const FeedList = () => {
   const [editPostId, setEditPostId] = useState<string | null>(null);
   const [viewPostId, setViewPostId] = useState<string | null>(null);
-  const { data, isFetchingNextPage, hasNextPage, isLoading, isFetching, ref } =
+  const { data, isFetchingNextPage, hasNextPage, isFetching, ref } =
     useInfinite({
       fetcher: getPosts,
       queryKey: ["posts"],
