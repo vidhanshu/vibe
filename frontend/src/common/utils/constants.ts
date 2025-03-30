@@ -2,12 +2,8 @@
 // export const API_BASE_URL = "http://localhost:4000/api";
 // export const SOCKET_URL = "https://vibe-api-tuam.onrender.com";
 // export const API_BASE_URL = "https://vibe-api-tuam.onrender.com/api";
-// export const SOCKET_URL = "https://5473-43-204-102-4.ngrok-free.app";
-// export const API_BASE_URL = "https://5473-43-204-102-4.ngrok-free.app/api";
-export const SOCKET_URL =
-  "ws://ec2-43-204-102-4.ap-south-1.compute.amazonaws.com:4000";
-export const API_BASE_URL =
-  "http://ec2-43-204-102-4.ap-south-1.compute.amazonaws.com:4000/api";
+export const SOCKET_URL = "wss://vibev.duckdns.org";
+export const API_BASE_URL = "https://vibev.duckdns.org/api";
 
 export const SOCKET_EVENTS = {
   JOIN_CHAT: "joinChat",
