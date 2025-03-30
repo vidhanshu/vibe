@@ -2,22 +2,27 @@
 
 import Button from "@/components/ui/button";
 import { signOut } from "@/src/auth/actions/auth-actions";
+import { ConfirmationModal } from "@/src/common/components/modals/confirmation-modal";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const LogoutButton = () => {
+const LogoutButton = ({ isIcon = false }: { isIcon?: boolean }) => {
   const router = useRouter();
 
+  const logoutHandler = async () => {
+    await signOut();
+    toast.success("Logged out successfully");
+    router.replace("/auth");
+  };
+
   return (
-    <Button
-      onClick={async () => {
-        await signOut();
-        toast.success("Logged out successfully");
-        router.replace("/auth");
-      }}
+    <ConfirmationModal
+      onConfirm={logoutHandler}
+      title="Log out?"
+      subtitle="You'll be logged out of the Vibe"
     >
-      Logout
-    </Button>
+      <Button>Logout</Button>
+    </ConfirmationModal>
   );
 };
 

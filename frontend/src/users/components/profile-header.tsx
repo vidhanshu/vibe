@@ -21,6 +21,7 @@ import ProfileHeaderSkeleton from "./skeletons/profile-header-skeleton";
 import StatusViewDrawer from "@/src/feed/components/status/status-view-drawer";
 import useFollow from "../hooks/use-follow";
 import { createChat } from "@/src/chats/actions/chats-action";
+import LogoutButton from "@/src/auth/components/logout-btn";
 
 const PRONOUN_MAP = {
   he: "he/his",
@@ -163,11 +164,18 @@ const ProfileHeader = () => {
               </Button>
             )}
             {isUserSelf ? (
-              <Link href="/users/accounts/edit">
-                <Button className="font-semibold" variant="secondary" size="sm">
-                  Edit profile
-                </Button>
-              </Link>
+              <>
+                <Link href="/users/accounts/edit">
+                  <Button
+                    className="font-semibold"
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Edit profile
+                  </Button>
+                </Link>
+                <LogoutButton />
+              </>
             ) : (
               <Button
                 onClick={handleUserSelect}

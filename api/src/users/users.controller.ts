@@ -24,8 +24,11 @@ export class UsersController {
   }
 
   @Get('/suggested-to-follow')
-  getSuggestedToFollow(@Query() filterUsersDto: FilterUsersDto, @User() user: AccessTokenPayload) {
-    return this.usersService.getSuggestedToFollow(filterUsersDto,user.sub);
+  getSuggestedToFollow(
+    @Query() filterUsersDto: FilterUsersDto,
+    @User() user: AccessTokenPayload,
+  ) {
+    return this.usersService.getSuggestedToFollow(filterUsersDto, user.sub);
   }
 
   @Get('/profile')

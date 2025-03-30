@@ -70,6 +70,33 @@ export const getProfile = async (): NSCommon.Response<
   }
 };
 
+export const checkAuth = async (): NSCommon.Response<
+  NSUser.User,
+  { statusCode?: number }
+> => {
+  try {
+    const response = await api.get(AUTH_API_ROUTES.CHECK_AUTH);
+    const resJson = response.data;
+    console.log(resJson);
+
+    if (response.status !== 200)
+      return {
+        message: resJson.message,
+        data: null,
+        statusCode: response.status,
+      };
+
+    return { data: resJson };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      message: error?.response?.data?.message || error.message,
+      statusCode: error.response.status,
+      data: null,
+    };
+  }
+};
+
 export const getUsers = async ({
   limit = 10,
   page = 1,

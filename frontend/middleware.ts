@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProfile } from "./src/users/actions/user-actions";
+import { checkAuth, getProfile } from "./src/users/actions/user-actions";
 
 const PUBLIC_ROUTES = ["/auth"];
 const PRIVATE_ROUTES = ["/"];
@@ -9,7 +9,8 @@ export async function middleware(req: NextRequest) {
   const purePathname = pathname.split("?")[0];
 
   try {
-    const { data } = await getProfile();
+    const { data } = await checkAuth();
+
     // if logged in
     if (data) {
       if (PUBLIC_ROUTES.some((route) => purePathname === route)) {
