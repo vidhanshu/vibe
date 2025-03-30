@@ -42,14 +42,12 @@ const MessageInput = ({
   const [typing, setTyping] = useState<Set<string>>();
   const userIdToNameMapRef = useRef<Map<string, string>>(new Map());
   const {
-    sendMessage: sSendMessage,
     startTyping,
     stopTyping,
     offStopTypingMessage,
     offTypingMessage,
     onStopTypingMessage,
     onTypingMessage,
-    updateMessage: sUpdateMessage,
   } = useChatSocket();
 
   const { isPending: isSendingMessage, mutate } = useMutation({
@@ -69,7 +67,7 @@ const MessageInput = ({
       setMessage("");
       setMediaFile(null);
       setReplyToMessage(null);
-      sSendMessage(res.data);
+      // sSendMessage(res.data); // moved to backend
       // scrollToBottom?.();
     },
   });
@@ -89,7 +87,7 @@ const MessageInput = ({
       }
       setMessage("");
       setEditingMessageId(null);
-      sUpdateMessage({ chatId: chatId, message: res.data });
+      // sUpdateMessage({ chatId: chatId, message: res.data }); // moved to backend
       toast.success("Message updated successfully");
       // scrollToBottom?.();
     },

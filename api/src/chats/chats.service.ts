@@ -17,12 +17,15 @@ import { AddParticipantDto } from './dto/add-participant.dto';
 import { RemoveParticipantDto } from './dto/remove-participant.dto';
 import { UpdateParticipantDto } from './dto/update-participant.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
+import { WebsocketsService } from 'src/websockets/websockets.service';
+import { SOCKET_EVENTS } from 'src/common/utils/constants';
 
 @Injectable()
 export class ChatsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mediaService: MediasService,
+    private readonly wsService: WebsocketsService,
   ) {}
 
   // chat
@@ -707,7 +710,7 @@ export class ChatsService {
       data: { updatedAt: new Date() },
     });
 
-    return this.prisma.message.create({
+    const createdMessage = await this.prisma.message.create({
       data: {
         chatId,
         senderId: userId,
@@ -755,6 +758,12 @@ export class ChatsService {
         },
       },
     });
+    this.wsService.emitToRoom(
+      chatId,
+      SOCKET_EVENTS.RECEIVE_MESSAGE,
+      createdMessage,
+    );
+    return createdMessage;
   }
 
   async updateMessage(
@@ -775,7 +784,7 @@ export class ChatsService {
         'You are not allowed to delete this message',
       );
 
-    return this.prisma.message.update({
+    const updatedMessage = await this.prisma.message.update({
       where: { id: messageId },
       data: {
         text: message,
@@ -819,6 +828,12 @@ export class ChatsService {
         },
       },
     });
+    this.wsService.emitToRoom(
+      updatedMessage.chatId,
+      SOCKET_EVENTS.RECEIVE_MESSAGE,
+      updatedMessage,
+    );
+    return updatedMessage;
   }
 
   async deleteMessage(userId: string, messageId: string) {
@@ -835,7 +850,7 @@ export class ChatsService {
     if (message.media?.key) {
       await this.mediaService.deleteFiles([message.media.key]);
     }
-    return this.prisma.message.delete({
+    const deletedMessage = await this.prisma.message.delete({
       where: { id: messageId },
       include: {
         media: true,
@@ -876,5 +891,11 @@ export class ChatsService {
         },
       },
     });
+    this.wsService.emitToRoom(
+      deletedMessage.chatId,
+      SOCKET_EVENTS.REMOVE_MESSAGE,
+      { chatId: deletedMessage.chatId, messageId: messageId },
+    );
+    return deletedMessage;
   }
 }

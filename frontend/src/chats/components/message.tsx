@@ -30,7 +30,6 @@ import Image from "next/image";
 import MediaViewerModal from "./media-viewer-modal";
 import { useState } from "react";
 import { getShortRelativeTime } from "@/src/common/utils/dayjs";
-import useChatSocket from "../hooks/use-chat-socket";
 import { isOnlyEmojis } from "../utils/emote";
 import Link from "next/link";
 
@@ -55,7 +54,6 @@ const Message = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, copyText] = useCopyToClipboard();
   const [isMediaViewerOpen, setIsMediaViewerOpen] = useState(false);
-  const { unSendMessage: sUnSendMessage } = useChatSocket();
 
   const { mutate: deleteMessage } = useMutation({
     mutationKey: ["message-delete", message.id],
@@ -67,7 +65,7 @@ const Message = ({
         return toast.error(res.message);
       }
       toast.success("Message unsent");
-      sUnSendMessage({ chatId, messageId: message.id });
+      // sUnSendMessage({ chatId, messageId: message.id }); // being handled in backend now
     },
   });
 
