@@ -11,9 +11,12 @@ services:
       - /app/node_modules # Prevents overwriting node_modules
     environment:
       DATABASE_URL: 'postgresql://postgres:postgres@db:5432/vibe-db'
-    command: pnpm run start:dev # Use development-specific command
     depends_on:
       - db
+    command: >
+      sh -c "npx prisma generate &&
+      npx prisma migrate deploy &&
+      pnpm run start:dev"
   db:
     image: postgres:15
     container_name: postgres_db

@@ -46,7 +46,6 @@ const PostFooter = ({
   comment: string;
   setComment: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const currentUserId = useSessionStore((select) => select.user?.id);
@@ -80,12 +79,6 @@ const PostFooter = ({
   useEffect(() => {
     if (!currentUserId) return;
 
-    if (post?.liked) {
-      setLiked(true);
-    } else {
-      setLiked(false);
-    }
-
     // TODO: also move to backed similar to like/follow
     if (post?.savedBy?.some(({ id }) => id === currentUserId)) {
       setSaved(true);
@@ -93,6 +86,8 @@ const PostFooter = ({
       setSaved(false);
     }
   }, [post, currentUserId]);
+
+  const liked = post?.liked; // getting updated optimistically
 
   return (
     <div
@@ -106,7 +101,6 @@ const PostFooter = ({
               variant={liked ? "destructive" : "secondary"}
               onClick={() => {
                 handleLike();
-                setLiked((prev) => !prev);
               }}
             >
               <Heart className="size-4" />
