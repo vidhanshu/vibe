@@ -1,7 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { likeUnLike } from "../actions/posts-actions";
+import { NSCommon } from "@/src/common/types";
+import { NSPost } from "../types";
 
+type OldDataType = {
+  pageParams: number[];
+  pages: NSCommon.PaginatedResponse<NSPost.DetailedPost>[];
+};
 const useLike = ({ postId }: { postId: string }) => {
   const qc = useQueryClient();
 
@@ -25,14 +31,14 @@ const useLike = ({ postId }: { postId: string }) => {
       console.log("📌 Previous post data:", previousPost);
 
       // Optimistic update for feed posts
-      qc.setQueryData(["posts"], (oldData: any) => {
+      qc.setQueryData(["posts"], (oldData: OldDataType) => {
         if (!oldData) return oldData;
 
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page) => ({
             ...page,
-            items: page.items.map((post: any) =>
+            items: page.items.map((post) =>
               post.id === postId
                 ? {
                     ...post,
@@ -51,7 +57,7 @@ const useLike = ({ postId }: { postId: string }) => {
       });
 
       // Optimistic update for modal post
-      qc.setQueryData(["post", postId], (oldPost: any) => {
+      qc.setQueryData(["post", postId], (oldPost: NSPost.DetailedPost) => {
         if (!oldPost) return oldPost;
         return {
           ...oldPost,
