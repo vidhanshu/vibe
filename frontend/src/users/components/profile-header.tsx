@@ -8,7 +8,15 @@ import useSessionStore from "@/src/common/stores/session-store";
 import { getShortNumber } from "@/src/common/utils/number";
 import { getUserByUsername } from "@/src/users/actions/user-actions";
 import { useQuery } from "@tanstack/react-query";
-import { Bookmark, Grid3X3, Youtube } from "lucide-react";
+import {
+  Bookmark,
+  Grid3X3,
+  MessageCircle,
+  PencilLine,
+  UserMinus,
+  UserPlus,
+  Youtube,
+} from "lucide-react";
 import Link from "next/link";
 import {
   useParams,
@@ -98,7 +106,7 @@ const ProfileHeader = () => {
       {currentUser?.status && (
         <StatusViewDrawer
           close={() => {
-            router.push(pathname.split("?")[0]);
+            router.back();
           }}
           statuses={[currentUser.status]}
           setViewStatusIdx={() => {}}
@@ -111,6 +119,7 @@ const ProfileHeader = () => {
             router.push(`${pathname}?status=open`);
           }}
           className={cn(
+            "h-fit w-fit",
             currentUser?.status
               ? currentUser.status.viewed
                 ? "rounded-full p-1 cursor-pointer bg-secondary"
@@ -126,7 +135,7 @@ const ProfileHeader = () => {
           />
         </div>
         <div className="flex-1 flex flex-col justify-between py-2 gap-2">
-          <div className="flex gap-x-4 items-center">
+          <div className="flex gap-x-4 md:items-center md:flex-row flex-col">
             <div className="">
               <p className="text-2xl">
                 {currentUser?.username}
@@ -147,45 +156,56 @@ const ProfileHeader = () => {
                 {currentUser?.name}
               </p>
             </div>
-            {!isUserSelf && (
-              <Button
-                onClick={() =>
-                  data?.data?.id &&
-                  handleFollowUnfollow({ userId: data.data.id })
-                }
-                className={cn(
-                  "font-semibold",
-                  data?.data?.follows && "bg-blue-500 hover:bg-blue-600"
-                )}
-                variant="default"
-                size="sm"
-              >
-                {data?.data?.follows ? "Unfollow" : "Follow"}
-              </Button>
-            )}
-            {isUserSelf ? (
-              <>
-                <Link href="/users/accounts/edit">
-                  <Button
-                    className="font-semibold"
-                    variant="secondary"
-                    size="sm"
-                  >
-                    Edit profile
-                  </Button>
-                </Link>
-                <LogoutButton />
-              </>
-            ) : (
-              <Button
-                onClick={handleUserSelect}
-                className="font-semibold"
-                variant="secondary"
-                size="sm"
-              >
-                Message
-              </Button>
-            )}
+            <div className="flex gap-x-4 my-2">
+              {!isUserSelf && (
+                <Button
+                  onClick={() =>
+                    data?.data?.id &&
+                    handleFollowUnfollow({ userId: data.data.id })
+                  }
+                  className={cn(
+                    "font-semibold",
+                    data?.data?.follows && "bg-blue-500 hover:bg-blue-600"
+                  )}
+                  endContent={
+                    data?.data?.follows ? (
+                      <UserMinus className="size-4" />
+                    ) : (
+                      <UserPlus className="size-4" />
+                    )
+                  }
+                  variant="default"
+                  size="sm"
+                >
+                  {data?.data?.follows ? "Unfollow" : "Follow"}
+                </Button>
+              )}
+              {isUserSelf ? (
+                <>
+                  <Link href="/users/accounts/edit">
+                    <Button
+                      endContent={<PencilLine className="size-4" />}
+                      className="font-semibold"
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Edit profile
+                    </Button>
+                  </Link>
+                  <LogoutButton />
+                </>
+              ) : (
+                <Button
+                  onClick={handleUserSelect}
+                  className="font-semibold"
+                  variant="secondary"
+                  size="sm"
+                  endContent={<MessageCircle className="size-4" />}
+                >
+                  Message
+                </Button>
+              )}
+            </div>
             {/* {!isUserSelf && (
               <Button size="icon-sm" variant="secondary" className="rounded-md">
                 <UserPlus2 className="size-5" />
@@ -202,7 +222,7 @@ const ProfileHeader = () => {
               </Button>
             )} */}
           </div>
-          <div className="flex justify-between items-center text-lg max-w-[300px]">
+          <div className="flex justify-between items-center text-lg max-w-[300px] my-2 md:my-0">
             <h1 className="text-sm font-bold md:text-base">
               <b>{currentUser?._count.posts}</b> Posts
             </h1>

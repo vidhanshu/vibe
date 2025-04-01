@@ -167,7 +167,7 @@ const MessageInput = ({
   return (
     <div
       className={cn(
-        "px-4 py-2 w-full",
+        "px-4 py-2 w-full sticky bottom-0 z-[2000] bg-background",
         (editingMessageId || !!replyMessage || typing?.size) && "border-t"
       )}
     >

@@ -23,6 +23,8 @@ const PostMediaCarousel = ({
   containerClassName,
   postId,
   isLiked,
+  isFeedVariant = false,
+  videoContainerClassName,
 }: {
   title: string;
   medias: NSCommon.FullMedia[];
@@ -30,7 +32,9 @@ const PostMediaCarousel = ({
   videoClassName?: string;
   containerClassName?: string;
   postId: string;
+  isFeedVariant?: boolean;
   isLiked: boolean;
+  videoContainerClassName?: string;
 }) => {
   const [active, setActive] = useState(0);
   const [showHeart, setShowHeart] = useState(false);
@@ -56,14 +60,20 @@ const PostMediaCarousel = ({
           width={500}
           height={500}
           className={cn(
-            "w-full max-h-[calc(100vh-52px)] object-contain object-center aspect-auto",
+            "w-full h-[489px] md:h-full md:max-h-[578px] object-contain object-center aspect-auto",
+            { "md:max-h-[calc(100vh-52px)]": !isFeedVariant },
             imageClassName
           )}
           draggable={false}
         />
       );
     return (
-      <VideoPreview key={key} src={media.url} videoClassName={videoClassName} />
+      <VideoPreview
+        key={key}
+        src={media.url}
+        videoClassName={videoClassName}
+        videoContainerClassName={videoContainerClassName}
+      />
     );
   });
 
@@ -106,7 +116,15 @@ const PostMediaCarousel = ({
 export default PostMediaCarousel;
 
 const VideoPreview = React.memo(
-  ({ src, videoClassName }: { src: string; videoClassName?: string }) => {
+  ({
+    src,
+    videoClassName,
+    videoContainerClassName,
+  }: {
+    src: string;
+    videoClassName?: string;
+    videoContainerClassName?: string;
+  }) => {
     const [play, setPlay] = useState(false);
     const [mute, setMute] = useState(false);
     const [progress, setProgress] = useState("0");
@@ -148,15 +166,15 @@ const VideoPreview = React.memo(
     // ct = % * total time / 100
 
     return (
-      <div className="relative">
-        <div className="w-fit relative" onClick={togglePlay}>
+      <div className={cn("relative h-full", videoContainerClassName)}>
+        <div className="w-fit relative h-full" onClick={togglePlay}>
           <video
             loop
             src={src}
             ref={videoRef}
             controls={false}
             className={cn(
-              "max-h-[calc(100vh-100px)] object-contain object-center",
+              "object-contain object-center h-full",
               videoClassName
             )}
             onTimeUpdate={(e) => {

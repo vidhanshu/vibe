@@ -34,7 +34,7 @@ const EmojiPicker = ({
       {typeof children === "function" ? children({ open, setOpen }) : children}
       <div
         className={cn(
-          "absolute left-full",
+          "absolute md:left-full",
           position === "top" ? "bottom-full" : "top-full"
         )}
       >

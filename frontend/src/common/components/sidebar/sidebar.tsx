@@ -27,7 +27,7 @@ import CreatePostModal from "../modals/create-post-modal/create-post-modal";
 import SearchDrawer, { SearchDrawerContent } from "./search-drawer";
 import { usePathname } from "next/navigation";
 import { useSocketContext } from "../../contexts/socket-context";
-import NotificationDrawer from "./notification-drawer";
+import NotificationDrawer, { MobileNotificationSheet } from "./notification-drawer";
 import { useUploadStore } from "../../stores/upload-store";
 import ActionTooltip from "../action-tooltip";
 
@@ -306,6 +306,9 @@ const Sidebar = () => {
 export const SidebarMobile = () => {
   const { user } = useSessionStore();
 
+  const pathname = usePathname();
+  if (pathname.startsWith("/chats")) return null;
+
   return (
     <div className="border-t px-4 py-2 bg-black flex items-center justify-between">
       <Link href="/">
@@ -315,11 +318,13 @@ export const SidebarMobile = () => {
           endContent={<Home className="size-6" />}
         />
       </Link>
-      <Button
-        size="icon"
-        variant="ghost"
-        endContent={<Compass className="size-6" />}
-      />
+      <Link href="/explore">
+        <Button
+          size="icon"
+          variant="ghost"
+          endContent={<Compass className="size-6" />}
+        />
+      </Link>
       <CreatePostModal asChild>
         <Button
           size="icon"
@@ -328,11 +333,13 @@ export const SidebarMobile = () => {
           endContent={<PlusSquare className="size-6" />}
         />
       </CreatePostModal>
-      <Button
-        size="icon"
-        variant="ghost"
-        endContent={<MessageCircle className="size-6" />}
-      />
+      <Link href="/chats">
+        <Button
+          size="icon"
+          variant="ghost"
+          endContent={<MessageCircle className="size-6" />}
+        />
+      </Link>
       <Link href={`/users/${user?.username}`}>
         <Button
           size="icon"
@@ -387,6 +394,9 @@ export const NavbarMobile = () => {
     setOpen(false);
   });
 
+  const pathname = usePathname();
+  if (pathname.startsWith("/chats")) return null;
+
   return (
     <div className="flex gap-x-2 items-center py-2 px-2 border-b">
       <Link href="/">
@@ -421,12 +431,7 @@ export const NavbarMobile = () => {
           </div>
         )}
       </div>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="min-w-10"
-        endContent={<Heart className="size-6" />}
-      />
+      <MobileNotificationSheet/>
     </div>
   );
 };

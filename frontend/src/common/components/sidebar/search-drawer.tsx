@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue, useLocalStorage } from "usehooks-ts";
 import UserChip from "../user-chip";
+import { cn } from "@/lib/utils";
 
 const SearchDrawer = ({ closeCollapse }: { closeCollapse: () => void }) => {
   const [debounced, updateDebounced] = useDebounceValue("", 1000);
@@ -91,7 +92,7 @@ export const SearchDrawerContent = ({
       {!debounced.trim().length ? (
         <>
           {recentSearches.length ? (
-            <div className="py-4">
+            <div className="py-2 md:py-4">
               <div className="flex items-center justify-between">
                 <h1 className="font-bold text-sm text-muted-foreground">
                   Recent searches
@@ -123,7 +124,7 @@ export const SearchDrawerContent = ({
               </div>
             </div>
           ) : (
-            <div className="py-6 text-muted-foreground">
+            <div className="py-2 md:py-6 text-muted-foreground">
               <p>Type something to search...</p>
             </div>
           )}
@@ -147,7 +148,7 @@ export const SearchDrawerContent = ({
           />
         </div>
       ) : (
-        data?.items?.map((user) => (
+        data?.items?.map((user, idx) => (
           <Link
             key={user.id}
             onClick={() => {
@@ -158,9 +159,16 @@ export const SearchDrawerContent = ({
               });
             }}
             href={`/users/${user.username}`}
-            className={`px-6 py-4`}
           >
-            <UserChip noLink user={user} size="xs" />
+            <UserChip
+              className={cn(
+                "mt-2 md:px-6 md:py-4",
+                idx === data?.items?.length - 1 && "mb-2 md:mb-0"
+              )}
+              noLink
+              user={user}
+              size="xs"
+            />
           </Link>
         ))
       )}

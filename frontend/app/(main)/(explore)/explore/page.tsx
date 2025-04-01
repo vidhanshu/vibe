@@ -17,7 +17,12 @@ import { Suspense, useMemo, useState } from "react";
 
 const ExplorePage = () => {
   const [viewPostId, setViewPostId] = useState<string | null>(null);
-  const { data, isFetchingNextPage, isLoading, ref } = useInfinite({
+  const {
+    data,
+    isFetchingNextPage,
+    isFetching: isLoading,
+    ref,
+  } = useInfinite({
     queryKey: ["explore"],
     fetcher: (val: { page: number }) => getExplorePosts({ ...val }),
   });
@@ -28,11 +33,12 @@ const ExplorePage = () => {
 
   const isMobile = useIsMobile();
   return (
-    <div className="max-w-4xl mx-auto py-8 min-h-screen">
+    <div className="max-w-4xl mx-auto py-12 min-h-screen">
       <div
         className={cn({
           "flex items-center justify-center h-[50vh]": allData.length === 0,
-          "grid grid-cols-3 gap-2": allData.length !== 0 || isLoading,
+          "grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-2":
+            allData.length !== 0 || isLoading,
         })}
       >
         {isLoading ? (
@@ -67,9 +73,9 @@ const ExplorePage = () => {
             );
             return (
               <button
-                onClick={() => setViewPostId(post.id)}
                 key={post.id}
-                className="relative"
+                onClick={() => setViewPostId(post.id)}
+                className="relative border"
               >
                 {image ? (
                   <Image

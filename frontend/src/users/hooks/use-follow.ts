@@ -1,13 +1,10 @@
-import {
-  useMutation,
-  useQueryClient
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { followUnfollow } from "../actions/follow-actions";
 
 const useFollow = ({
   queryKesToInvalidate = [],
-  follows = false,
+  // follows = false,
 }: {
   queryKesToInvalidate?: string[][];
   follows?: boolean;
@@ -18,8 +15,8 @@ const useFollow = ({
     mutationKey: ["follows"],
     mutationFn: async ({
       userId,
-      username,
-    }: {
+    }: // username,
+    {
       userId: string;
       username?: string;
     }) => {
@@ -27,13 +24,13 @@ const useFollow = ({
       if (res.message) {
         toast.error(res.message);
       } else {
-        if (username) {
-          toast.success(
-            `${follows ? "unfollowed" : "followed"} ${username} successfully`
-          );
-        } else {
-          toast.success(`${follows ? "unfollowed" : "followed"} successfully`);
-        }
+        // if (username) {
+        //   toast.success(
+        //     `${follows ? "unfollowed" : "followed"} ${username} successfully`
+        //   );
+        // } else {
+        //   toast.success(`${follows ? "unfollowed" : "followed"} successfully`);
+        // }
         queryKesToInvalidate.forEach((qk) => {
           qc.invalidateQueries({ queryKey: qk });
         });

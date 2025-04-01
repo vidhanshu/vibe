@@ -20,7 +20,12 @@ const ExploreTagPage = () => {
   const tag = useParams().tag as string;
 
   const [viewPostId, setViewPostId] = useState<string | null>(null);
-  const { data, isFetchingNextPage, isLoading, ref } = useInfinite({
+  const {
+    data,
+    isFetchingNextPage,
+    isFetching: isLoading,
+    ref,
+  } = useInfinite({
     queryKey: ["explore"],
     fetcher: (val: { page: number }) => getPosts({ ...val, tag }),
   });
@@ -33,11 +38,12 @@ const ExploreTagPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-8 min-h-screen">
-      <h1 className="text-lg font-bold mb-4">#{tag}</h1>
+      <h1 className="text-lg font-bold mb-4 px-4">#{tag}</h1>
       <div
         className={cn({
           "flex items-center justify-center h-[50vh]": allData.length === 0,
-          "grid grid-cols-3 gap-2": allData.length !== 0 || isLoading,
+          "grid grid-cols-2 md:grid-cols-3 gap-2":
+            allData.length !== 0 || isLoading,
         })}
       >
         {isLoading ? (

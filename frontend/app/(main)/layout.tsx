@@ -11,17 +11,18 @@ const MainLayout = ({ children }: PropsWithChildren) => {
   return (
     <SessionProvider>
       <SocketContextProvider>
-        <main className="relative min-h-screen md:flex pb-[40px] md:pb-0">
+        <main className="relative min-h-screen md:flex md:pb-0">
           {/* Sidebar */}
           <NotificationContextProvider>
-            <aside className="hidden md:block sticky top-0 h-screen z-[20]">
-              <Sidebar />
-            </aside>
+            <>
+              <aside className="hidden md:block sticky top-0 h-screen z-[20]">
+                <Sidebar />
+              </aside>
+              <nav className="md:hidden sticky top-0 bg-black z-[20]">
+                <NavbarMobile />
+              </nav>
+            </>
           </NotificationContextProvider>
-
-          <nav className="md:hidden sticky top-0 bg-black z-[20]">
-            <NavbarMobile />
-          </nav>
 
           {/* Main Content */}
           <div className="flex-1">{children}</div>

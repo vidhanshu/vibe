@@ -30,12 +30,11 @@ const ViewPostModal = dynamic(
 const FeedList = () => {
   const [editPostId, setEditPostId] = useState<string | null>(null);
   const [viewPostId, setViewPostId] = useState<string | null>(null);
-  const { data, isFetchingNextPage, hasNextPage, isLoading, ref } = useInfinite(
-    {
+  const { data, isFetchingNextPage, hasNextPage, isFetching, ref } =
+    useInfinite({
       fetcher: getPosts,
       queryKey: ["posts"],
-    }
-  );
+    });
 
   const paginatedResponse = useMemo(
     () => data?.map((data) => data.items).flat(),
@@ -51,9 +50,9 @@ const FeedList = () => {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-6 pb-[40px] md:pb-0">
         <FeedStatuses />
-        {isLoading ? (
+        {isFetching ? (
           <FeedListSkeleton />
         ) : paginatedResponse.length === 0 ? (
           <div className="h-[50vh] flex items-center justify-center">

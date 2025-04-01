@@ -37,7 +37,7 @@ const ProfilePosts = () => {
   const postId = sp.get("postId");
 
   return (
-    <div>
+    <div className="pb-[40px] md:pb-0">
       {isFetching ? (
         <div className="grid px-4 md:px-0 md:grid-cols-3 gap-4">
           <Skeleton className="h-52" />

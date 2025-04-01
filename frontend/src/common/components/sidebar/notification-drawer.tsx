@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { NSCommon } from "../../types";
 import UserAvatar from "@/src/auth/components/user-avatar";
 import Image from "next/image";
-import { Bell, Loader2 } from "lucide-react";
+import { Bell, Heart, Loader2 } from "lucide-react";
 import { getShortRelativeTime } from "../../utils/dayjs";
 import useSessionStore from "../../stores/session-store";
 import Link from "next/link";
@@ -16,6 +16,16 @@ import UserChipSkeleton from "../skeletons/user-chip-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotificationContext } from "../../contexts/notification-context";
 import NoContent from "@/src/users/components/no-content";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useUploadStore } from "../../stores/upload-store";
+import { cn } from "@/lib/utils";
 
 const NotificationDrawer = ({ closeDrawer }: { closeDrawer: () => void }) => {
   const { notifications, setNotifications } = useNotificationContext();
@@ -38,7 +48,7 @@ const NotificationDrawer = ({ closeDrawer }: { closeDrawer: () => void }) => {
         </div>
         <Separator className="my-6" />
         {/* Ensure this div expands properly */}
-        <div className="flex-1 overflow-y-auto max-h-[calc(100vh-125px)]">
+        <div className="flex-1 overflow-y-auto max-h-[calc(100vh-165px)] md:max-h-[calc(100vh-125px)]">
           {" "}
           {/* This is the key change */}
           {isLoading ? (
@@ -176,7 +186,10 @@ const NotificationItem = ({
                   className="rounded-md h-[40px] object-cover object-center"
                 />
               ) : (
-                <video className="rounded-md full" src={mediaToShow.url} />
+                <video
+                  className="rounded-md size-[40px] object-cover"
+                  src={mediaToShow.url}
+                />
               )}
             </div>
           )}
@@ -222,5 +235,71 @@ const NotificationItem = ({
         </div>
       )}
     </div>
+  );
+};
+
+export const MobileNotificationSheet = () => {
+  const { uploads } = useUploadStore();
+
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="min-w-10 relative"
+          endContent={
+            <>
+              <Heart className="size-6" />
+              {uploads.length > 0 && (
+                <div className="size-2 absolute top-2 right-2 bg-rose-500 rounded-full" />
+              )}
+            </>
+          }
+        />
+      </SheetTrigger>
+      <SheetContent className="w-full px-0">
+        <SheetHeader className="hidden">
+          <SheetTitle>Edit profile</SheetTitle>
+          <SheetDescription>
+            Make changes to your profile here. Click save when you&apos;re done.
+          </SheetDescription>
+        </SheetHeader>
+        {uploads.length > 0 && (
+          <div className="absolute bottom-4 left-4 space-y-2">
+            {uploads.map(({ id, status }) => {
+              const isStatus = id.startsWith("status-");
+              return (
+                <div
+                  key={id}
+                  className={cn(
+                    "flex items-center gap-2 text-sm px-2 py-1 rounded-sm",
+                    {
+                      "bg-yellow-950": status === "uploading",
+                      "bg-green-950": status === "completed",
+                      "bg-rose-950": status === "failed",
+                    }
+                  )}
+                >
+                  <span>
+                    {status === "uploading"
+                      ? `${isStatus ? "Status" : "Post"} uploading...`
+                      : status === "failed"
+                      ? `Failed adding ${isStatus ? "status" : "post"} ❌`
+                      : `Added ${isStatus ? "status" : "post"} ✅`}
+                  </span>
+                  {status === "uploading" && (
+                    <div className="size-5 flex items-center justify-center">
+                      <Loader2 className="size-4 animate-spin" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <NotificationDrawer closeDrawer={() => {}} />
+      </SheetContent>
+    </Sheet>
   );
 };

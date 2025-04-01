@@ -149,11 +149,12 @@ const FeedPostCard = ({
           <PostMediaCarousel
             containerClassName="flex-1"
             imageClassName="w-full max-h-[578px]"
-            videoClassName="max-h-[578px] w-full"
+            videoClassName="max-h-[489px] md:max-h-[578px] w-full"
             title={title}
             postId={id}
             medias={medias}
             isLiked={!!liked}
+            isFeedVariant
           />
         </div>
         {detailedPost && (

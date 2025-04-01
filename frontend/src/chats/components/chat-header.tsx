@@ -22,7 +22,7 @@ const ChatHeader = ({
   const chatType = chat?.type;
 
   return (
-    <div className="px-4 border-b h-[65px] flex justify-between items-center w-full">
+    <div className="px-4 border-b h-[65px] flex justify-between items-center w-full sticky top-0 z-[2000] bg-background">
       <div className="flex items-center">
         {isLoading ? (
           <div className="flex items-center gap-2">
