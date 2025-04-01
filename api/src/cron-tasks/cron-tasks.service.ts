@@ -16,10 +16,11 @@ export class CronTasksService {
   async expiredStatusCleanup() {
     this.logger.log('Starting expiredStatusCleanup task...');
     try {
-      const expiredStatuses = await this.prisma.media.findMany({
+      const expiredStatuses = await this.prisma.status.findMany({
         where: {
           createdAt: { lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
         },
+        select: { id: true, medias: { select: { key: true } } },
       });
 
       if (!expiredStatuses.length) {
@@ -27,13 +28,17 @@ export class CronTasksService {
         return;
       }
 
+      const mediasToDelete = expiredStatuses.map(({ medias }) => medias).flat();
+
       // Intentionally kept sequential
-      await this.prisma.media.deleteMany({
+      await this.prisma.status.deleteMany({ // (there is cascade on medias for status relation)
         where: { id: { in: expiredStatuses.map(({ id }) => id) } },
       });
-      await this.mediasService.deleteFiles(
-        expiredStatuses.map(({ key }) => key),
-      );
+      if (mediasToDelete.length) {
+        await this.mediasService.deleteFiles(
+          mediasToDelete.map(({ key }) => key),
+        );
+      }
 
       this.logger.log(
         `Successfully cleaned up ${expiredStatuses.length} expired statuses.`,
