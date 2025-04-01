@@ -7,14 +7,7 @@ import useComments from "@/src/posts/hooks/use-comments";
 import useLike from "@/src/posts/hooks/use-like";
 import { NSPost } from "@/src/posts/types";
 import dayjs from "dayjs";
-import {
-  Bookmark,
-  Forward,
-  Heart,
-  Loader2,
-  MessageCircle,
-  Smile,
-} from "lucide-react";
+import { Bookmark, Forward, Heart, MessageCircle, Smile } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -58,12 +51,7 @@ const PostFooter = ({
 
   const isFeedVariant = variant === "feed";
 
-  const {
-    handleUpdateComment,
-    handleComment,
-    isCommentAdding,
-    isUpdatingComment,
-  } = useComments({
+  const { handleUpdateComment, handleComment } = useComments({
     setComment,
     postId: post.id,
     setEditCommentId,
