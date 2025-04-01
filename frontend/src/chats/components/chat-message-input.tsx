@@ -52,11 +52,15 @@ const MessageInput = ({
 
   const { isPending: isSendingMessage, mutate } = useMutation({
     mutationKey: ["send-message", chatId],
-    mutationFn: async () => {
-      if (!message.trim().length) return toast.error("Please enter message");
+    mutationFn: async (newMessage: string) => {
+      setMessage("");
+      setMediaFile(null);
+      setReplyToMessage(null);
+
+      if (!newMessage.trim().length) return toast.error("Please enter message");
       const res = await sendMessage({
         chatId,
-        message,
+        message: newMessage,
         media: mediaFile,
         repliedMessageId: replyMessage?.id,
       });
@@ -64,11 +68,7 @@ const MessageInput = ({
         toast.error(res.message);
         return;
       }
-      setMessage("");
-      setMediaFile(null);
-      setReplyToMessage(null);
       // sSendMessage(res.data); // moved to backend
-      // scrollToBottom?.();
     },
   });
 
@@ -88,7 +88,7 @@ const MessageInput = ({
       setMessage("");
       setEditingMessageId(null);
       // sUpdateMessage({ chatId: chatId, message: res.data }); // moved to backend
-      toast.success("Message updated successfully");
+      // toast.success("Message updated successfully");
       // scrollToBottom?.();
     },
   });
@@ -161,7 +161,7 @@ const MessageInput = ({
     };
   }, [message, chatId, startTyping, stopTyping]);
 
-  const isLoading = isUpdatingMessage || isSendingMessage;
+  // const isLoading = isUpdatingMessage || isSendingMessage;
   const showPreview = editingMessageId || !!replyMessage;
 
   return (
@@ -248,7 +248,7 @@ const MessageInput = ({
             )}
             <Button
               size="icon-xxs"
-              loading={isLoading}
+              // loading={isLoading}
               variant="secondary"
               loaderClassName="size-3"
               onClick={() => setMediaFile(null)}
@@ -263,7 +263,7 @@ const MessageInput = ({
           >
             {({ open, setOpen }) => (
               <Button
-                loading={isLoading}
+                // loading={isLoading}
                 type="button"
                 size="icon-sm"
                 variant="secondary"
@@ -277,7 +277,7 @@ const MessageInput = ({
           </EmojiPicker>
           <Textarea
             autoFocus
-            disabled={isLoading}
+            // disabled={isLoading}
             ref={textareaRef}
             rows={1}
             value={message}
@@ -294,7 +294,7 @@ const MessageInput = ({
                 if (editingMessageId) {
                   update();
                 } else {
-                  mutate();
+                  mutate(message);
                 }
               }
             }}
@@ -307,8 +307,8 @@ const MessageInput = ({
           />
           {message.trim().length ? (
             <button
-              onClick={() => (editingMessageId ? update() : mutate())}
-              disabled={isLoading}
+              // disabled={isLoading}
+              onClick={() => (editingMessageId ? update() : mutate(message))}
               className="text-blue-500 font-bold text-sm"
             >
               {editingMessageId ? "Update" : "Send"}
@@ -323,7 +323,7 @@ const MessageInput = ({
                 size="icon-sm"
                 variant="secondary"
                 className="min-w-9"
-                loading={isLoading}
+                // loading={isLoading}
                 loaderClassName="size-4"
               >
                 {/* eslint-disable-next-line  jsx-a11y/alt-text */}
@@ -332,7 +332,7 @@ const MessageInput = ({
             </div>
           )}
           <input
-            disabled={isLoading}
+            // disabled={isLoading}
             type="file"
             accept=".jpg, .jpeg, .png, .webp, .gif, .bmp, .mp4, .avi, .mov, .wmv"
             ref={inputRef}

@@ -11,7 +11,7 @@ import useIsMobile from "@/src/common/hooks/use-is-mobile";
 import usePost from "@/src/posts/hooks/use-post";
 import NoContent from "@/src/users/components/no-content";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import PostComments from "./post-comments";
 import PostFooter from "./post-footer";
 import PostMediaCarousel from "./post-media-carousel";
@@ -32,6 +32,7 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
     (typeof window === "undefined" ? "" : window.location.href) +
     p +
     sp.toString();
+  const commentInputRef = useRef<HTMLInputElement>({} as HTMLInputElement);
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
 
   const { isPostLoading, post } = usePost({
@@ -74,10 +75,10 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
             <div className="col-span-5 flex flex-col max-h-[calc(100vh-50px)]">
               <PostComments
                 post={post}
-                comment={comment}
                 setComment={setComment}
                 editCommentId={editCommentId}
                 setEditCommentId={setEditCommentId}
+                commentInputRef={commentInputRef}
                 setOpen={setOpen}
               />
               <PostFooter
@@ -85,6 +86,7 @@ const ViewPostModal = ({ postId, open, setOpen }: ViewPostModalProps) => {
                 comment={comment}
                 setComment={setComment}
                 pathToCopy={pathname}
+                commentInputRef={commentInputRef}
                 editCommentId={editCommentId}
                 autoFocusComment={!isMobile}
                 setEditCommentId={setEditCommentId}

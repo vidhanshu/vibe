@@ -12,7 +12,7 @@ import PostFooter from "@/src/common/components/modals/view-post-modal/post-foot
 import usePost from "@/src/posts/hooks/use-post";
 import NoContent from "@/src/users/components/no-content";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const FeedPostViewDrawer = ({
   postId,
@@ -27,6 +27,7 @@ const FeedPostViewDrawer = ({
     postId: postId!,
     skipPostFetch: !postId,
   });
+  const commentInputRef = useRef<HTMLInputElement>({} as HTMLInputElement);
 
   return (
     <Drawer open={!!postId} onClose={cancelView}>
@@ -44,16 +45,17 @@ const FeedPostViewDrawer = ({
             <PostComments
               post={post}
               hideClose
-              comment={comment}
               setComment={setComment}
               editCommentId={editCommentId}
               setEditCommentId={setEditCommentId}
+              commentInputRef={commentInputRef}
               setOpen={() => {}}
             />
             <PostFooter
               post={post}
               comment={comment}
               setComment={setComment}
+              commentInputRef={commentInputRef}
               pathToCopy={`${window.location.href}/users/${post?.user?.username}?postId=${post.id}`}
               editCommentId={editCommentId}
               autoFocusComment={false}

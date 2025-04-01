@@ -16,7 +16,7 @@ import {
   Smile,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import EmojiPicker from "../../popovers/emoji-picker";
@@ -34,6 +34,7 @@ const PostFooter = ({
   setEditCommentId,
   comment,
   setComment,
+  commentInputRef,
 }: {
   post: NSPost.DetailedPost;
   className?: string;
@@ -45,12 +46,13 @@ const PostFooter = ({
   setEditCommentId: React.Dispatch<React.SetStateAction<string | null>>;
   comment: string;
   setComment: React.Dispatch<React.SetStateAction<string>>;
+  commentInputRef: React.RefObject<HTMLInputElement>;
 }) => {
   const [saved, setSaved] = useState(false);
 
   const currentUserId = useSessionStore((select) => select.user?.id);
 
-  const commentInputRef = useRef<HTMLInputElement>(null);
+  // const commentInputRef = useRef<HTMLInputElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_copiedText, copyText] = useCopyToClipboard();
 
@@ -62,10 +64,8 @@ const PostFooter = ({
     isCommentAdding,
     isUpdatingComment,
   } = useComments({
-    comment,
-    editCommentId,
-    postId: post.id,
     setComment,
+    postId: post.id,
     setEditCommentId,
   });
 
@@ -192,9 +192,12 @@ const PostFooter = ({
           if (!comment.trim().length)
             return toast.error("Comment cannot be empty");
           if (editCommentId) {
-            handleUpdateComment();
+            handleUpdateComment({
+              editCommentId,
+              updatedCommentContent: comment,
+            });
           } else {
-            handleComment();
+            handleComment(comment);
           }
         }}
         className={cn(

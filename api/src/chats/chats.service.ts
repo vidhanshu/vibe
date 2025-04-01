@@ -840,9 +840,10 @@ export class ChatsService {
         },
       },
     });
+
     this.wsService.emitToRoom(
       updatedMessage.chatId,
-      SOCKET_EVENTS.RECEIVE_MESSAGE,
+      SOCKET_EVENTS.RECEIVE_UPDATED_MESSAGE,
       updatedMessage,
     );
     return updatedMessage;

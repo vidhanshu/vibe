@@ -4,13 +4,8 @@ import PostMediaCarousel from "@/src/common/components/modals/view-post-modal/po
 import useSessionStore from "@/src/common/stores/session-store";
 import { getShortRelativeTime } from "@/src/common/utils/dayjs";
 import { NSPost } from "@/src/posts/types";
-import {
-  Ellipsis,
-  Paperclip,
-  Pencil,
-  Share, Trash
-} from "lucide-react";
-import { useState } from "react";
+import { Ellipsis, Paperclip, Pencil, Share, Trash } from "lucide-react";
+import { useRef, useState } from "react";
 
 import {
   AlertDialog,
@@ -53,6 +48,7 @@ const FeedPostCard = ({
   const qc = useQueryClient();
   const [comment, setComment] = useState("");
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
+  const commentInputRef = useRef<HTMLInputElement>({} as HTMLInputElement);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_copiedText, copyText] = useCopyToClipboard();
 
@@ -168,6 +164,7 @@ const FeedPostCard = ({
             comment={comment}
             setComment={setComment}
             editCommentId={editCommentId}
+            commentInputRef={commentInputRef}
             setEditCommentId={setEditCommentId}
             post={detailedPost}
             pathToCopy={

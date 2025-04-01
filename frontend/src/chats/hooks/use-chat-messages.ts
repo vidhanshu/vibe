@@ -101,14 +101,13 @@ const useChatMessages = () => {
       }
     };
 
-    const handleUpdateMessage = ({
-      chatId: mChatId,
-      message,
-    }: SocketOnUpdateMessagePayload) => {
-      if (mChatId === chatId && message) {
+    const handleUpdateMessage = (
+      updatedMessage: SocketOnUpdateMessagePayload
+    ) => {
+      if (updatedMessage.chatId === chatId && updatedMessage.text) {
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === message.id ? { ...msg, ...message } : msg
+            msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
           )
         );
       }

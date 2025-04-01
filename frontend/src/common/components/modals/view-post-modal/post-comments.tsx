@@ -16,17 +16,17 @@ const PostComments = ({
   post,
   setOpen,
   setEditCommentId,
-  comment,
   setComment,
   editCommentId,
   hideClose = false,
+  commentInputRef,
 }: {
   post: NSPost.DetailedPost;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   setEditCommentId: React.Dispatch<React.SetStateAction<string | null>>;
   setComment: React.Dispatch<React.SetStateAction<string>>;
   editCommentId: string | null;
-  comment: string;
+  commentInputRef: React.RefObject<HTMLInputElement>;
   hideClose?: boolean;
 }) => {
   const router = useRouter();
@@ -41,8 +41,6 @@ const PostComments = ({
     isCommentsLoading,
     ref,
   } = useComments({
-    comment,
-    editCommentId,
     postId: post.id,
     setComment,
     setEditCommentId,
@@ -122,6 +120,7 @@ const PostComments = ({
             ) : (
               comments.map((comment) => (
                 <Comment
+                  commentInputRef={commentInputRef}
                   handleDeleteComment={handleDeleteComment}
                   isDeletingComment={isCommentDeleting}
                   setEditCommentId={(id) => {

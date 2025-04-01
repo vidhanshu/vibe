@@ -16,11 +16,13 @@ const Comment = ({
   setEditCommentId,
   handleDeleteComment,
   isDeletingComment,
+  commentInputRef,
 }: NSPost.Comment & {
   setEditCommentId: (id: string | null) => void;
   editCommentId: string | null;
   handleDeleteComment: (id: string) => void;
   isDeletingComment: boolean;
+  commentInputRef: React.RefObject<HTMLInputElement>;
 }) => {
   const currentUserId = useSessionStore((select) => select.user?.id);
 
@@ -47,10 +49,10 @@ const Comment = ({
           {user.id === currentUserId && (
             <>
               <button
-                onClick={setEditCommentId.bind(
-                  null,
-                  editCommentId === id ? null : id
-                )}
+                onClick={() => {
+                  setEditCommentId(editCommentId === id ? null : id);
+                  commentInputRef?.current?.focus();
+                }}
                 className={cn("text-blue-500 text-xs font-bold")}
               >
                 {editCommentId === id ? "Cancel" : "Edit"}

@@ -7,10 +7,7 @@ export type SocketOnRemoveMessagePayload = {
   chatId: string;
   messageId: string;
 };
-export type SocketOnUpdateMessagePayload = {
-  chatId: string;
-  message: NSChat.Message;
-};
+export type SocketOnUpdateMessagePayload = NSChat.Message;
 export type SocketOnTypingResponse = {
   chatId: string;
   userId: string;
@@ -22,6 +19,7 @@ const useChatSocket = () => {
   const joinChat = useCallback(
     (chatId: string) => {
       if (!socketInstance) return;
+      console.log("joinChat");
       socketInstance.emit(SOCKET_EVENTS.JOIN_CHAT, { chatId });
     },
     [socketInstance]
@@ -30,6 +28,7 @@ const useChatSocket = () => {
   const leaveChat = useCallback(
     (chatId: string) => {
       if (!socketInstance) return;
+      console.log("leaveChat");
       socketInstance.emit(SOCKET_EVENTS.LEAVE_CHAT, { chatId });
     },
     [socketInstance]
@@ -38,6 +37,7 @@ const useChatSocket = () => {
   const onNewMessage = useCallback(
     (callback: (message: NSChat.Message) => void) => {
       if (!socketInstance) return;
+      console.log("onNewMessage");
       socketInstance.on(SOCKET_EVENTS.RECEIVE_MESSAGE, callback);
     },
     [socketInstance]
@@ -46,6 +46,7 @@ const useChatSocket = () => {
   const offNewMessage = useCallback(
     (callback: (message: NSChat.Message) => void) => {
       if (!socketInstance) return;
+      console.log("offNewMessage");
       socketInstance.off(SOCKET_EVENTS.RECEIVE_MESSAGE, callback);
     },
     [socketInstance]
@@ -62,6 +63,7 @@ const useChatSocket = () => {
   const offUpdateMessage = useCallback(
     (callback: (message: SocketOnUpdateMessagePayload) => void) => {
       if (!socketInstance) return;
+      console.log("offUpdateMessage");
       socketInstance.off(SOCKET_EVENTS.RECEIVE_UPDATED_MESSAGE, callback);
     },
     [socketInstance]
@@ -70,6 +72,7 @@ const useChatSocket = () => {
   const onRemoveMessage = useCallback(
     (callback: (payload: SocketOnRemoveMessagePayload) => void) => {
       if (!socketInstance) return;
+      console.log("onRemoveMessage");
       socketInstance.on(SOCKET_EVENTS.REMOVE_MESSAGE, callback);
     },
     [socketInstance]
@@ -78,6 +81,7 @@ const useChatSocket = () => {
   const offRemoveMessage = useCallback(
     (callback: (payload: SocketOnRemoveMessagePayload) => void) => {
       if (!socketInstance) return;
+      console.log("offRemoveMessage");
       socketInstance.off(SOCKET_EVENTS.REMOVE_MESSAGE, callback);
     },
     [socketInstance]

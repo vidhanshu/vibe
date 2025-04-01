@@ -64,7 +64,7 @@ const Message = ({
       if (res.message) {
         return toast.error(res.message);
       }
-      toast.success("Message unsent");
+      // toast.success("Message unsent");
       // sUnSendMessage({ chatId, messageId: message.id }); // being handled in backend now
     },
   });
@@ -168,7 +168,7 @@ const Message = ({
                   <Link
                     href={`/users/${message.status.user.username}?status=open`}
                   >
-                    {message.status.medias[0].mediaType === "IMAGE" ? (
+                    {message?.status?.medias?.[0]?.mediaType === "IMAGE" ? (
                       <Image
                         draggable={false}
                         src={message.status.medias[0].url}
@@ -178,7 +178,7 @@ const Message = ({
                         quality={1}
                         className="rounded-md cursor-pointer"
                       />
-                    ) : (
+                    ) : message?.status?.medias?.[0]?.mediaType === "VIDEO" ? (
                       <div className="relative group/video cursor-pointer">
                         <video
                           className="rounded-md max-w-[200px]"
@@ -186,7 +186,7 @@ const Message = ({
                         />
                         <Play className="size-8 group-hover/video:scale-125 transition-transform fill-white inset-0 m-auto absolute z-10" />
                       </div>
-                    )}
+                    ) : null}
                   </Link>
                 </div>
               ) : (
