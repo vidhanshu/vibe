@@ -204,14 +204,19 @@ const PostFooter = ({
           isFeedVariant ? "flex items-center" : "flex items-center px-4"
         )}
       >
-        <EmojiPicker onEmojiClick={(e) => setComment((p) => `${p}${e}`)}>
+        <EmojiPicker
+          position={isFeedVariant ? "bottom" : "top"}
+          onEmojiClick={(e) => setComment((p) => `${p}${e}`)}
+        >
           {({ open, setOpen }) => (
             <Button
               type="button"
               size="icon-xs"
               variant="secondary"
               className="min-w-7"
-              onClick={() => setOpen((p) => !p)}
+              onClick={() => {
+                setOpen((prev) => !prev);
+              }}
             >
               <Smile className={cn("size-4", open && "text-blue-500")} />
             </Button>
@@ -229,18 +234,12 @@ const PostFooter = ({
           )}
         />
         <button
-          disabled={
-            !comment.trim().length || isUpdatingComment || isCommentAdding
-          }
+          disabled={!comment.trim().length}
           className={cn(
-            "text-blue-400 font-bold relative",
+            "text-blue-400 font-bold",
             !comment.trim().length && "text-blue-500/50"
           )}
         >
-          {isUpdatingComment ||
-            (isCommentAdding && (
-              <Loader2 className="text-white size-4 animate-spin absolute inset-0 m-auto" />
-            ))}
           {editCommentId ? "Update" : "Post"}
         </button>
       </form>

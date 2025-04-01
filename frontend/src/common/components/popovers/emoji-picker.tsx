@@ -1,48 +1,46 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Picker, { Theme } from "emoji-picker-react";
 import React, { useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 
 interface EmojiPickerProps {
   onEmojiClick: (e: string) => void;
+  position?: "top" | "bottom";
   children:
     | React.ReactNode
     | ((props: {
         open: boolean;
         setOpen: React.Dispatch<React.SetStateAction<boolean>>;
       }) => React.ReactNode);
-  // for the case where you want to control the open state
-  open?: boolean;
-  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const EmojiPicker = ({
   children,
   onEmojiClick,
-  open: eOpen,
-  setOpen: setEOpen,
+  position = "top",
 }: EmojiPickerProps) => {
   const [open, setOpen] = useState(false);
-
-  React.useEffect(() => {
-    setOpen(eOpen || false);
-  }, [eOpen]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ref = React.useRef<any>(null);
 
   useOnClickOutside(ref, () => {
     setOpen(false);
-    setEOpen?.(false);
   });
 
   return (
-    <div className="relative z-10 w-fit h-fit">
+    <div ref={ref} className="relative z-10 w-fit h-fit">
       {typeof children === "function" ? children({ open, setOpen }) : children}
-      <div ref={ref} className="absolute bottom-full left-full">
+      <div
+        className={cn(
+          "absolute left-full",
+          position === "top" ? "bottom-full" : "top-full"
+        )}
+      >
         <Picker
-          theme={Theme.DARK}
           open={open}
+          theme={Theme.DARK}
           onEmojiClick={(e) => onEmojiClick(e.emoji)}
         />
       </div>
