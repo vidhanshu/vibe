@@ -4,7 +4,7 @@ import { USERS_API_ROUTES } from "./api-routes";
 import { NSUser } from "./types";
 
 const getProfile = async (): NSCommon.Response<
-  NSUser.User,
+  NSUser.DetailedUser,
   { statusCode?: number }
 > => {
   try {

@@ -3,11 +3,18 @@ import { router, Tabs } from "expo-router";
 import { Pressable } from "react-native";
 
 import { useColorScheme } from "@/components/useColorScheme";
-import { AntDesign, Entypo, Feather, Foundation } from "@expo/vector-icons";
+import { Entypo, Feather, Foundation } from "@expo/vector-icons";
 import colors from "@/src/common/constants/colors";
+import useSessionStore from "@/src/common/stores/session-store";
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from "@/components/ui/avatar";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { user } = useSessionStore();
 
   return (
     <Tabs
@@ -64,9 +71,20 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarStyle: { display: "none" },
-          tabBarIcon: ({ color }) => (
-            <AntDesign size={25} name="user" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Avatar
+              size="sm"
+              className={focused ? "border-2 border-white" : ""}
+            >
+              <AvatarFallbackText>
+                {user?.name || user?.username}
+              </AvatarFallbackText>
+              <AvatarImage
+                source={{
+                  uri: user?.profilePhoto?.url,
+                }}
+              />
+            </Avatar>
           ),
         }}
       />

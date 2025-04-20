@@ -2,9 +2,9 @@ import { NSUser } from "@/src/users/types";
 import { create } from "zustand";
 
 interface SessionStore {
-  user: NSUser.User | null;
+  user: NSUser.DetailedUser | null;
   isLoading: boolean;
-  setSession: (user: NSUser.User | null) => void;
+  setSession: (user: NSUser.DetailedUser | null) => void;
 }
 
 const useSessionStore = create<SessionStore>()((set) => ({

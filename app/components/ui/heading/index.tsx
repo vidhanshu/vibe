@@ -204,14 +204,20 @@ const Heading = memo(
             highlight,
             class: className,
           })}
-          style={[props.style, { fontFamily: "AlataRegular" }]}
           {...props}
+          style={[props.style, { fontFamily: "AlataRegular" }]}
         />
       );
     }
 
     return (
-      <MappedHeading className={className} size={size} ref={ref} {...props} />
+      <MappedHeading
+        className={className}
+        size={size}
+        ref={ref}
+        {...props}
+        style={[props.style, { fontFamily: "AlataRegular" }]}
+      />
     );
   })
 );
