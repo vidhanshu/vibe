@@ -1,5 +1,5 @@
 import React from "react";
-import { router, Tabs } from "expo-router";
+import { router, Tabs, useLocalSearchParams, usePathname } from "expo-router";
 import { Pressable } from "react-native";
 
 import { useColorScheme } from "@/components/useColorScheme";
@@ -15,6 +15,7 @@ import {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { user } = useSessionStore();
+  const pathname = usePathname();
 
   return (
     <Tabs
@@ -69,12 +70,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="users/[username]"
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Avatar
               size="sm"
-              className={focused ? "border-2 border-white" : ""}
+              className={
+                focused && pathname === `/users/${user?.username}`
+                  ? "border-2 border-white"
+                  : ""
+              }
             >
               <AvatarFallbackText>
                 {user?.name || user?.username}

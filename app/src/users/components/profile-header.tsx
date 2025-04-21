@@ -21,12 +21,10 @@ import { authService } from "@/src/auth/auth.service";
 import useAppToast from "@/src/common/hooks/use-app-toast";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { Divider } from "@/components/ui/divider";
 import DividerWithTitle from "@/src/common/components/divider-with-title";
 
-const ProfileHeader = () => {
-  const { user } = useSessionStore();
-  const [showDrawer, setShowDrawer] = useState(true);
+const ProfileHeader = ({ username }: { username: string }) => {
+  const [showDrawer, setShowDrawer] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const toast = useAppToast({});
@@ -39,9 +37,9 @@ const ProfileHeader = () => {
   };
 
   return (
-    <Box className="pt-4 flex flex-row justify-between">
+    <Box className="px-4 pt-4 flex flex-row justify-between">
       <Heading isTruncated size="2xl">
-        {user?.username}
+        {username}
       </Heading>
 
       <Pressable onPress={() => setShowDrawer((p) => !p)}>
@@ -55,7 +53,7 @@ const ProfileHeader = () => {
         onClose={() => setShowDrawer(false)}
       >
         <DrawerBackdrop />
-        <DrawerContent>
+        <DrawerContent className="p-4">
           <DrawerHeader>
             <Heading size="xl">Settings</Heading>
             <Button onPress={() => setShowDrawer(false)} variant="link">

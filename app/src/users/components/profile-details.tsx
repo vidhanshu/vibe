@@ -11,6 +11,7 @@ import {
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
+import { Button, ButtonText } from "@/components/ui/button";
 
 const PRONOUN_MAP = {
   he: "he/his",
@@ -22,11 +23,11 @@ const ProfileDetails = ({
   user,
   isLoading,
 }: {
-  user: NSUser.DetailedUser | null;
+  user?: NSUser.DetailedUser | null;
   isLoading: boolean;
 }) => {
   return (
-    <Box className="flex-1">
+    <Box className="px-4">
       {isLoading ? (
         <Box className="flex-1 flex justify-center items-center">
           <ActivityIndicator color="white" size="large" />
@@ -65,6 +66,25 @@ const ProfileDetails = ({
                 </VStack>
               </Box>
             </Box>
+          </HStack>
+          <HStack space="sm">
+            <Button
+              className="flex-1 rounded-lg"
+              variant="outline"
+              action="default"
+            >
+              <ButtonText>Edit Profile</ButtonText>
+            </Button>
+            <Button className="rounded-lg" variant="outline" action="default">
+              <ButtonText>Share Profile</ButtonText>
+            </Button>
+            <Button
+              className="flex-1 rounded-lg"
+              variant="outline"
+              action="default"
+            >
+              <ButtonText>Contact</ButtonText>
+            </Button>
           </HStack>
           {user.bio && <Text>{user.bio}</Text>}
         </VStack>
