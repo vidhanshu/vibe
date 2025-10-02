@@ -22,6 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(req: Request, payload: AccessTokenPayload) {
+    console.log(req.cookies);
     const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req); // Extract token from header
     if (!token) {
       throw new UnauthorizedException();

@@ -5,9 +5,14 @@ import Sidebar, {
 } from "@/src/common/components/sidebar/sidebar";
 import NotificationContextProvider from "@/src/common/contexts/notification-context";
 import { SocketContextProvider } from "@/src/common/contexts/socket-context";
+import { checkAuth } from "@/src/users/actions/user-actions";
+import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 
-const MainLayout = ({ children }: PropsWithChildren) => {
+const MainLayout = async ({ children }: PropsWithChildren) => {
+  const { data } = await checkAuth();
+
+  if (!data) return redirect("/auth");
   return (
     <SessionProvider>
       <SocketContextProvider>
